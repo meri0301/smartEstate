@@ -1,0 +1,637 @@
+// SmartEstate data model.
+//
+// Conventions
+// - Tables and columns are snake_case (`@@map` / `@map`) so hand-written SQL for
+//   PostGIS, pgvector and hybrid search stays readable without quoted identifiers.
+// - Primary keys are time-ordered UUIDv7: globally unique for ingestion from many
+//   sources, and monotonically increasing so cursor pagination and B-tree
+//   locality behave like auto-increment ids.
+// - Money is stored as canonical AMD in BigInt (`*_amd`). Foreign-currency
+//   originals are kept for display and audit; conversion uses `exchange_rates`.
+// - Geometry (PostGIS) and embeddings (pgvector) use `Unsupported` types. Their
+//   specialised indexes (GiST, HNSW) live in hand-written migration SQL because
+//   Prisma Schema Language cannot express them; see prisma/migrations.
+
+generator client {
+  provider     = "prisma-client"
+  output       = "../src/generated/prisma"
+  moduleFormat = "esm"
+  runtime      = "nodejs"
+}
+
+datasource db {
+  provider = "postgresql"
+}
+
+// ---------------------------------------------------------------------------
+// Enumerations
+// ---------------------------------------------------------------------------
+
+enum Role {
+  USER
+  AGENT
+  MODERATOR
+  ADMIN
+}
+
+/// Supported UI and content locales. Armenian is the default.
+enum Locale {
+  hy
+  ru
+  en
+}
+
+enum ListingStatus {
+  DRAFT
+  ACTIVE
+  RESERVED
+  SOLD
+  WITHDRAWN
+}
+
+/// Yerevan building stock. Type has a large, well-known effect on price.
+enum BuildingType {
+  STONE
+  PANEL
+  MONOLITH
+  KHRUSHCHYOVKA
+  STALINKA
+  NEW_BUILD
+}
+
+enum Condition {
+  NEEDS_REPAIR
+  OLD_RENOVATION
+  GOOD
+  EURO_RENOVATION
+  DESIGNER
+}
+
+enum HeatingType {
+  CENTRAL_GAS
+  INDIVIDUAL_GAS_BOILER
+  ELECTRIC
+  NONE
+}
+
+/// Cadastre certificate status as declared by the seller / source.
+enum OwnershipDocsStatus {
+  VERIFIED
+  UNVERIFIED
+}
+
+enum Currency {
+  AMD
+  USD
+  EUR
+}
+
+enum DistrictKind {
+  /// One of the 12 administrative districts of Yerevan.
+  CITY_DISTRICT
+  /// A town outside Yerevan modelled at marz level (Gyumri, Vanadzor, Dilijan).
+  TOWN
+}
+
+enum MediaKind {
+  PHOTO
+  FLOOR_PLAN
+  VIDEO
+}
+
+enum PoiCategory {
+  METRO
+  SCHOOL
+  KINDERGARTEN
+  PARK
+  HOSPITAL
+  SUPERMARKET
+}
+
+enum TranslationSource {
+  HUMAN
+  MACHINE
+}
+
+enum ValuationVerdict {
+  UNDERPRICED
+  FAIR
+  OVERPRICED
+}
+
+/// Ranking strategies compared in the thesis evaluation.
+enum RankingStrategy {
+  MCDA
+  LEARNED_BASELINE
+}
+
+/// Implicit feedback signals used by the recommender.
+enum InteractionType {
+  VIEW
+  DWELL
+  FAVORITE
+  UNFAVORITE
+  COMPARE
+  DISMISS
+  CONTACT
+}
+
+// ---------------------------------------------------------------------------
+// Identity and access
+// ---------------------------------------------------------------------------
+
+model User {
+  id           String   @id @default(uuid(7)) @db.Uuid
+  email        String   @unique @db.Citext
+  passwordHash String   @map("password_hash")
+  role         Role     @default(USER)
+  locale       Locale   @default(hy)
+  isActive     Boolean  @default(true) @map("is_active")
+  createdAt    DateTime @default(now()) @map("created_at") @db.Timestamptz(3)
+  updatedAt    DateTime @updatedAt @map("updated_at") @db.Timestamptz(3)
+
+  profile                Profile?
+  refreshTokens          RefreshToken[]
+  listings               Listing[]               @relation("ListingCreatedBy")
+  favorites              Favorite[]
+  savedSearches          SavedSearch[]
+  comparisons            Comparison[]
+  recommendationSessions RecommendationSession[]
+  interactions           UserInteraction[]
+  auditLogs              AuditLog[]
+
+  @@map("users")
+}
+
+/// Buyer preferences captured by the onboarding quiz (cold start) and refined later.
+model Profile {
+  userId              String    @id @map("user_id") @db.Uuid
+  displayName         String    @map("display_name")
+  phone               String?
+  budgetMinAmd        BigInt?   @map("budget_min_amd")
+  budgetMaxAmd        BigInt?   @map("budget_max_amd")
+  preferredRooms      Int[]     @map("preferred_rooms")
+  /// Workplace / university used as the commute reference point.
+  commuteAnchor       Unsupported("geometry(Point, 4326)")? @map("commute_anchor")
+  commuteAnchorLabel  String?   @map("commute_anchor_label")
+  /// Ranked criteria weights for the MCDA recommender, e.g. {"price":0.4,"commute":0.3,...}.
+  priorities          Json      @default("{}")
+  onboardingCompletedAt DateTime? @map("onboarding_completed_at") @db.Timestamptz(3)
+  updatedAt           DateTime  @updatedAt @map("updated_at") @db.Timestamptz(3)
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@map("profiles")
+}
+
+/// Refresh-token rotation with reuse detection: every issued token belongs to a
+/// family; presenting a revoked token revokes the whole family.
+model RefreshToken {
+  id         String    @id @default(uuid(7)) @db.Uuid
+  userId     String    @map("user_id") @db.Uuid
+  familyId   String    @map("family_id") @db.Uuid
+  tokenHash  String    @unique @map("token_hash")
+  expiresAt  DateTime  @map("expires_at") @db.Timestamptz(3)
+  revokedAt  DateTime? @map("revoked_at") @db.Timestamptz(3)
+  replacedBy String?   @map("replaced_by") @db.Uuid
+  userAgent  String?   @map("user_agent")
+  ipAddress  String?   @map("ip_address") @db.Inet
+  createdAt  DateTime  @default(now()) @map("created_at") @db.Timestamptz(3)
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId])
+  @@index([familyId])
+  @@map("refresh_tokens")
+}
+
+// ---------------------------------------------------------------------------
+// Geography
+// ---------------------------------------------------------------------------
+
+/// Administrative district (Yerevan) or town (marz level). Boundaries come from
+/// OpenStreetMap (ODbL) and are loaded by the seed.
+model District {
+  id       String       @id @default(uuid(7)) @db.Uuid
+  slug     String       @unique
+  kind     DistrictKind
+  nameHy   String       @map("name_hy")
+  nameRu   String       @map("name_ru")
+  nameEn   String       @map("name_en")
+  city     String
+  marz     String
+  osmType  String?      @map("osm_type")
+  osmId    BigInt?      @map("osm_id")
+  boundary Unsupported("geometry(MultiPolygon, 4326)")
+  centroid Unsupported("geometry(Point, 4326)")
+
+  buildings Building[]
+  listings  Listing[]
+  pois      PointOfInterest[]
+  snapshots DistrictMarketSnapshot[]
+
+  @@index([boundary], type: Gist)
+  @@index([centroid], type: Gist)
+  @@map("districts")
+}
+
+/// Amenities used for derived distance features and the walkability composite.
+model PointOfInterest {
+  id         String      @id @default(uuid(7)) @db.Uuid
+  category   PoiCategory
+  nameHy     String?     @map("name_hy")
+  nameRu     String?     @map("name_ru")
+  nameEn     String?     @map("name_en")
+  osmType    String?     @map("osm_type")
+  osmId      BigInt?     @map("osm_id")
+  districtId String?     @map("district_id") @db.Uuid
+  location   Unsupported("geometry(Point, 4326)")
+
+  district District? @relation(fields: [districtId], references: [id], onDelete: SetNull)
+
+  @@index([location], type: Gist)
+  @@unique([osmType, osmId])
+  @@index([category])
+  @@map("points_of_interest")
+}
+
+/// Canonical-name → alias table for Armenian / Russian / Latin address variants.
+model StreetAlias {
+  id        String  @id @default(uuid(7)) @db.Uuid
+  canonical String
+  alias     String  @unique @db.Citext
+  locale    Locale?
+
+  @@index([canonical])
+  @@map("street_aliases")
+}
+
+// ---------------------------------------------------------------------------
+// Property inventory
+// ---------------------------------------------------------------------------
+
+/// Physical building. Several listings can share one building, so structural
+/// facts (type, year, floors, seismic retrofit) live here, not on the listing.
+model Building {
+  id               String       @id @default(uuid(7)) @db.Uuid
+  districtId       String       @map("district_id") @db.Uuid
+  /// Normalised, Latin-script address line used for deduplication.
+  addressLine      String       @map("address_line")
+  streetHy         String       @map("street_hy")
+  streetRu         String       @map("street_ru")
+  streetEn         String       @map("street_en")
+  houseNumber      String       @map("house_number")
+  buildingType     BuildingType @map("building_type")
+  constructionYear Int          @map("construction_year")
+  totalFloors      Int          @map("total_floors")
+  hasElevator      Boolean      @map("has_elevator")
+  /// Declared post-1988 seismic strengthening. Informational, not an engineering assessment.
+  seismicRetrofit  Boolean      @default(false) @map("seismic_retrofit")
+  location         Unsupported("geometry(Point, 4326)")
+  createdAt        DateTime     @default(now()) @map("created_at") @db.Timestamptz(3)
+
+  district District  @relation(fields: [districtId], references: [id])
+  listings Listing[]
+
+  @@index([location], type: Gist)
+  @@unique([districtId, addressLine])
+  @@index([buildingType, constructionYear])
+  @@map("buildings")
+}
+
+model Listing {
+  id               String              @id @default(uuid(7)) @db.Uuid
+  /// Short, URL-safe public identifier (e.g. "L-7F3K9Q").
+  publicId         String              @unique @map("public_id")
+  buildingId       String              @map("building_id") @db.Uuid
+  /// Denormalised from building for the composite search index.
+  districtId       String              @map("district_id") @db.Uuid
+  createdById      String?             @map("created_by_id") @db.Uuid
+  /// Ingestion adapter that produced the row, e.g. "seed", "csv-import".
+  source           String
+  /// Identifier inside the source system; unique per source for dedup / upsert.
+  sourceRef        String?             @map("source_ref")
+  status           ListingStatus       @default(ACTIVE)
+
+  priceAmd         BigInt              @map("price_amd")
+  priceNegotiable  Boolean             @default(false) @map("price_negotiable")
+  originalCurrency Currency            @default(AMD) @map("original_currency")
+  originalPrice    Decimal?            @map("original_price") @db.Decimal(14, 2)
+  /// Derived: price_amd / total_area. Stored for indexing and sorting.
+  pricePerSqmAmd   Int                 @map("price_per_sqm_amd")
+
+  totalArea        Decimal             @map("total_area") @db.Decimal(7, 2)
+  livingArea       Decimal?            @map("living_area") @db.Decimal(7, 2)
+  kitchenArea      Decimal?            @map("kitchen_area") @db.Decimal(6, 2)
+  rooms            Int
+  bathrooms        Int                 @default(1)
+  ceilingHeight    Decimal?            @map("ceiling_height") @db.Decimal(3, 2)
+  floor            Int
+  balconyCount     Int                 @default(0) @map("balcony_count")
+  hasLoggia        Boolean             @default(false) @map("has_loggia")
+  hasParking       Boolean             @default(false) @map("has_parking")
+  hasStorage       Boolean             @default(false) @map("has_storage")
+  condition        Condition
+  heating          HeatingType
+  ownershipDocs    OwnershipDocsStatus @default(UNVERIFIED) @map("ownership_docs")
+
+  /// Copied from building so the spatial index lives on the searched table.
+  location         Unsupported("geometry(Point, 4326)")
+
+  publishedAt      DateTime            @default(now()) @map("published_at") @db.Timestamptz(3)
+  createdAt        DateTime            @default(now()) @map("created_at") @db.Timestamptz(3)
+  updatedAt        DateTime            @updatedAt @map("updated_at") @db.Timestamptz(3)
+
+  building        Building                 @relation(fields: [buildingId], references: [id])
+  district        District                 @relation(fields: [districtId], references: [id])
+  createdBy       User?                    @relation("ListingCreatedBy", fields: [createdById], references: [id], onDelete: SetNull)
+  translations    ListingTranslation[]
+  media           Media[]
+  embedding       ListingEmbedding?
+  priceHistory    ListingPriceHistory[]
+  favorites       Favorite[]
+  comparisonItems ComparisonItem[]
+  valuations      ValuationRecord[]
+  interactions    UserInteraction[]
+
+  @@index([location], type: Gist)
+  @@unique([source, sourceRef])
+  @@index([districtId, priceAmd, rooms])
+  @@index([status, publishedAt(sort: Desc)])
+  @@index([pricePerSqmAmd])
+  @@index([buildingId])
+  @@map("listings")
+}
+
+/// Localised listing content. Machine translations are flagged for admin review.
+model ListingTranslation {
+  listingId   String            @map("listing_id") @db.Uuid
+  locale      Locale
+  title       String
+  description String
+  source      TranslationSource @default(HUMAN)
+  isReviewed  Boolean           @default(false) @map("is_reviewed")
+  updatedAt   DateTime          @updatedAt @map("updated_at") @db.Timestamptz(3)
+
+  listing Listing @relation(fields: [listingId], references: [id], onDelete: Cascade)
+
+  @@id([listingId, locale])
+  @@map("listing_translations")
+}
+
+/// Sentence embedding of the listing text for hybrid semantic search.
+/// Dimension 768 matches LaBSE / multilingual-e5-base; a model change is a migration.
+model ListingEmbedding {
+  listingId    String   @id @map("listing_id") @db.Uuid
+  modelVersion String   @map("model_version")
+  /// SHA-256 of the embedded text; lets the worker skip unchanged listings.
+  sourceHash   String   @map("source_hash")
+  embedding    Unsupported("vector(768)")
+  createdAt    DateTime @default(now()) @map("created_at") @db.Timestamptz(3)
+
+  listing Listing @relation(fields: [listingId], references: [id], onDelete: Cascade)
+
+  @@index([modelVersion])
+  @@map("listing_embeddings")
+}
+
+model ListingPriceHistory {
+  id         String   @id @default(uuid(7)) @db.Uuid
+  listingId  String   @map("listing_id") @db.Uuid
+  priceAmd   BigInt   @map("price_amd")
+  recordedAt DateTime @default(now()) @map("recorded_at") @db.Timestamptz(3)
+
+  listing Listing @relation(fields: [listingId], references: [id], onDelete: Cascade)
+
+  @@index([listingId, recordedAt])
+  @@map("listing_price_history")
+}
+
+model Media {
+  id             String    @id @default(uuid(7)) @db.Uuid
+  listingId      String    @map("listing_id") @db.Uuid
+  kind           MediaKind @default(PHOTO)
+  url            String
+  width          Int?
+  height         Int?
+  sortOrder      Int       @default(0) @map("sort_order")
+  /// Perceptual hash for cross-listing photo reuse detection (trust score).
+  perceptualHash String?   @map("perceptual_hash")
+  /// Seed / demo imagery rather than a photo of the actual property.
+  isPlaceholder  Boolean   @default(false) @map("is_placeholder")
+  createdAt      DateTime  @default(now()) @map("created_at") @db.Timestamptz(3)
+
+  listing Listing @relation(fields: [listingId], references: [id], onDelete: Cascade)
+
+  @@index([listingId, sortOrder])
+  @@index([perceptualHash])
+  @@map("media")
+}
+
+// ---------------------------------------------------------------------------
+// Market data
+// ---------------------------------------------------------------------------
+
+/// Daily Central Bank of Armenia reference rate, snapshotted so historical
+/// valuations remain reproducible.
+model ExchangeRate {
+  id        String   @id @default(uuid(7)) @db.Uuid
+  date      DateTime @db.Date
+  currency  Currency
+  rateToAmd Decimal  @map("rate_to_amd") @db.Decimal(12, 4)
+  source    String   @default("CBA")
+  createdAt DateTime @default(now()) @map("created_at") @db.Timestamptz(3)
+
+  valuations ValuationRecord[]
+
+  @@unique([date, currency])
+  @@map("exchange_rates")
+}
+
+/// Monthly aggregate per district for trend charts and rental-yield estimates.
+model DistrictMarketSnapshot {
+  id                    String   @id @default(uuid(7)) @db.Uuid
+  districtId            String   @map("district_id") @db.Uuid
+  periodStart           DateTime @map("period_start") @db.Date
+  medianPricePerSqmAmd  Int      @map("median_price_per_sqm_amd")
+  meanPricePerSqmAmd    Int      @map("mean_price_per_sqm_amd")
+  medianRentPerSqmAmd   Int?     @map("median_rent_per_sqm_amd")
+  listingCount          Int      @map("listing_count")
+
+  district District @relation(fields: [districtId], references: [id], onDelete: Cascade)
+
+  @@unique([districtId, periodStart])
+  @@map("district_market_snapshots")
+}
+
+/// Versioned mortgage income-tax-refund rules (Armenian Tax Code art. 160).
+/// Stored as data so rule changes do not require a deployment.
+model TaxRefundRuleSet {
+  id            String    @id @default(uuid(7)) @db.Uuid
+  version       Int       @unique
+  effectiveFrom DateTime  @map("effective_from") @db.Date
+  effectiveTo   DateTime? @map("effective_to") @db.Date
+  description   String
+  /// Rule parameters, e.g. {"maxPropertyValueAmd":55000000,"maxMonthlyRefundAmd":1500000,...}
+  rules         Json
+  createdAt     DateTime  @default(now()) @map("created_at") @db.Timestamptz(3)
+
+  @@map("tax_refund_rule_sets")
+}
+
+// ---------------------------------------------------------------------------
+// AI outputs
+// ---------------------------------------------------------------------------
+
+/// Fair-price estimate from the ML service. Every number shown in the UI
+/// traces back to one of these rows and its model version.
+model ValuationRecord {
+  id             String           @id @default(uuid(7)) @db.Uuid
+  listingId      String           @map("listing_id") @db.Uuid
+  modelVersion   String           @map("model_version")
+  fairPriceAmd   BigInt           @map("fair_price_amd")
+  lowerBoundAmd  BigInt           @map("lower_bound_amd")
+  upperBoundAmd  BigInt           @map("upper_bound_amd")
+  /// (listing price − fair price) / fair price × 100.
+  deviationPct   Decimal          @map("deviation_pct") @db.Decimal(6, 2)
+  verdict        ValuationVerdict
+  /// Top SHAP contributions, e.g. [{"feature":"floor","impactAmd":-1200000}, ...]
+  topFactors     Json             @map("top_factors")
+  exchangeRateId String?          @map("exchange_rate_id") @db.Uuid
+  createdAt      DateTime         @default(now()) @map("created_at") @db.Timestamptz(3)
+
+  listing      Listing       @relation(fields: [listingId], references: [id], onDelete: Cascade)
+  exchangeRate ExchangeRate? @relation(fields: [exchangeRateId], references: [id])
+
+  @@index([listingId, createdAt(sort: Desc)])
+  @@index([modelVersion])
+  @@map("valuation_records")
+}
+
+/// One recommendation request: inputs, strategy (A/B arm) and the ranked
+/// output with its score breakdown, logged for the thesis evaluation.
+model RecommendationSession {
+  id            String          @id @default(uuid(7)) @db.Uuid
+  userId        String?         @map("user_id") @db.Uuid
+  anonymousId   String?         @map("anonymous_id")
+  strategy      RankingStrategy
+  experimentKey String?         @map("experiment_key")
+  /// Preference vector / filters used as input.
+  preferences   Json
+  /// Ordered results: [{"listingId":"…","score":0.82,"breakdown":{…}}, …]
+  results       Json
+  /// Prompt + model metadata for LLM explanations, for reproducibility.
+  llmTrace      Json?           @map("llm_trace")
+  createdAt     DateTime        @default(now()) @map("created_at") @db.Timestamptz(3)
+
+  user User? @relation(fields: [userId], references: [id], onDelete: SetNull)
+
+  @@index([userId, createdAt(sort: Desc)])
+  @@index([experimentKey, strategy])
+  @@map("recommendation_sessions")
+}
+
+/// Implicit feedback stream (views, dwell time, favourites, dismissals).
+model UserInteraction {
+  id          String          @id @default(uuid(7)) @db.Uuid
+  userId      String?         @map("user_id") @db.Uuid
+  anonymousId String?         @map("anonymous_id")
+  listingId   String          @map("listing_id") @db.Uuid
+  type        InteractionType
+  /// Type-specific magnitude, e.g. dwell time in milliseconds.
+  value       Int?
+  sessionId   String?         @map("session_id") @db.Uuid
+  createdAt   DateTime        @default(now()) @map("created_at") @db.Timestamptz(3)
+
+  user    User?   @relation(fields: [userId], references: [id], onDelete: SetNull)
+  listing Listing @relation(fields: [listingId], references: [id], onDelete: Cascade)
+
+  @@index([userId, createdAt(sort: Desc)])
+  @@index([listingId, type])
+  @@map("user_interactions")
+}
+
+// ---------------------------------------------------------------------------
+// User collections
+// ---------------------------------------------------------------------------
+
+model Favorite {
+  userId    String   @map("user_id") @db.Uuid
+  listingId String   @map("listing_id") @db.Uuid
+  createdAt DateTime @default(now()) @map("created_at") @db.Timestamptz(3)
+
+  user    User    @relation(fields: [userId], references: [id], onDelete: Cascade)
+  listing Listing @relation(fields: [listingId], references: [id], onDelete: Cascade)
+
+  @@id([userId, listingId])
+  @@index([listingId])
+  @@map("favorites")
+}
+
+/// Saved filter set; a background job diffs new listings against it for alerts.
+model SavedSearch {
+  id             String    @id @default(uuid(7)) @db.Uuid
+  userId         String    @map("user_id") @db.Uuid
+  name           String
+  /// Structured filter object validated by the shared Zod search schema.
+  filters        Json
+  alertsEnabled  Boolean   @default(true) @map("alerts_enabled")
+  lastNotifiedAt DateTime? @map("last_notified_at") @db.Timestamptz(3)
+  createdAt      DateTime  @default(now()) @map("created_at") @db.Timestamptz(3)
+  updatedAt      DateTime  @updatedAt @map("updated_at") @db.Timestamptz(3)
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId])
+  @@index([alertsEnabled, lastNotifiedAt])
+  @@map("saved_searches")
+}
+
+/// Side-by-side comparison of up to four listings.
+model Comparison {
+  id        String   @id @default(uuid(7)) @db.Uuid
+  userId    String   @map("user_id") @db.Uuid
+  name      String?
+  createdAt DateTime @default(now()) @map("created_at") @db.Timestamptz(3)
+  updatedAt DateTime @updatedAt @map("updated_at") @db.Timestamptz(3)
+
+  user  User             @relation(fields: [userId], references: [id], onDelete: Cascade)
+  items ComparisonItem[]
+
+  @@index([userId])
+  @@map("comparisons")
+}
+
+model ComparisonItem {
+  comparisonId String @map("comparison_id") @db.Uuid
+  listingId    String @map("listing_id") @db.Uuid
+  position     Int
+
+  comparison Comparison @relation(fields: [comparisonId], references: [id], onDelete: Cascade)
+  listing    Listing    @relation(fields: [listingId], references: [id], onDelete: Cascade)
+
+  @@id([comparisonId, listingId])
+  @@unique([comparisonId, position])
+  @@map("comparison_items")
+}
+
+// ---------------------------------------------------------------------------
+// Governance
+// ---------------------------------------------------------------------------
+
+model AuditLog {
+  id         String   @id @default(uuid(7)) @db.Uuid
+  actorId    String?  @map("actor_id") @db.Uuid
+  action     String
+  entityType String   @map("entity_type")
+  entityId   String?  @map("entity_id")
+  metadata   Json     @default("{}")
+  ipAddress  String?  @map("ip_address") @db.Inet
+  createdAt  DateTime @default(now()) @map("created_at") @db.Timestamptz(3)
+
+  actor User? @relation(fields: [actorId], references: [id], onDelete: SetNull)
+
+  @@index([entityType, entityId])
+  @@index([actorId, createdAt(sort: Desc)])
+  @@map("audit_logs")
+}

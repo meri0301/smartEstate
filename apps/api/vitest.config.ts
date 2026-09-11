@@ -13,7 +13,7 @@ export default defineConfig({
         test: {
           name: 'unit',
           environment: 'node',
-          include: ['src/**/*.spec.ts'],
+          include: ['src/**/*.spec.ts', 'prisma/**/*.test.ts'],
         },
       },
       {
@@ -26,8 +26,8 @@ export default defineConfig({
     ],
     coverage: {
       provider: 'v8',
-      include: ['src/**/*.ts'],
-      exclude: ['src/main.ts', 'src/**/*.module.ts', 'src/**/*.spec.ts'],
+      include: ['src/**/*.ts', 'prisma/seed/lib/**/*.ts'],
+      exclude: ['src/main.ts', 'src/**/*.module.ts', 'src/**/*.spec.ts', 'src/generated/**'],
       thresholds: { lines: 80, functions: 80, branches: 80, statements: 80 },
     },
   },

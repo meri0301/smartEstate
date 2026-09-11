@@ -33,3 +33,9 @@ __pycache__/
 .pytest_cache/
 .ruff_cache/
 *.egg-info/
+
+# Prisma client is generated into the api workspace on install/build
+apps/api/src/generated/
+
+# Raw OpenStreetMap downloads cached by apps/api/prisma/seed/scripts/fetch-osm.ts
+apps/api/prisma/seed/data/.osm-cache/

@@ -1,0 +1,126 @@
+/**
+ * Real street names per district in the three content locales. Russian names
+ * are in the genitive form that follows "улица"; Armenian names precede "փողոց".
+ * Used for synthetic building addresses and to seed the street-alias table.
+ */
+export interface Street {
+  en: string;
+  hy: string;
+  ru: string;
+}
+
+export const STREETS_BY_DISTRICT: Readonly<Record<string, readonly Street[]>> = {
+  kentron: [
+    { en: 'Abovyan', hy: 'Աբովյան', ru: 'Абовяна' },
+    { en: 'Tumanyan', hy: 'Թումանյան', ru: 'Туманяна' },
+    { en: 'Sayat-Nova', hy: 'Սայաթ-Նովա', ru: 'Саят-Новы' },
+    { en: 'Mashtots', hy: 'Մաշտոց', ru: 'Маштоца' },
+    { en: 'Teryan', hy: 'Տերյան', ru: 'Терьяна' },
+    { en: 'Nalbandyan', hy: 'Նալբանդյան', ru: 'Налбандяна' },
+    { en: 'Pushkin', hy: 'Պուշկին', ru: 'Пушкина' },
+    { en: 'Amiryan', hy: 'Ամիրյան', ru: 'Амиряна' },
+    { en: 'Vardanants', hy: 'Վարդանանց', ru: 'Вардананц' },
+    { en: 'Koryun', hy: 'Կորյուն', ru: 'Корюна' },
+  ],
+  arabkir: [
+    { en: 'Komitas', hy: 'Կոմիտաս', ru: 'Комитаса' },
+    { en: 'Kievyan', hy: 'Կիևյան', ru: 'Киевян' },
+    { en: 'Papazyan', hy: 'Պապազյան', ru: 'Папазяна' },
+    { en: 'Vagharshyan', hy: 'Վաղարշյան', ru: 'Вагаршяна' },
+    { en: 'Griboyedov', hy: 'Գրիբոյեդով', ru: 'Грибоедова' },
+    { en: 'Hrachya Kochar', hy: 'Հրաչյա Քոչար', ru: 'Грачья Кочара' },
+    { en: 'Kasyan', hy: 'Կասյան', ru: 'Касьяна' },
+    { en: 'Orbeli Brothers', hy: 'Օրբելի եղբայրներ', ru: 'Братьев Орбели' },
+    { en: 'Mamikonyants', hy: 'Մամիկոնյանց', ru: 'Мамиконянц' },
+    { en: 'Baghramyan', hy: 'Բաղրամյան', ru: 'Баграмяна' },
+  ],
+  ajapnyak: [
+    { en: 'Margaryan', hy: 'Մարգարյան', ru: 'Маргаряна' },
+    { en: 'Shiraz', hy: 'Շիրազ', ru: 'Шираза' },
+    { en: 'Halabyan', hy: 'Հալաբյան', ru: 'Алабяна' },
+    { en: 'Bashinjaghyan', hy: 'Բաշինջաղյան', ru: 'Башинджагяна' },
+    { en: 'Nazarbekyan', hy: 'Նազարբեկյան', ru: 'Назарбекяна' },
+    { en: 'Leningradyan', hy: 'Լենինգրադյան', ru: 'Ленинградян' },
+    { en: 'Fuchik', hy: 'Ֆուչիկ', ru: 'Фучика' },
+  ],
+  avan: [
+    { en: 'Isahakyan', hy: 'Իսահակյան', ru: 'Исаакяна' },
+    { en: 'Khudyakov', hy: 'Խուդյակով', ru: 'Худякова' },
+    { en: 'Charents', hy: 'Չարենց', ru: 'Чаренца' },
+    { en: 'Tsarav Aghbyur', hy: 'Ծարավ Աղբյուր', ru: 'Царав Ахбюр' },
+    { en: 'Narekatsi', hy: 'Նարեկացի', ru: 'Нарекаци' },
+    { en: 'Duryan', hy: 'Դուրյան', ru: 'Дуряна' },
+  ],
+  davtashen: [
+    { en: 'Pirumyanner', hy: 'Պիրումյանների', ru: 'Пирумянов' },
+    { en: 'Sasna Tsrer', hy: 'Սասնա Ծռեր', ru: 'Сасна Црер' },
+    { en: 'Tigran Petrosyan', hy: 'Տիգրան Պետրոսյան', ru: 'Тиграна Петросяна' },
+    { en: 'Aghababyan', hy: 'Աղաբաբյան', ru: 'Агабабяна' },
+    { en: 'Mikayelyan', hy: 'Միքայելյան', ru: 'Микаеляна' },
+    { en: 'Anastas Mikoyan', hy: 'Անաստաս Միկոյան', ru: 'Анастаса Микояна' },
+  ],
+  erebuni: [
+    { en: 'Erebuni', hy: 'Էրեբունի', ru: 'Эребуни' },
+    { en: 'Sasuntsi David', hy: 'Սասունցի Դավիթ', ru: 'Сасунци Давида' },
+    { en: 'Arin-Berd', hy: 'Արին-Բերդ', ru: 'Арин-Берд' },
+    { en: 'Rostovyan', hy: 'Ռոստովյան', ru: 'Ростовская' },
+    { en: 'Khaghagh Don', hy: 'Խաղաղ Դոն', ru: 'Тихий Дон' },
+    { en: 'Mushegh Ishkhan', hy: 'Մուշեղ Իշխան', ru: 'Мушега Ишхана' },
+    { en: 'Atoyan', hy: 'Ատոյան', ru: 'Атояна' },
+  ],
+  'kanaker-zeytun': [
+    { en: 'Rubinyants', hy: 'Ռուբինյանց', ru: 'Рубинянц' },
+    { en: 'Dro', hy: 'Դրո', ru: 'Дро' },
+    { en: 'Zeytun', hy: 'Զեյթուն', ru: 'Зейтун' },
+    { en: 'Nersisyan', hy: 'Ներսիսյան', ru: 'Нерсисяна' },
+    { en: 'Ulnetsi', hy: 'Ուլնեցի', ru: 'Улнеци' },
+    { en: 'Kanakertsi', hy: 'Քանաքեռցի', ru: 'Канакерци' },
+    { en: 'Sarkavag', hy: 'Սարկավագ', ru: 'Саркавага' },
+    { en: 'Ohanov', hy: 'Օհանով', ru: 'Оганова' },
+  ],
+  'malatia-sebastia': [
+    { en: 'Sebastia', hy: 'Սեբաստիա', ru: 'Себастия' },
+    { en: 'Andranik', hy: 'Անդրանիկ', ru: 'Андраника' },
+    { en: 'Raffi', hy: 'Րաֆֆի', ru: 'Раффи' },
+    { en: 'Isakov', hy: 'Իսակով', ru: 'Исакова' },
+    { en: 'Babajanyan', hy: 'Բաբաջանյան', ru: 'Бабаджаняна' },
+    { en: 'Shirak', hy: 'Շիրակ', ru: 'Ширак' },
+    { en: 'Svachyan', hy: 'Սվաճյան', ru: 'Свачяна' },
+    { en: 'Tichina', hy: 'Տիչինա', ru: 'Тычины' },
+  ],
+  'nor-nork': [
+    { en: 'Gai', hy: 'Գայ', ru: 'Гая' },
+    { en: 'Moldovakan', hy: 'Մոլդովական', ru: 'Молдавская' },
+    { en: 'Nansen', hy: 'Նանսեն', ru: 'Нансена' },
+    { en: 'Vilnius', hy: 'Վիլնյուս', ru: 'Вильнюсская' },
+    { en: 'Minsk', hy: 'Մինսկ', ru: 'Минская' },
+    { en: 'Totovents', hy: 'Թոթովենց', ru: 'Тотовенца' },
+    { en: 'Safaryan', hy: 'Սաֆարյան', ru: 'Сафаряна' },
+    { en: 'Davit Bek', hy: 'Դավիթ Բեկ', ru: 'Давид-Бека' },
+  ],
+  'nork-marash': [
+    { en: 'Nork', hy: 'Նորք', ru: 'Норк' },
+    { en: 'Armenakyan', hy: 'Արմենակյան', ru: 'Арменакяна' },
+    { en: 'Norki Ayginer', hy: 'Նորքի Այգիներ', ru: 'Норкские сады' },
+    { en: 'Mkrtchyan', hy: 'Մկրտչյան', ru: 'Мкртчяна' },
+    { en: 'Khorenatsi', hy: 'Խորենացի', ru: 'Хоренаци' },
+    { en: 'Marash', hy: 'Մարաշ', ru: 'Мараш' },
+  ],
+  nubarashen: [
+    { en: 'Nubarashen Highway', hy: 'Նուբարաշեն խճուղի', ru: 'Нубарашенское шоссе' },
+    { en: 'Nubarashen 1st', hy: 'Նուբարաշեն 1-ին', ru: 'Нубарашен 1-я' },
+    { en: 'Nubarashen 5th', hy: 'Նուբարաշեն 5-րդ', ru: 'Нубарашен 5-я' },
+    { en: 'Nubarashen 9th', hy: 'Նուբարաշեն 9-րդ', ru: 'Нубарашен 9-я' },
+    { en: 'Nubarashen 13th', hy: 'Նուբարաշեն 13-րդ', ru: 'Нубарашен 13-я' },
+  ],
+  shengavit: [
+    { en: 'Bagratunyats', hy: 'Բագրատունյաց', ru: 'Багратуняц' },
+    { en: 'Garegin Nzhdeh', hy: 'Գարեգին Նժդեհ', ru: 'Гарегина Нжде' },
+    { en: 'Manandyan', hy: 'Մանանդյան', ru: 'Манандяна' },
+    { en: 'Artsakh', hy: 'Արցախ', ru: 'Арцах' },
+    { en: 'Chekhov', hy: 'Չեխով', ru: 'Чехова' },
+    { en: 'Tamantsineri', hy: 'Թամանցիների', ru: 'Таманцев' },
+    { en: 'Arshakunyats', hy: 'Արշակունյաց', ru: 'Аршакуняц' },
+    { en: 'Sharur', hy: 'Շարուր', ru: 'Шарур' },
+  ],
+};

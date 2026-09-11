@@ -39,6 +39,8 @@ cd smartEstate
 cp .env.example .env
 pnpm install
 pnpm docker:up        # Postgres (PostGIS + pgvector) and Redis, waits for health checks
+pnpm db:migrate       # apply Prisma migrations
+pnpm db:seed          # 300 synthetic Yerevan listings inside real district boundaries
 pnpm check            # lint + typecheck + test + build across all workspaces
 pnpm dev              # api on :3000, web on :5173
 ```
@@ -55,21 +57,27 @@ curl http://localhost:3000/health
 
 ## Everyday commands
 
-| Command             | What it does                                                    |
-| ------------------- | --------------------------------------------------------------- |
-| `pnpm dev`          | Start all app dev servers with hot reload                       |
-| `pnpm check`        | `lint`, `typecheck`, `test`, `build` for every workspace        |
-| `pnpm lint`         | ESLint, zero warnings allowed                                   |
-| `pnpm typecheck`    | `tsc --noEmit` per workspace                                    |
-| `pnpm test`         | Vitest in every workspace (api unit + e2e, web, contracts)      |
-| `pnpm build`        | Production builds into each workspace's `dist/`                 |
-| `pnpm format`       | Prettier write; `pnpm format:check` in CI                       |
-| `pnpm docker:up`    | Start infrastructure, build images if needed, wait for health   |
-| `pnpm docker:down`  | Stop containers, keep data                                      |
-| `pnpm docker:reset` | **Destroy volumes** and start fresh — the documented demo reset |
-| `pnpm docker:logs`  | Tail container logs                                             |
-| `pnpm ml:test`      | Build the ML test image and run `pytest` inside it              |
-| `pnpm ml:lint`      | `ruff check` + `ruff format --check` inside Docker              |
+| Command               | What it does                                                    |
+| --------------------- | --------------------------------------------------------------- |
+| `pnpm dev`            | Start all app dev servers with hot reload                       |
+| `pnpm check`          | `lint`, `typecheck`, `test`, `build` for every workspace        |
+| `pnpm lint`           | ESLint, zero warnings allowed                                   |
+| `pnpm typecheck`      | `tsc --noEmit` per workspace                                    |
+| `pnpm test`           | Vitest in every workspace (api unit + e2e, web, contracts)      |
+| `pnpm build`          | Production builds into each workspace's `dist/`                 |
+| `pnpm format`         | Prettier write; `pnpm format:check` in CI                       |
+| `pnpm docker:up`      | Start infrastructure, build images if needed, wait for health   |
+| `pnpm docker:down`    | Stop containers, keep data                                      |
+| `pnpm docker:reset`   | **Destroy volumes** and start fresh — the documented demo reset |
+| `pnpm docker:logs`    | Tail container logs                                             |
+| `pnpm ml:test`        | Build the ML test image and run `pytest` inside it              |
+| `pnpm ml:lint`        | `ruff check` + `ruff format --check` inside Docker              |
+| `pnpm db:migrate`     | Apply pending Prisma migrations (`prisma migrate deploy`)       |
+| `pnpm db:seed`        | Rebuild the synthetic market data (destructive for listings)    |
+| `pnpm db:reset`       | Drop, migrate and seed the database from scratch                |
+| `pnpm db:migrate:dev` | Create a migration from schema changes (development only)       |
+| `pnpm db:studio`      | Open Prisma Studio                                              |
+| `pnpm erd`            | Regenerate `docs/diagrams/erd.md` from the Prisma schema        |
 
 Workspace-scoped runs: `pnpm --filter @smartestate/api test`, `pnpm --filter @smartestate/web dev`.
 
@@ -94,6 +102,23 @@ docker/       Purpose-built images (postgres with PostGIS + pgvector)
 ```
 
 `packages/ui-tokens` is created in Phase 4 once the Figma tokens are available.
+
+## Database
+
+- Schema: [`apps/api/prisma/schema.prisma`](apps/api/prisma/schema.prisma); migrations in
+  `apps/api/prisma/migrations`; ERD in [`docs/diagrams/erd.md`](docs/diagrams/erd.md).
+- Extensions: PostGIS (geometry, GiST indexes), pgvector (768-d embeddings, HNSW index),
+  citext (case-insensitive emails and street aliases). They are created by the first
+  migration, so any empty Postgres 16 with the extensions installed works.
+- Geometry and vector columns are `Unsupported` in Prisma and are accessed with raw SQL;
+  `listing_embeddings` and PostGIS's `spatial_ref_sys` are declared external in
+  `apps/api/prisma.config.ts` (see [ADR-0004](docs/adr/0004-postgresql-postgis-pgvector-with-prisma.md)).
+- Seed data is synthetic and deterministic; district boundaries and points of interest come
+  from OpenStreetMap (© OpenStreetMap contributors, ODbL). Design notes:
+  [`docs/thesis/seed-data.md`](docs/thesis/seed-data.md). Refresh the OSM files with
+  `pnpm --filter @smartestate/api osm:fetch -- --force`.
+- Schema change workflow: edit `schema.prisma` → `pnpm db:migrate:dev -- --name <change>` →
+  review the SQL → commit schema, migration and the regenerated ERD.
 
 ## Conventions
 

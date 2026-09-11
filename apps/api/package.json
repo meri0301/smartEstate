@@ -15,12 +15,24 @@
     "test:unit": "vitest run --project unit",
     "test:e2e": "vitest run --project e2e",
     "test:watch": "vitest",
-    "test:cov": "vitest run --coverage"
+    "test:cov": "vitest run --coverage",
+    "db:generate": "prisma generate",
+    "db:migrate": "prisma migrate deploy",
+    "db:migrate:dev": "prisma migrate dev",
+    "db:seed": "prisma db seed",
+    "db:reset": "prisma migrate reset --force",
+    "db:studio": "prisma studio",
+    "db:status": "prisma migrate status",
+    "erd": "tsx prisma/erd/generate-erd.ts",
+    "osm:fetch": "node prisma/seed/scripts/fetch-osm.ts"
   },
   "dependencies": {
     "@nestjs/common": "12.0.1",
     "@nestjs/core": "12.0.1",
     "@nestjs/platform-fastify": "12.0.1",
+    "@prisma/adapter-pg": "7.10.0",
+    "@prisma/client": "7.10.0",
+    "pg": "8.23.0",
     "reflect-metadata": "0.2.2",
     "rxjs": "7.8.2"
   },
@@ -28,11 +40,15 @@
     "@nestjs/cli": "12.0.0",
     "@nestjs/schematics": "12.0.0",
     "@nestjs/testing": "12.0.1",
+    "@prisma/internals": "7.10.0",
     "@smartestate/eslint-config": "workspace:*",
     "@smartestate/tsconfig": "workspace:*",
     "@types/node": "24.13.4",
+    "@types/pg": "8.23.1",
     "@vitest/coverage-v8": "5.0.0",
     "eslint": "10.10.0",
+    "prisma": "7.10.0",
+    "tsx": "4.23.13",
     "typescript": "6.0.3",
     "vitest": "5.0.0"
   }
