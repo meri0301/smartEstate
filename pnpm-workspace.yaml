@@ -1,0 +1,5 @@
+# Workspace members. `apps/ml` is a Python service and has no package.json,
+# so pnpm ignores it automatically; it is driven by Docker and the CI `ml` job.
+packages:
+  - 'apps/*'
+  - 'packages/*'

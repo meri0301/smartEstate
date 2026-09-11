@@ -1,0 +1,10 @@
+node_modules/
+dist/
+build/
+coverage/
+.turbo/
+pnpm-lock.yaml
+# Python is formatted by ruff
+apps/ml/
+# Authored brief, kept verbatim
+docs/BUILD_PROMPT.md

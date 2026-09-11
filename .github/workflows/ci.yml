@@ -1,0 +1,97 @@
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: ci-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  node:
+    name: Lint, typecheck, test, build (Node workspaces)
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Install pnpm (version from package.json "packageManager")
+        uses: pnpm/action-setup@v4
+
+      - name: Install Node (version from .nvmrc)
+        uses: actions/setup-node@v4
+        with:
+          node-version-file: .nvmrc
+          cache: pnpm
+
+      - run: pnpm install --frozen-lockfile
+
+      - run: pnpm format:check
+      - run: pnpm lint
+      - run: pnpm typecheck
+      - run: pnpm test
+      - run: pnpm build
+
+  commitlint:
+    name: Conventional Commits
+    if: github.event_name == 'pull_request'
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - uses: pnpm/action-setup@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version-file: .nvmrc
+          cache: pnpm
+      - run: pnpm install --frozen-lockfile
+      - name: Lint every commit in the pull request
+        run: pnpm commitlint --from ${{ github.event.pull_request.base.sha }} --to ${{ github.event.pull_request.head.sha }} --verbose
+
+  ml:
+    name: Lint and test (ML service)
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: apps/ml
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version-file: apps/ml/.python-version
+          cache: pip
+      - run: pip install -e ".[dev]"
+      - run: ruff check .
+      - run: ruff format --check .
+      - run: pytest
+
+  infra:
+    name: Docker Compose boots healthy
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Validate compose file
+        run: docker compose --env-file .env.example config --quiet
+      - name: Start infrastructure and wait for health checks
+        run: docker compose --env-file .env.example up -d --build --wait --wait-timeout 180
+      - name: Verify PostGIS and pgvector are installed
+        run: |
+          docker compose --env-file .env.example exec -T postgres \
+            psql -U smartestate -d smartestate -Atc \
+            "SELECT extname || ' ' || extversion FROM pg_extension WHERE extname IN ('postgis','vector') ORDER BY extname" \
+            | tee extensions.txt
+          grep -q '^postgis ' extensions.txt
+          grep -q '^vector ' extensions.txt
+      - name: Verify Redis answers
+        run: docker compose --env-file .env.example exec -T redis redis-cli ping | grep -q PONG
+      - name: Build ML image and run its tests
+        run: |
+          docker build --target test -t smartestate-ml-test apps/ml
+          docker run --rm smartestate-ml-test
+      - if: always()
+        run: docker compose --env-file .env.example down -v --remove-orphans

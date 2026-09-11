@@ -1,0 +1,42 @@
+{
+  "name": "smartestate",
+  "version": "0.1.0",
+  "private": true,
+  "description": "SmartEstate — AI-assisted apartment search and buying advisor for the Armenian real-estate market (thesis project).",
+  "license": "UNLICENSED",
+  "type": "module",
+  "packageManager": "pnpm@9.15.9",
+  "engines": {
+    "node": ">=24.0.0 <25",
+    "pnpm": ">=9.15.0 <10"
+  },
+  "scripts": {
+    "dev": "turbo run dev",
+    "build": "turbo run build",
+    "lint": "turbo run lint",
+    "typecheck": "turbo run typecheck",
+    "test": "turbo run test",
+    "check": "turbo run lint typecheck test build",
+    "format": "prettier --write .",
+    "format:check": "prettier --check .",
+    "docker:up": "docker compose up -d --build --wait",
+    "docker:down": "docker compose down",
+    "docker:reset": "docker compose down -v --remove-orphans && docker compose up -d --build --wait",
+    "docker:logs": "docker compose logs -f",
+    "ml:test": "docker build --target test -t smartestate-ml-test apps/ml && docker run --rm smartestate-ml-test",
+    "ml:lint": "docker build --target test -t smartestate-ml-test apps/ml && docker run --rm smartestate-ml-test ruff check . && docker run --rm smartestate-ml-test ruff format --check .",
+    "prepare": "husky"
+  },
+  "devDependencies": {
+    "@commitlint/cli": "21.2.2",
+    "@commitlint/config-conventional": "21.2.2",
+    "@smartestate/eslint-config": "workspace:*",
+    "@smartestate/tsconfig": "workspace:*",
+    "eslint": "10.10.0",
+    "husky": "9.1.7",
+    "lint-staged": "17.5.1",
+    "prettier": "3.9.6",
+    "turbo": "2.10.12",
+    "typescript": "6.0.3"
+  }
+}

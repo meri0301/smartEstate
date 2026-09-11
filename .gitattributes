@@ -1,0 +1,17 @@
+# Normalise line endings to LF in the repository regardless of the contributor's OS.
+# The project is developed on Windows; without this, CRLF would leak into shell
+# scripts (husky hooks, Docker entrypoints) and break them inside Linux containers.
+* text=auto eol=lf
+
+# Binary assets
+*.png binary
+*.jpg binary
+*.jpeg binary
+*.webp binary
+*.avif binary
+*.ico binary
+*.woff binary
+*.woff2 binary
+*.pdf binary
+*.pkl binary
+*.joblib binary

@@ -1,0 +1,57 @@
+[project]
+name = "smartestate-ml"
+version = "0.1.0"
+description = "SmartEstate ML service — price valuation, explanations and multilingual embeddings."
+readme = "README.md"
+requires-python = ">=3.12,<3.13"
+license = { text = "UNLICENSED" }
+dependencies = [
+  "fastapi>=0.141,<1.0",
+  "uvicorn[standard]>=0.52,<1.0",
+  "pydantic>=2.13,<3.0",
+  "pydantic-settings>=2.15,<3.0",
+]
+
+[project.optional-dependencies]
+dev = [
+  "pytest>=9.1,<10",
+  "httpx>=0.28,<1.0",
+  "ruff>=0.16,<1.0",
+]
+
+[build-system]
+requires = ["setuptools>=75"]
+build-backend = "setuptools.build_meta"
+
+[tool.setuptools.packages.find]
+include = ["app*"]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+addopts = "-q --strict-markers"
+
+[tool.ruff]
+line-length = 100
+target-version = "py312"
+
+[tool.ruff.lint]
+select = [
+  "E",   # pycodestyle errors
+  "W",   # pycodestyle warnings
+  "F",   # pyflakes
+  "I",   # isort
+  "B",   # bugbear
+  "UP",  # pyupgrade
+  "N",   # pep8-naming
+  "ANN", # type annotations on every function
+  "RUF", # ruff-specific
+]
+ignore = [
+  "ANN401", # `Any` is occasionally unavoidable in FastAPI dependency signatures
+]
+
+[tool.ruff.lint.per-file-ignores]
+"tests/**" = ["ANN"]
+
+[tool.ruff.format]
+quote-style = "double"

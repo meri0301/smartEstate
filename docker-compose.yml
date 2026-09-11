@@ -1,0 +1,51 @@
+# Local infrastructure for SmartEstate.
+# Application containers (api, web, ml) are added as those apps gain real code;
+# Phase 0 provides the stateful services every later phase depends on.
+#
+#   pnpm docker:up      start (builds the Postgres image on first run) and wait for health
+#   pnpm docker:down    stop, keep data
+#   pnpm docker:reset   stop, DELETE data volumes, start fresh
+name: smartestate
+
+services:
+  postgres:
+    build:
+      context: ./docker/postgres
+    image: smartestate/postgres:16-postgis-pgvector
+    container_name: smartestate-postgres
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: ${POSTGRES_USER:-smartestate}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-smartestate}
+      POSTGRES_DB: ${POSTGRES_DB:-smartestate}
+    ports:
+      - '${POSTGRES_PORT:-5432}:5432'
+    volumes:
+      - postgres-data:/var/lib/postgresql/data
+      # Runs once, on first initialisation of an empty data volume.
+      - ./docker/postgres/initdb:/docker-entrypoint-initdb.d:ro
+    healthcheck:
+      test: ['CMD-SHELL', 'pg_isready -U "$$POSTGRES_USER" -d "$$POSTGRES_DB"']
+      interval: 5s
+      timeout: 5s
+      retries: 12
+      start_period: 10s
+
+  redis:
+    image: redis:7-alpine
+    container_name: smartestate-redis
+    restart: unless-stopped
+    command: ['redis-server', '--appendonly', 'yes']
+    ports:
+      - '${REDIS_PORT:-6379}:6379'
+    volumes:
+      - redis-data:/data
+    healthcheck:
+      test: ['CMD', 'redis-cli', 'ping']
+      interval: 5s
+      timeout: 3s
+      retries: 12
+
+volumes:
+  postgres-data:
+  redis-data:

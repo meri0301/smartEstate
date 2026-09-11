@@ -1,0 +1,9 @@
+{
+  "$schema": "https://json.schemastore.org/tsconfig",
+  "_comment": "Node 24 runtime preset. `module: node20` follows Node's own CJS/ESM rules based on the nearest package.json `type` field and implies the matching module resolution; TypeScript 6 rejects an explicit `moduleResolution: node20`.",
+  "extends": "./base.json",
+  "compilerOptions": {
+    "module": "node20",
+    "types": ["node"]
+  }
+}

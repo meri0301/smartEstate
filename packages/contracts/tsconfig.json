@@ -1,0 +1,9 @@
+{
+  "extends": "@smartestate/tsconfig/node.json",
+  "compilerOptions": {
+    "verbatimModuleSyntax": true,
+    "rootDir": ".",
+    "outDir": "./dist"
+  },
+  "include": ["src/**/*.ts", "vitest.config.ts"]
+}
