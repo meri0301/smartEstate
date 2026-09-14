@@ -60,6 +60,8 @@ describe('apiRequest with the typed client', () => {
     expect(request.url).toBe('http://api.test/api/districts');
     expect(request.headers.get('authorization')).toBe('Bearer stale-token');
     expect(request.credentials).toBe('include');
+    // The API picks listing language from this header when no query parameter is given.
+    expect(request.headers.get('accept-language')).toBe('hy');
   });
 
   it('refreshes once on 401 and replays with the new token', async () => {

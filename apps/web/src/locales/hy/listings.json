@@ -1,0 +1,34 @@
+{
+  "resultCount": "{count, plural, =0 {Հայտարարություններ չկան} one {# հայտարարություն} other {# հայտարարություն}}",
+  "roomCount": "{count, plural, one {# սենյակ} other {# սենյակ}}",
+  "photoCount": "{count, plural, =0 {Լուսանկարներ չկան} one {# լուսանկար} other {# լուսանկար}}",
+  "floorOf": "{total}-ից {floor}-րդ հարկ",
+  "area": "{area} քմ",
+  "pricePerSqm": "{price} մեկ քմ-ի համար",
+  "publishedRelative": "Հրապարակվել է {when}",
+  "noResults": "Այս զտիչներին համապատասխան հայտարարություններ չկան",
+  "noResultsHint": "Փորձեք ընդլայնել գնային միջակայքը կամ ավելացնել շրջան։",
+  "machineTranslated": "Թարգմանվել է ավտոմատ",
+  "machineTranslatedHint": "Այս տեքստը թարգմանվել է {sourceLanguage}-ից և չի ստուգվել։",
+  "verdict": {
+    "underpriced": "Գինը գնահատականից ցածր է",
+    "fair": "Գինը համապատասխանում է գնահատականին",
+    "overpriced": "Գինը գնահատականից բարձր է",
+    "deviation": "{percent} գնահատականի նկատմամբ"
+  },
+  "condition": {
+    "NEEDS_REPAIR": "Վերանորոգման կարիք ունի",
+    "OLD_RENOVATION": "Հին վերանորոգում",
+    "GOOD": "Լավ վիճակ",
+    "EURO_RENOVATION": "Եվրովերանորոգում",
+    "DESIGNER": "Դիզայներական վերանորոգում"
+  },
+  "buildingType": {
+    "STONE": "Քարե",
+    "PANEL": "Պանելային",
+    "MONOLITH": "Մոնոլիտ",
+    "KHRUSHCHYOVKA": "Խրուշչովկա",
+    "STALINKA": "Ստալինկա",
+    "NEW_BUILD": "Նորակառույց"
+  }
+}

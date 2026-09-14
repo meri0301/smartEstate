@@ -1,5 +1,7 @@
 import type { Decorator, Preview } from '@storybook/react-vite';
 import { useEffect, type JSX, type ReactNode } from 'react';
+import { I18nProvider } from '../src/shared/i18n/I18nProvider.js';
+import { isLocale } from '../src/shared/i18n/locales.js';
 import { applyTheme, isThemePreference } from '../src/shared/ui/theme.js';
 import '../src/styles/index.css';
 
@@ -25,11 +27,17 @@ const withTheme: Decorator = (Story, context) => (
   </ThemeFrame>
 );
 
-const withLocale: Decorator = (Story, context) => (
-  <div lang={String(context.globals.locale ?? 'en')} className="bg-bg p-6 text-text-secondary">
-    <Story />
-  </div>
-);
+const withLocale: Decorator = (Story, context) => {
+  const raw = String(context.globals.locale ?? 'en');
+  const locale = isLocale(raw) ? raw : 'en';
+  return (
+    <I18nProvider locale={locale}>
+      <div lang={locale} className="bg-bg p-6 text-text-secondary">
+        <Story />
+      </div>
+    </I18nProvider>
+  );
+};
 
 const preview: Preview = {
   parameters: {

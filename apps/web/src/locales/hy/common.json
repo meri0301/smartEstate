@@ -1,0 +1,35 @@
+{
+  "brand": "SmartEstate",
+  "tagline": "Գնե՞լ այս բնակարանը, թե՞ ոչ",
+  "skipToContent": "Անցնել բովանդակությանը",
+  "loading": "Բեռնվում է…",
+  "nav": {
+    "search": "Որոնում",
+    "favourites": "Ընտրված",
+    "compare": "Համեմատել",
+    "signIn": "Մուտք",
+    "account": "Հաշիվ"
+  },
+  "actions": {
+    "save": "Պահպանել",
+    "cancel": "Չեղարկել",
+    "close": "Փակել",
+    "retry": "Կրկին փորձել",
+    "showMore": "Ցույց տալ ավելին",
+    "dismiss": "Փակել"
+  },
+  "language": {
+    "label": "Լեզու",
+    "current": "Ընթացիկ լեզուն՝ {language}",
+    "switchTo": "Փոխել {language}-ի"
+  },
+  "theme": {
+    "label": "Թեմա",
+    "light": "Բաց",
+    "dark": "Մուգ",
+    "system": "Ըստ համակարգի"
+  },
+  "notifications": {
+    "region": "Ծանուցումներ"
+  }
+}

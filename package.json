@@ -25,6 +25,7 @@
     "db:studio": "pnpm --filter @smartestate/api db:studio",
     "erd": "pnpm --filter @smartestate/api erd",
     "tokens:css": "turbo run tokens:css",
+    "i18n:check": "pnpm --filter @smartestate/web i18n:check",
     "storybook": "pnpm --filter @smartestate/web storybook",
     "openapi:export": "turbo run openapi:export",
     "format": "prettier --write .",

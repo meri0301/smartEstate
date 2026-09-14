@@ -15,7 +15,8 @@
     "test:watch": "vitest",
     "api:generate": "openapi-typescript ../../docs/api/openapi.json -o src/shared/api/schema.d.ts --root-types --root-types-no-schema-prefix --default-non-nullable=false",
     "storybook": "storybook dev -p 6006 --no-open",
-    "build-storybook": "storybook build"
+    "build-storybook": "storybook build",
+    "i18n:check": "tsx scripts/check-i18n.ts"
   },
   "dependencies": {
     "@fontsource/krona-one": "5.3.0",
@@ -26,9 +27,14 @@
     "@tanstack/react-query": "5.102.8",
     "class-variance-authority": "0.7.1",
     "clsx": "2.1.1",
+    "i18next": "26.4.2",
+    "i18next-icu": "2.4.4",
+    "intl-messageformat": "11.2.15",
     "openapi-fetch": "0.17.0",
     "react": "19.3.0",
     "react-dom": "19.3.0",
+    "react-i18next": "17.0.14",
+    "react-router": "8.3.1",
     "tailwind-merge": "3.7.0",
     "tailwindcss": "4.3.3",
     "zustand": "5.0.15"
@@ -53,6 +59,7 @@
     "jsdom": "30.0.1",
     "openapi-typescript": "7.13.0",
     "storybook": "10.6.0",
+    "tsx": "4.23.13",
     "typescript": "6.0.3",
     "vite": "8.3.0",
     "vitest": "5.0.0"

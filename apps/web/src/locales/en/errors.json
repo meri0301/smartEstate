@@ -1,0 +1,14 @@
+{
+  "network": "Could not reach the server",
+  "networkHint": "Check your connection and try again.",
+  "unexpected": "Something went wrong",
+  "unexpectedHint": "The problem has been logged. Please try again.",
+  "notFound": "Not found",
+  "notFoundHint": "The page or listing you asked for does not exist.",
+  "forbidden": "You do not have access to this",
+  "sessionExpired": "Your session has expired",
+  "sessionExpiredHint": "Sign in again to continue.",
+  "validation": "Please check the highlighted fields",
+  "rateLimited": "Too many attempts",
+  "rateLimitedHint": "Wait a minute before trying again."
+}

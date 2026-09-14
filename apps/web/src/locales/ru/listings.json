@@ -1,0 +1,34 @@
+{
+  "resultCount": "{count, plural, =0 {Объявлений нет} one {# объявление} few {# объявления} many {# объявлений} other {# объявления}}",
+  "roomCount": "{count, plural, one {# комната} few {# комнаты} many {# комнат} other {# комнаты}}",
+  "photoCount": "{count, plural, =0 {Фотографий нет} one {# фотография} few {# фотографии} many {# фотографий} other {# фотографии}}",
+  "floorOf": "{floor} этаж из {total}",
+  "area": "{area} м²",
+  "pricePerSqm": "{price} за м²",
+  "publishedRelative": "Опубликовано {when}",
+  "noResults": "По этим фильтрам объявлений не найдено",
+  "noResultsHint": "Попробуйте расширить диапазон цен или добавить район.",
+  "machineTranslated": "Переведено автоматически",
+  "machineTranslatedHint": "Этот текст переведён с {sourceLanguage} и не был проверен.",
+  "verdict": {
+    "underpriced": "Цена ниже оценки",
+    "fair": "Цена соответствует оценке",
+    "overpriced": "Цена выше оценки",
+    "deviation": "{percent} относительно оценки"
+  },
+  "condition": {
+    "NEEDS_REPAIR": "Требует ремонта",
+    "OLD_RENOVATION": "Старый ремонт",
+    "GOOD": "Хорошее состояние",
+    "EURO_RENOVATION": "Евроремонт",
+    "DESIGNER": "Дизайнерский ремонт"
+  },
+  "buildingType": {
+    "STONE": "Каменный",
+    "PANEL": "Панельный",
+    "MONOLITH": "Монолитный",
+    "KHRUSHCHYOVKA": "Хрущёвка",
+    "STALINKA": "Сталинка",
+    "NEW_BUILD": "Новостройка"
+  }
+}

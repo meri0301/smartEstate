@@ -1,0 +1,35 @@
+{
+  "brand": "SmartEstate",
+  "tagline": "Стоит ли покупать эту квартиру?",
+  "skipToContent": "Перейти к содержимому",
+  "loading": "Загрузка…",
+  "nav": {
+    "search": "Поиск",
+    "favourites": "Избранное",
+    "compare": "Сравнить",
+    "signIn": "Войти",
+    "account": "Аккаунт"
+  },
+  "actions": {
+    "save": "Сохранить",
+    "cancel": "Отмена",
+    "close": "Закрыть",
+    "retry": "Повторить",
+    "showMore": "Показать ещё",
+    "dismiss": "Закрыть"
+  },
+  "language": {
+    "label": "Язык",
+    "current": "Текущий язык: {language}",
+    "switchTo": "Переключить на {language}"
+  },
+  "theme": {
+    "label": "Тема",
+    "light": "Светлая",
+    "dark": "Тёмная",
+    "system": "Как в системе"
+  },
+  "notifications": {
+    "region": "Уведомления"
+  }
+}

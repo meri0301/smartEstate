@@ -1,4 +1,5 @@
 import createClient, { type Client, type Middleware } from 'openapi-fetch';
+import { getActiveLocale } from '../i18n/active-locale.js';
 import type { paths } from './schema.js';
 import { sessionStore } from './session-store.js';
 
@@ -40,7 +41,22 @@ export function createApiClient(options: ClientOptions = {}): ApiClient {
       return request;
     },
   };
-  client.use(bearer);
+
+  /**
+   * The API picks the language of listing text from the query string, then the
+   * account, then this header. Sending the locale being rendered keeps server
+   * content in step with the interface without threading it through every call.
+   */
+  const language: Middleware = {
+    onRequest({ request }) {
+      if (!request.headers.has('accept-language')) {
+        request.headers.set('accept-language', getActiveLocale());
+      }
+      return request;
+    },
+  };
+
+  client.use(bearer, language);
   return client;
 }
 

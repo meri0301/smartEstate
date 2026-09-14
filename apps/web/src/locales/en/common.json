@@ -1,0 +1,35 @@
+{
+  "brand": "SmartEstate",
+  "tagline": "Should you buy this house or not?",
+  "skipToContent": "Skip to content",
+  "loading": "Loading…",
+  "nav": {
+    "search": "Search",
+    "favourites": "Favourites",
+    "compare": "Compare",
+    "signIn": "Sign in",
+    "account": "Account"
+  },
+  "actions": {
+    "save": "Save",
+    "cancel": "Cancel",
+    "close": "Close",
+    "retry": "Try again",
+    "showMore": "Show more",
+    "dismiss": "Dismiss"
+  },
+  "language": {
+    "label": "Language",
+    "current": "Current language: {language}",
+    "switchTo": "Switch to {language}"
+  },
+  "theme": {
+    "label": "Theme",
+    "light": "Light",
+    "dark": "Dark",
+    "system": "Match system"
+  },
+  "notifications": {
+    "region": "Notifications"
+  }
+}

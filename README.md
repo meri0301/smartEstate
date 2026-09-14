@@ -191,6 +191,28 @@ Storybook carries theme and locale in the toolbar, and each primitive has an `Al
 story rendering Armenian, Russian and English side by side. See
 [ADR-0007](docs/adr/0007-design-system-tokens-and-multi-script-typography.md).
 
+## Languages
+
+Armenian is the default, English the fallback. The locale is the first path segment, so
+`/hy/listings/123` and `/ru/listings/123` are different URLs for the same listing.
+
+- **Detection order:** URL, then the signed-in account, then this browser's remembered choice,
+  then `navigator.languages`, then Armenian. An unsupported locale in the URL is replaced, so
+  `/de/listings` becomes `/hy/listings`.
+- **Messages are ICU**, not i18next plural suffixes, because Russian needs four plural
+  categories and Armenian selects the singular for zero. Catalogues are namespaced per feature
+  under `apps/web/src/locales/<locale>/` and typed, so a mistyped key fails `pnpm typecheck`.
+- **Formatting is `Intl`**, wrapped in `shared/i18n/formatters.ts`. Dram renders as ֏.
+- **The catalogue is checked**, for key parity, ICU syntax, and whether each plural block covers
+  the categories its language needs. Key parity alone would accept a Russian message copied from
+  the English two-form shape.
+
+```bash
+pnpm i18n:check
+```
+
+See [ADR-0008](docs/adr/0008-internationalisation.md).
+
 ## Conventions
 
 - **Commits** follow [Conventional Commits](https://www.conventionalcommits.org). Allowed

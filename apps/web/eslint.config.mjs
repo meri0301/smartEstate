@@ -14,7 +14,18 @@ export default defineConfig(
      * API harder to read. Stories are not part of the application bundle at
      * all, so the rule cannot apply to them either.
      */
-    files: ['src/shared/ui/**/*.{ts,tsx}', '**/*.stories.tsx', '.storybook/**/*.{ts,tsx}'],
+    files: [
+      'src/shared/ui/**/*.{ts,tsx}',
+      'src/shared/i18n/**/*.{ts,tsx}',
+      'src/app/**/*.{ts,tsx}',
+      '**/*.stories.tsx',
+      '.storybook/**/*.{ts,tsx}',
+    ],
     rules: { 'react-refresh/only-export-components': 'off' },
+  },
+  {
+    // CLI scripts report to the developer; stdout is their user interface.
+    files: ['scripts/**/*.ts'],
+    rules: { 'no-console': 'off' },
   },
 );
