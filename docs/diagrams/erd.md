@@ -96,6 +96,10 @@ erDiagram
     string source
     string source_ref "nullable"
     ListingStatus status
+    timestamptz submitted_at "nullable"
+    timestamptz reviewed_at "nullable"
+    uuid reviewed_by_id FK "nullable"
+    string rejection_reason "nullable"
     bigint price_amd
     boolean price_negotiable
     Currency original_currency
@@ -267,6 +271,7 @@ erDiagram
   listings ||--o| listing_embeddings : "listing"
   users |o--o{ audit_logs : "actor"
   users |o--o{ listings : "createdBy"
+  users |o--o{ listings : "reviewedBy"
   users |o--o{ recommendation_sessions : "user"
   users |o--o{ user_interactions : "user"
   users ||--o{ comparisons : "user"
