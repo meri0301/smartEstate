@@ -24,8 +24,9 @@
       "dependsOn": ["db:generate"]
     },
     "db:generate": {
-      "inputs": ["prisma/schema.prisma"],
-      "outputs": ["src/generated/**"]
+      "inputs": ["prisma/schema.prisma", "prisma.config.ts"],
+      "outputs": ["src/generated/**"],
+      "env": ["DATABASE_URL"]
     }
   }
 }

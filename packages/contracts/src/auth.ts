@@ -16,6 +16,8 @@ export const registerBodySchema = z.object({
   locale: localeSchema.default('hy'),
 });
 export type RegisterBody = z.infer<typeof registerBodySchema>;
+/** What a form submits: defaulted fields (locale) are optional. */
+export type RegisterBodyInput = z.input<typeof registerBodySchema>;
 
 export const loginBodySchema = z.object({
   email: emailSchema,

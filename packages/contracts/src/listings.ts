@@ -131,6 +131,8 @@ export const createListingBodySchema = z.object({
   translations: translationsInputSchema,
 });
 export type CreateListingBody = z.infer<typeof createListingBodySchema>;
+/** What a form submits: defaulted fields are optional. */
+export type CreateListingBodyInput = z.input<typeof createListingBodySchema>;
 
 export const updateListingBodySchema = listingAttributesSchema
   .partial()

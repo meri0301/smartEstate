@@ -149,6 +149,19 @@ Tests: `pnpm --filter @smartestate/api test:unit` (no I/O) and `test:integration
 real app against a Testcontainers PostgreSQL built from `docker/postgres`, migrated and seeded;
 needs Docker). `pnpm test` runs both.
 
+## Frontend data access
+
+- Generated types: `apps/web/src/shared/api/schema.d.ts` from the exported OpenAPI document
+  (`pnpm --filter @smartestate/web api:generate`; CI fails when stale). `openapi-fetch` uses them
+  for a fully typed client; domain types come from `@smartestate/contracts`, and a compile-time
+  test keeps the two in step.
+- `apiRequest()` unwraps responses, converts failures to `ApiError` and refreshes the session
+  once on 401. The access token lives only in memory (Zustand); the httpOnly refresh cookie
+  restores it on reload.
+- Server state: TanStack Query hooks per feature (`features/<name>/api`), exposed through each
+  feature's `index.ts`. See [ADR-0006](docs/adr/0006-frontend-data-access.md).
+- Development is same-origin: Vite proxies `/api`, `/health` and `/docs` to the API.
+
 ## Conventions
 
 - **Commits** follow [Conventional Commits](https://www.conventionalcommits.org). Allowed

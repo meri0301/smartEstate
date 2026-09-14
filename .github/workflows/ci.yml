@@ -34,6 +34,10 @@ jobs:
       - run: pnpm install --frozen-lockfile
 
       - run: pnpm format:check
+      - name: Generated API client types are up to date
+        run: |
+          pnpm --filter @smartestate/web api:generate
+          git diff --exit-code -- apps/web/src/shared/api/schema.d.ts
       - run: pnpm lint
       - run: pnpm typecheck
       - run: pnpm test
@@ -101,6 +105,8 @@ jobs:
           node-version-file: .nvmrc
           cache: pnpm
       - run: pnpm install --frozen-lockfile
+      - name: Generate Prisma Client (needed by the seed and the OpenAPI export)
+        run: pnpm db:generate
       - name: Apply migrations to a fresh database
         run: pnpm db:migrate
       - name: Migration history matches the schema (no drift)
