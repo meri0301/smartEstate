@@ -9,7 +9,7 @@ import { flattenListings, useListingsSearch } from './use-listings.js';
 const summary = (id: string, publicId: string): ListingsPage['items'][number] => ({
   id,
   publicId,
-  status: 'ACTIVE',
+  status: 'PUBLISHED',
   locale: 'hy',
   title: 'Բնակարան',
   priceAmd: 45_000_000,

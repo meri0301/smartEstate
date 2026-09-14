@@ -40,6 +40,10 @@ export interface ListingRow {
   lon: number;
   lat: number;
   published_at: Date;
+  submitted_at: Date | null;
+  reviewed_at: Date | null;
+  reviewed_by_id: string | null;
+  rejection_reason: string | null;
   created_at: Date;
   updated_at: Date;
   created_by_id: string | null;

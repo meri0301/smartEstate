@@ -92,6 +92,9 @@ export function toListingDetail(
       recordedAt: entry.recordedAt.toISOString(),
     })),
     createdById: row.created_by_id,
+    rejectionReason: row.rejection_reason,
+    reviewedAt: row.reviewed_at?.toISOString() ?? null,
+    submittedAt: row.submitted_at?.toISOString() ?? null,
     createdAt: row.created_at.toISOString(),
     updatedAt: row.updated_at.toISOString(),
   };

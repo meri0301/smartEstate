@@ -41,12 +41,14 @@ enum Locale {
   en
 }
 
+/// Moderation lifecycle. A sale or reservation ends with the listing ARCHIVED;
+/// these states describe review, not the market.
 enum ListingStatus {
   DRAFT
-  ACTIVE
-  RESERVED
-  SOLD
-  WITHDRAWN
+  PENDING_REVIEW
+  PUBLISHED
+  REJECTED
+  ARCHIVED
 }
 
 /// Yerevan building stock. Type has a large, well-known effect on price.
@@ -153,6 +155,7 @@ model User {
   profile                Profile?
   refreshTokens          RefreshToken[]
   listings               Listing[]               @relation("ListingCreatedBy")
+  reviewedListings       Listing[]               @relation("ListingReviewedBy")
   favorites              Favorite[]
   savedSearches          SavedSearch[]
   comparisons            Comparison[]
@@ -311,7 +314,14 @@ model Listing {
   source           String
   /// Identifier inside the source system; unique per source for dedup / upsert.
   sourceRef        String?             @map("source_ref")
-  status           ListingStatus       @default(ACTIVE)
+  status           ListingStatus       @default(DRAFT)
+  /// Set when the owner sends the listing for review.
+  submittedAt      DateTime?           @map("submitted_at") @db.Timestamptz(3)
+  /// When a moderator last approved or rejected it.
+  reviewedAt       DateTime?           @map("reviewed_at") @db.Timestamptz(3)
+  reviewedById     String?             @map("reviewed_by_id") @db.Uuid
+  /// Required by the REJECT transition; cleared when the owner revises.
+  rejectionReason  String?             @map("rejection_reason")
 
   priceAmd         BigInt              @map("price_amd")
   priceNegotiable  Boolean             @default(false) @map("price_negotiable")
@@ -345,6 +355,7 @@ model Listing {
   building        Building                 @relation(fields: [buildingId], references: [id])
   district        District                 @relation(fields: [districtId], references: [id])
   createdBy       User?                    @relation("ListingCreatedBy", fields: [createdById], references: [id], onDelete: SetNull)
+  reviewedBy      User?                    @relation("ListingReviewedBy", fields: [reviewedById], references: [id], onDelete: SetNull)
   translations    ListingTranslation[]
   media           Media[]
   embedding       ListingEmbedding?
@@ -358,6 +369,10 @@ model Listing {
   @@unique([source, sourceRef])
   @@index([districtId, priceAmd, rooms])
   @@index([status, publishedAt(sort: Desc)])
+  /// Moderation queue: oldest pending submissions first.
+  @@index([status, submittedAt])
+  /// "My listings" for an owner, newest first, in any status.
+  @@index([createdById, createdAt(sort: Desc)])
   @@index([pricePerSqmAmd])
   @@index([buildingId])
   @@map("listings")

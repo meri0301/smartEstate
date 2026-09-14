@@ -3,13 +3,15 @@
  * is raw SQL here; purely relational reads and writes use the typed client.
  */
 import { Injectable } from '@nestjs/common';
-import type { CreateBuildingBody, ListingSearchQuery } from '@smartestate/contracts';
+import type { CreateBuildingBody, ListingSearchQuery, ListingStatus } from '@smartestate/contracts';
 import { uuidV7 } from '../../common/ids/uuid-v7.js';
 import { Prisma } from '../../generated/prisma/client.js';
 import { PrismaService } from '../../infrastructure/prisma/prisma.service.js';
 import type { BuildingRow, ListingRow } from './listing-row.js';
 import type { MediaRecord, PriceHistoryRecord, TranslationRecord } from './listing.mapper.js';
-import { buildSearchStatement, LISTING_SELECT } from './search-query.builder.js';
+import type { ListingStateChange } from './listing-lifecycle.js';
+import { QUOTA_STATUSES } from './listing.policy.js';
+import { buildSearchStatement, LISTING_SELECT, type SearchScope } from './search-query.builder.js';
 
 const BUILDING_SELECT = Prisma.sql`
   SELECT id, district_id, address_line, street_hy, street_ru, street_en, house_number, building_type,
@@ -41,14 +43,54 @@ export interface NewListingRecord {
   condition: string;
   heating: string;
   ownershipDocs: string;
+  /** Decided by the lifecycle from the creator's role, not by the caller. */
+  status: ListingStatus;
+  submittedAt: Date | null;
+  publishedAt: Date;
 }
 
 @Injectable()
 export class ListingsRepository {
   constructor(private readonly prisma: PrismaService) {}
 
-  search(query: ListingSearchQuery): Promise<ListingRow[]> {
-    return this.prisma.$queryRaw<ListingRow[]>(buildSearchStatement(query));
+  search(query: ListingSearchQuery, scope: SearchScope = {}): Promise<ListingRow[]> {
+    return this.prisma.$queryRaw<ListingRow[]>(buildSearchStatement(query, scope));
+  }
+
+  /** How many listings the owner already holds in a status that counts against their quota. */
+  countLiveListings(ownerId: string): Promise<number> {
+    return this.prisma.listing.count({
+      where: { createdById: ownerId, status: { in: [...QUOTA_STATUSES] } },
+    });
+  }
+
+  /** Writes the columns a lifecycle transition changed, and nothing else. */
+  async applyStateChange(id: string, change: ListingStateChange): Promise<void> {
+    await this.prisma.listing.update({
+      where: { id },
+      data: {
+        status: change.status,
+        ...(change.submittedAt === undefined ? {} : { submittedAt: change.submittedAt }),
+        ...(change.publishedAt === undefined ? {} : { publishedAt: change.publishedAt }),
+        ...(change.reviewedAt === undefined ? {} : { reviewedAt: change.reviewedAt }),
+        ...(change.reviewedById === undefined
+          ? {}
+          : {
+              reviewedBy:
+                change.reviewedById === null
+                  ? { disconnect: true }
+                  : { connect: { id: change.reviewedById } },
+            }),
+        ...(change.rejectionReason === undefined
+          ? {}
+          : { rejectionReason: change.rejectionReason }),
+      },
+    });
+  }
+
+  /** Hard delete. Every dependent row cascades; the listing leaves no history. */
+  async deleteListing(id: string): Promise<void> {
+    await this.prisma.listing.delete({ where: { id } });
   }
 
   async findRowById(id: string): Promise<ListingRow | undefined> {
@@ -114,11 +156,11 @@ export class ListingsRepository {
            price_amd, price_negotiable, original_currency, original_price, price_per_sqm_amd,
            total_area, living_area, kitchen_area, rooms, bathrooms, ceiling_height, floor,
            balcony_count, has_loggia, has_parking, has_storage, condition, heating, ownership_docs, location,
-           updated_at)
+           published_at, submitted_at, updated_at)
         VALUES (
           ${record.id}::uuid, ${record.publicId}, ${record.buildingId}::uuid,
           (SELECT b.district_id FROM buildings b WHERE b.id = ${record.buildingId}::uuid),
-          ${record.createdById}::uuid, 'manual', 'ACTIVE'::"ListingStatus",
+          ${record.createdById}::uuid, 'manual', ${record.status}::"ListingStatus",
           ${record.priceAmd.toString()}::bigint, ${record.priceNegotiable}, ${record.originalCurrency}::"Currency",
           ${record.originalPrice}::numeric, ${record.pricePerSqmAmd},
           ${record.totalArea}::numeric, ${record.livingArea}::numeric, ${record.kitchenArea}::numeric,
@@ -126,6 +168,7 @@ export class ListingsRepository {
           ${record.balconyCount}, ${record.hasLoggia}, ${record.hasParking}, ${record.hasStorage},
           ${record.condition}::"Condition", ${record.heating}::"HeatingType", ${record.ownershipDocs}::"OwnershipDocsStatus",
           (SELECT b.location FROM buildings b WHERE b.id = ${record.buildingId}::uuid),
+          ${record.publishedAt}::timestamptz, ${record.submittedAt}::timestamptz,
           now()
         )`;
       await tx.listingTranslation.createMany({

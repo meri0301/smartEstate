@@ -432,6 +432,7 @@
     },
     "/api/listings": {
       "get": {
+        "description": "Returns published listings. With mine=true it returns the caller’s own listings in any status; moderators may filter by any status.",
         "operationId": "Listings.search",
         "parameters": [
           {
@@ -491,14 +492,26 @@
             "required": false,
             "in": "query",
             "schema": {
-              "default": "ACTIVE",
+              "default": "PUBLISHED",
               "type": "string",
               "enum": [
                 "DRAFT",
-                "ACTIVE",
-                "RESERVED",
-                "SOLD",
-                "WITHDRAWN"
+                "PENDING_REVIEW",
+                "PUBLISHED",
+                "REJECTED",
+                "ARCHIVED"
+              ]
+            }
+          },
+          {
+            "name": "mine",
+            "required": false,
+            "in": "query",
+            "schema": {
+              "type": "string",
+              "enum": [
+                "true",
+                "false"
               ]
             }
           },
@@ -857,6 +870,7 @@
         ]
       },
       "post": {
+        "description": "Any signed-in account may create one. A regular user’s listing enters the review queue; a verified agent’s is published immediately.",
         "operationId": "Listings.create",
         "parameters": [
           {
@@ -895,8 +909,8 @@
               }
             }
           },
-          "403": {
-            "description": "Requires AGENT, MODERATOR or ADMIN"
+          "409": {
+            "description": "The account already holds its maximum of live listings"
           }
         },
         "security": [
@@ -904,7 +918,7 @@
             "bearer": []
           }
         ],
-        "summary": "Publish a listing for an existing building",
+        "summary": "Create a listing for an existing building",
         "tags": [
           "listings"
         ]
@@ -970,6 +984,7 @@
     },
     "/api/listings/{id}": {
       "patch": {
+        "description": "Status is not editable here; use the transitions endpoint.",
         "operationId": "Listings.update",
         "parameters": [
           {
@@ -1019,7 +1034,7 @@
             }
           },
           "403": {
-            "description": "Not the owner and not a moderator"
+            "description": "Not the owner"
           }
         },
         "security": [
@@ -1027,13 +1042,13 @@
             "bearer": []
           }
         ],
-        "summary": "Update attributes, status or translations of an own listing",
+        "summary": "Update attributes or translations of a listing",
         "tags": [
           "listings"
         ]
       },
       "delete": {
-        "operationId": "Listings.withdraw",
+        "operationId": "Listings.archive",
         "parameters": [
           {
             "name": "id",
@@ -1059,7 +1074,111 @@
             "bearer": []
           }
         ],
-        "summary": "Withdraw a listing (soft delete)",
+        "summary": "Archive a listing (soft delete)",
+        "tags": [
+          "listings"
+        ]
+      }
+    },
+    "/api/listings/{id}/transitions": {
+      "post": {
+        "description": "SUBMIT, PUBLISH, APPROVE, REJECT, REVISE and ARCHIVE. A transition that is not legal from the current status is a conflict, not a bad request.",
+        "operationId": "Listings.transition",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "format": "uuid",
+              "pattern": "^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}|00000000-0000-0000-0000-000000000000|ffffffff-ffff-ffff-ffff-ffffffffffff)$",
+              "type": "string"
+            }
+          },
+          {
+            "name": "locale",
+            "required": false,
+            "in": "query",
+            "description": "Response locale for listing texts; falls back to the account preference, then Accept-Language, then hy",
+            "schema": {
+              "enum": [
+                "hy",
+                "ru",
+                "en"
+              ],
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ListingTransitionBodyDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ListingDetailDto"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "The caller may not perform this transition"
+          },
+          "409": {
+            "description": "Illegal from the listing’s current status"
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Move a listing through the moderation lifecycle",
+        "tags": [
+          "listings"
+        ]
+      }
+    },
+    "/api/listings/{id}/permanent": {
+      "delete": {
+        "description": "Administrators only. Archiving is the reversible option.",
+        "operationId": "Listings.destroy",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "format": "uuid",
+              "pattern": "^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}|00000000-0000-0000-0000-000000000000|ffffffff-ffff-ffff-ffff-ffffffffffff)$",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "204": {
+            "description": ""
+          },
+          "403": {
+            "description": "Requires ADMIN"
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Delete a listing and all of its history, permanently",
         "tags": [
           "listings"
         ]
@@ -1850,10 +1969,10 @@
                   "type": "string",
                   "enum": [
                     "DRAFT",
-                    "ACTIVE",
-                    "RESERVED",
-                    "SOLD",
-                    "WITHDRAWN"
+                    "PENDING_REVIEW",
+                    "PUBLISHED",
+                    "REJECTED",
+                    "ARCHIVED"
                   ]
                 },
                 "locale": {
@@ -2048,10 +2167,10 @@
             "type": "string",
             "enum": [
               "DRAFT",
-              "ACTIVE",
-              "RESERVED",
-              "SOLD",
-              "WITHDRAWN"
+              "PENDING_REVIEW",
+              "PUBLISHED",
+              "REJECTED",
+              "ARCHIVED"
             ]
           },
           "locale": {
@@ -2465,6 +2584,22 @@
             "format": "uuid",
             "pattern": "^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}|00000000-0000-0000-0000-000000000000|ffffffff-ffff-ffff-ffff-ffffffffffff)$"
           },
+          "rejectionReason": {
+            "nullable": true,
+            "type": "string"
+          },
+          "reviewedAt": {
+            "nullable": true,
+            "type": "string",
+            "format": "date-time",
+            "pattern": "^(?:(?:\\d\\d[2468][048]|\\d\\d[13579][26]|\\d\\d0[48]|[02468][048]00|[13579][26]00)-02-29|\\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\\d|30)|(?:02)-(?:0[1-9]|1\\d|2[0-8])))T(?:(?:[01]\\d|2[0-3]):[0-5]\\d:[0-5]\\d(?:\\.\\d+)?(?:Z|([+-](?:[01]\\d|2[0-3]):[0-5]\\d)))$"
+          },
+          "submittedAt": {
+            "nullable": true,
+            "type": "string",
+            "format": "date-time",
+            "pattern": "^(?:(?:\\d\\d[2468][048]|\\d\\d[13579][26]|\\d\\d0[48]|[02468][048]00|[13579][26]00)-02-29|\\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\\d|30)|(?:02)-(?:0[1-9]|1\\d|2[0-8])))T(?:(?:[01]\\d|2[0-3]):[0-5]\\d:[0-5]\\d(?:\\.\\d+)?(?:Z|([+-](?:[01]\\d|2[0-3]):[0-5]\\d)))$"
+          },
           "createdAt": {
             "type": "string",
             "format": "date-time",
@@ -2513,6 +2648,9 @@
           "translations",
           "priceHistory",
           "createdById",
+          "rejectionReason",
+          "reviewedAt",
+          "submittedAt",
           "createdAt",
           "updatedAt"
         ],
@@ -2786,16 +2924,6 @@
               "UNVERIFIED"
             ]
           },
-          "status": {
-            "type": "string",
-            "enum": [
-              "DRAFT",
-              "ACTIVE",
-              "RESERVED",
-              "SOLD",
-              "WITHDRAWN"
-            ]
-          },
           "translations": {
             "minItems": 1,
             "maxItems": 3,
@@ -2830,6 +2958,30 @@
             }
           }
         }
+      },
+      "ListingTransitionBodyDto": {
+        "type": "object",
+        "properties": {
+          "action": {
+            "type": "string",
+            "enum": [
+              "SUBMIT",
+              "PUBLISH",
+              "APPROVE",
+              "REJECT",
+              "REVISE",
+              "ARCHIVE"
+            ]
+          },
+          "reason": {
+            "type": "string",
+            "minLength": 10,
+            "maxLength": 1000
+          }
+        },
+        "required": [
+          "action"
+        ]
       },
       "BuildingDto": {
         "type": "object",

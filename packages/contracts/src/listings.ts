@@ -134,16 +134,52 @@ export type CreateListingBody = z.infer<typeof createListingBodySchema>;
 /** What a form submits: defaulted fields are optional. */
 export type CreateListingBodyInput = z.input<typeof createListingBodySchema>;
 
+/**
+ * Attribute edits only. `status` is deliberately absent: the moderation
+ * lifecycle is driven by `POST /listings/:id/transitions`, and letting a PATCH
+ * assign a status would be a way around the transition table.
+ */
 export const updateListingBodySchema = listingAttributesSchema
   .partial()
   .extend({
-    status: listingStatusSchema.optional(),
     translations: translationsInputSchema.optional(),
   })
   .refine((body) => Object.keys(body).length > 0, {
     message: 'At least one field must be provided',
   });
 export type UpdateListingBody = z.infer<typeof updateListingBodySchema>;
+
+// ---------------------------------------------------------------------------
+// Moderation lifecycle
+// ---------------------------------------------------------------------------
+
+/**
+ * Transitions a caller may request. Whether one is legal depends on two
+ * independent checks: the listing's current status, against the transition
+ * table, and who is asking, against the listing policy.
+ */
+export const LISTING_TRANSITIONS = [
+  'SUBMIT',
+  'PUBLISH',
+  'APPROVE',
+  'REJECT',
+  'REVISE',
+  'ARCHIVE',
+] as const;
+export const listingTransitionSchema = z.enum(LISTING_TRANSITIONS);
+export type ListingTransition = z.infer<typeof listingTransitionSchema>;
+
+/** A rejection must say why; the reason is stored and shown back to the owner. */
+export const listingTransitionBodySchema = z
+  .object({
+    action: listingTransitionSchema,
+    reason: z.string().trim().min(10).max(1000).optional(),
+  })
+  .refine((body) => body.action !== 'REJECT' || body.reason !== undefined, {
+    message: 'A rejection requires a reason',
+    path: ['reason'],
+  });
+export type ListingTransitionBody = z.infer<typeof listingTransitionBodySchema>;
 
 export const mediaSchema = z.object({
   id: uuidSchema,
@@ -207,6 +243,12 @@ export const listingDetailSchema = listingSummarySchema.extend({
   translations: z.array(listingTranslationSchema),
   priceHistory: z.array(priceHistoryEntrySchema),
   createdById: uuidSchema.nullable(),
+  /** Why a moderator sent the listing back; present only while the status is REJECTED. */
+  rejectionReason: z.string().nullable(),
+  /** When a moderator last approved or rejected it. */
+  reviewedAt: isoDateTimeSchema.nullable(),
+  /** When the owner last sent it for review. */
+  submittedAt: isoDateTimeSchema.nullable(),
   createdAt: isoDateTimeSchema,
   updatedAt: isoDateTimeSchema,
 });
@@ -250,7 +292,13 @@ export const listingSearchQuerySchema = paginationQuerySchema
   .extend({
     locale: localeSchema.optional(),
     sort: listingSortSchema.default('published_desc'),
-    status: listingStatusSchema.default('ACTIVE'),
+    status: listingStatusSchema.default('PUBLISHED'),
+    /**
+     * Restrict the result to the caller's own listings. Only with this flag may
+     * a non-moderator ask for a status other than PUBLISHED; the API narrows the
+     * filter otherwise, so nobody can enumerate someone else's drafts.
+     */
+    mine: queryBooleanSchema.default(false),
 
     priceMin: queryIntSchema.min(0).optional(),
     priceMax: queryIntSchema.min(0).optional(),

@@ -199,10 +199,16 @@ export interface paths {
             path?: never;
             cookie?: never;
         };
-        /** Structured search with filters, sorting and cursor pagination */
+        /**
+         * Structured search with filters, sorting and cursor pagination
+         * @description Returns published listings. With mine=true it returns the caller’s own listings in any status; moderators may filter by any status.
+         */
         get: operations["Listings.search"];
         put?: never;
-        /** Publish a listing for an existing building */
+        /**
+         * Create a listing for an existing building
+         * @description Any signed-in account may create one. A regular user’s listing enters the review queue; a verified agent’s is published immediately.
+         */
         post: operations["Listings.create"];
         delete?: never;
         options?: never;
@@ -237,12 +243,55 @@ export interface paths {
         get?: never;
         put?: never;
         post?: never;
-        /** Withdraw a listing (soft delete) */
-        delete: operations["Listings.withdraw"];
+        /** Archive a listing (soft delete) */
+        delete: operations["Listings.archive"];
         options?: never;
         head?: never;
-        /** Update attributes, status or translations of an own listing */
+        /**
+         * Update attributes or translations of a listing
+         * @description Status is not editable here; use the transitions endpoint.
+         */
         patch: operations["Listings.update"];
+        trace?: never;
+    };
+    "/api/listings/{id}/transitions": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * Move a listing through the moderation lifecycle
+         * @description SUBMIT, PUBLISH, APPROVE, REJECT, REVISE and ARCHIVE. A transition that is not legal from the current status is a conflict, not a bad request.
+         */
+        post: operations["Listings.transition"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/listings/{id}/permanent": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        post?: never;
+        /**
+         * Delete a listing and all of its history, permanently
+         * @description Administrators only. Archiving is the reversible option.
+         */
+        delete: operations["Listings.destroy"];
+        options?: never;
+        head?: never;
+        patch?: never;
         trace?: never;
     };
     "/api/buildings/{id}": {
@@ -466,7 +515,7 @@ export interface components {
                 id: string;
                 publicId: string;
                 /** @enum {string} */
-                status: "DRAFT" | "ACTIVE" | "RESERVED" | "SOLD" | "WITHDRAWN";
+                status: "DRAFT" | "PENDING_REVIEW" | "PUBLISHED" | "REJECTED" | "ARCHIVED";
                 /** @enum {string} */
                 locale: "hy" | "ru" | "en";
                 title: string;
@@ -508,7 +557,7 @@ export interface components {
             id: string;
             publicId: string;
             /** @enum {string} */
-            status: "DRAFT" | "ACTIVE" | "RESERVED" | "SOLD" | "WITHDRAWN";
+            status: "DRAFT" | "PENDING_REVIEW" | "PUBLISHED" | "REJECTED" | "ARCHIVED";
             /** @enum {string} */
             locale: "hy" | "ru" | "en";
             title: string;
@@ -604,6 +653,11 @@ export interface components {
             }[];
             /** Format: uuid */
             createdById: string | null;
+            rejectionReason: string | null;
+            /** Format: date-time */
+            reviewedAt: string | null;
+            /** Format: date-time */
+            submittedAt: string | null;
             /** Format: date-time */
             createdAt: string;
             /** Format: date-time */
@@ -680,14 +734,17 @@ export interface components {
             heating?: "CENTRAL_GAS" | "INDIVIDUAL_GAS_BOILER" | "ELECTRIC" | "NONE";
             /** @enum {string} */
             ownershipDocs?: "VERIFIED" | "UNVERIFIED";
-            /** @enum {string} */
-            status?: "DRAFT" | "ACTIVE" | "RESERVED" | "SOLD" | "WITHDRAWN";
             translations?: {
                 /** @enum {string} */
                 locale: "hy" | "ru" | "en";
                 title: string;
                 description: string;
             }[];
+        };
+        ListingTransitionBodyDto: {
+            /** @enum {string} */
+            action: "SUBMIT" | "PUBLISH" | "APPROVE" | "REJECT" | "REVISE" | "ARCHIVE";
+            reason?: string;
         };
         BuildingDto: {
             /** Format: uuid */
@@ -753,6 +810,7 @@ export type ListingsPageDto = components['schemas']['ListingsPageDto'];
 export type ListingDetailDto = components['schemas']['ListingDetailDto'];
 export type CreateListingBodyDto = components['schemas']['CreateListingBodyDto'];
 export type UpdateListingBodyDto = components['schemas']['UpdateListingBodyDto'];
+export type ListingTransitionBodyDto = components['schemas']['ListingTransitionBodyDto'];
 export type BuildingDto = components['schemas']['BuildingDto'];
 export type CreateBuildingBodyDto = components['schemas']['CreateBuildingBodyDto'];
 export type $defs = Record<string, never>;
@@ -1066,7 +1124,8 @@ export interface operations {
                 cursor?: string;
                 locale?: "hy" | "ru" | "en";
                 sort?: "published_desc" | "price_asc" | "price_desc" | "price_per_sqm_asc" | "price_per_sqm_desc" | "area_asc" | "area_desc";
-                status?: "DRAFT" | "ACTIVE" | "RESERVED" | "SOLD" | "WITHDRAWN";
+                status?: "DRAFT" | "PENDING_REVIEW" | "PUBLISHED" | "REJECTED" | "ARCHIVED";
+                mine?: "true" | "false";
                 priceMin?: number;
                 priceMax?: number;
                 pricePerSqmMax?: number;
@@ -1137,8 +1196,8 @@ export interface operations {
                     "application/json": components["schemas"]["ListingDetailDto"];
                 };
             };
-            /** @description Requires AGENT, MODERATOR or ADMIN */
-            403: {
+            /** @description The account already holds its maximum of live listings */
+            409: {
                 headers: {
                     [name: string]: unknown;
                 };
@@ -1177,7 +1236,7 @@ export interface operations {
             };
         };
     };
-    "Listings.withdraw": {
+    "Listings.archive": {
         parameters: {
             query?: never;
             header?: never;
@@ -1229,7 +1288,75 @@ export interface operations {
                     "application/json": components["schemas"]["ListingDetailDto"];
                 };
             };
-            /** @description Not the owner and not a moderator */
+            /** @description Not the owner */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    "Listings.transition": {
+        parameters: {
+            query?: {
+                /** @description Response locale for listing texts; falls back to the account preference, then Accept-Language, then hy */
+                locale?: "hy" | "ru" | "en";
+            };
+            header?: never;
+            path: {
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["ListingTransitionBodyDto"];
+            };
+        };
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ListingDetailDto"];
+                };
+            };
+            /** @description The caller may not perform this transition */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Illegal from the listing’s current status */
+            409: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    "Listings.destroy": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            204: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Requires ADMIN */
             403: {
                 headers: {
                     [name: string]: unknown;

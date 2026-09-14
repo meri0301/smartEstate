@@ -312,7 +312,7 @@ async function insertListings(
     const rows = batch.map(
       (l) => Prisma.sql`(
         ${l.id}::uuid, ${l.publicId}, ${l.building.id}::uuid, ${l.districtId}::uuid,
-        ${SEED_SOURCE}, ${l.sourceRef}, 'ACTIVE'::"ListingStatus",
+        ${SEED_SOURCE}, ${l.sourceRef}, 'PUBLISHED'::"ListingStatus",
         ${l.priceAmd.toString()}::bigint, ${l.priceNegotiable},
         ${l.originalCurrency}::"Currency", ${l.originalPrice}::numeric, ${l.pricePerSqmAmd},
         ${l.totalArea.toFixed(2)}::numeric, ${l.livingArea.toFixed(2)}::numeric, ${l.kitchenArea.toFixed(2)}::numeric,

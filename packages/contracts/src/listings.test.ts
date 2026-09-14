@@ -8,7 +8,7 @@ import {
 describe('listingSearchQuerySchema', () => {
   it('applies defaults for an empty query', () => {
     const parsed = listingSearchQuerySchema.parse({});
-    expect(parsed).toMatchObject({ limit: 20, sort: 'published_desc', status: 'ACTIVE' });
+    expect(parsed).toMatchObject({ limit: 20, sort: 'published_desc', status: 'PUBLISHED' });
   });
 
   it('coerces numeric strings and boolean flags from the query string', () => {
@@ -112,7 +112,8 @@ describe('updateListingBodySchema', () => {
     expect(updateListingBodySchema.safeParse({}).success).toBe(false);
   });
 
-  it('accepts a status-only update', () => {
-    expect(updateListingBodySchema.safeParse({ status: 'SOLD' }).success).toBe(true);
+  it('rejects a status-only update, because status moves through transitions', () => {
+    // Unknown keys are stripped, so the body is empty and fails the "at least one field" rule.
+    expect(updateListingBodySchema.safeParse({ status: 'ARCHIVED' }).success).toBe(false);
   });
 });

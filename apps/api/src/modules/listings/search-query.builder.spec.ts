@@ -25,7 +25,17 @@ describe('buildFilters', () => {
     expect(filters).toHaveLength(1);
     expect(sqlOf(filters[0] ?? { sql: '', values: [] })).toEqual({
       text: 'l.status = ?::"ListingStatus"',
-      values: ['ACTIVE'],
+      values: ['PUBLISHED'],
+    });
+  });
+
+  it('adds an ownership predicate when the search is scoped to one owner', () => {
+    const ownerId = '018f6d3e-7b6c-7c3a-9a0e-1f2b3c4d5e01';
+    const filters = buildFilters(parse({}), { ownerId });
+    expect(filters).toHaveLength(2);
+    expect(sqlOf(filters[1] ?? { sql: '', values: [] })).toEqual({
+      text: 'l.created_by_id = ?::uuid',
+      values: [ownerId],
     });
   });
 

@@ -30,11 +30,11 @@ describe('listings search', () => {
     return response.json<ListingsPage>();
   };
 
-  it('returns the first page of active listings, newest first, with a continuation cursor', async () => {
+  it('returns the first page of published listings, newest first, with a continuation cursor', async () => {
     const page = await search('');
     expect(page.items).toHaveLength(20);
     expect(page.nextCursor).not.toBeNull();
-    expect(page.items.every((item) => item.status === 'ACTIVE')).toBe(true);
+    expect(page.items.every((item) => item.status === 'PUBLISHED')).toBe(true);
     const dates = page.items.map((item) => item.publishedAt);
     expect([...dates].sort().reverse()).toEqual(dates);
     const first = page.items[0];
@@ -248,7 +248,7 @@ describe('listings management', () => {
     expect(outside.json<ApiError>().code).toBe('OUTSIDE_COVERAGE');
   });
 
-  it('creates, updates and withdraws a listing with ownership rules and price history', async () => {
+  it('creates, updates and archives a listing with ownership rules and price history', async () => {
     const owner = await registerUser(app, { role: 'AGENT' });
     const stranger = await registerUser(app, { role: 'AGENT' });
     const building = (
@@ -318,16 +318,16 @@ describe('listings management', () => {
     );
     expect(visible.json<ListingsPage>().items.some((item) => item.id === listing.id)).toBe(true);
 
-    const withdrawn = await app.request('DELETE', `/api/listings/${listing.id}`, {
+    const archived = await app.request('DELETE', `/api/listings/${listing.id}`, {
       token: owner.accessToken,
     });
-    expect(withdrawn.statusCode).toBe(204);
+    expect(archived.statusCode).toBe(204);
     expect((await app.request('GET', `/api/listings/${listing.id}`)).statusCode).toBe(404);
     const asOwner = await app.request('GET', `/api/listings/${listing.id}`, {
       token: owner.accessToken,
     });
     expect(asOwner.statusCode).toBe(200);
-    expect(asOwner.json<ListingDetail>().status).toBe('WITHDRAWN');
+    expect(asOwner.json<ListingDetail>().status).toBe('ARCHIVED');
     const gone = await app.request(
       'GET',
       `/api/listings?districts=kentron&sort=published_desc&limit=5`,
@@ -340,7 +340,178 @@ describe('listings management', () => {
     expect(audit.map((a) => a.action)).toEqual([
       'listing.create',
       'listing.update',
-      'listing.withdraw',
+      'listing.archive',
     ]);
+  });
+
+  it('puts a listing from a regular user through review before anyone else can see it', async () => {
+    const author = await registerUser(app);
+    const moderator = await registerUser(app, { role: 'MODERATOR' });
+    const agent = await registerUser(app, { role: 'AGENT' });
+    const building = (
+      await app.request('POST', '/api/buildings', {
+        token: agent.accessToken,
+        body: buildingBody(),
+      })
+    ).json<Building>();
+
+    const created = await app.request('POST', '/api/listings', {
+      token: author.accessToken,
+      body: listingBody(building.id),
+    });
+    expect(created.statusCode).toBe(201);
+    const listing = created.json<ListingDetail>();
+    expect(listing.status).toBe('PENDING_REVIEW');
+    expect(listing.submittedAt).not.toBeNull();
+
+    // Hidden from the public, visible to its author.
+    expect((await app.request('GET', `/api/listings/${listing.id}`)).statusCode).toBe(404);
+    expect(
+      (await app.request('GET', `/api/listings/${listing.id}`, { token: author.accessToken }))
+        .statusCode,
+    ).toBe(200);
+
+    // The author finds it under "my listings", nobody finds it through ordinary search.
+    const mine = await app.request(
+      'GET',
+      '/api/listings?mine=true&status=PENDING_REVIEW&limit=50',
+      {
+        token: author.accessToken,
+      },
+    );
+    expect(mine.json<ListingsPage>().items.some((item) => item.id === listing.id)).toBe(true);
+    const publicSearch = await app.request('GET', '/api/listings?status=PENDING_REVIEW&limit=50');
+    expect(publicSearch.json<ListingsPage>().items.some((item) => item.id === listing.id)).toBe(
+      false,
+    );
+
+    // An author cannot approve their own listing.
+    const selfApprove = await app.request('POST', `/api/listings/${listing.id}/transitions`, {
+      token: author.accessToken,
+      body: { action: 'APPROVE' },
+    });
+    expect(selfApprove.statusCode).toBe(403);
+
+    // A rejection without a reason fails validation before it reaches the machine.
+    const noReason = await app.request('POST', `/api/listings/${listing.id}/transitions`, {
+      token: moderator.accessToken,
+      body: { action: 'REJECT' },
+    });
+    expect(noReason.statusCode).toBe(400);
+
+    const rejected = await app.request('POST', `/api/listings/${listing.id}/transitions`, {
+      token: moderator.accessToken,
+      body: { action: 'REJECT', reason: 'The photographs do not match the description.' },
+    });
+    expect(rejected.statusCode).toBe(200);
+    expect(rejected.json<ListingDetail>().status).toBe('REJECTED');
+    expect(rejected.json<ListingDetail>().rejectionReason).toContain('photographs');
+
+    // REJECTED is not a state you can approve out of: a conflict, not a bad request.
+    const illegal = await app.request('POST', `/api/listings/${listing.id}/transitions`, {
+      token: moderator.accessToken,
+      body: { action: 'APPROVE' },
+    });
+    expect(illegal.statusCode).toBe(409);
+    expect(illegal.json<ApiError>().code).toBe('ILLEGAL_LISTING_TRANSITION');
+
+    const revised = await app.request('POST', `/api/listings/${listing.id}/transitions`, {
+      token: author.accessToken,
+      body: { action: 'REVISE' },
+    });
+    expect(revised.statusCode).toBe(200);
+    expect(revised.json<ListingDetail>().status).toBe('DRAFT');
+    expect(revised.json<ListingDetail>().rejectionReason).toBeNull();
+
+    // A regular user may not skip review; they resubmit instead.
+    const selfPublish = await app.request('POST', `/api/listings/${listing.id}/transitions`, {
+      token: author.accessToken,
+      body: { action: 'PUBLISH' },
+    });
+    expect(selfPublish.statusCode).toBe(403);
+
+    expect(
+      (
+        await app.request('POST', `/api/listings/${listing.id}/transitions`, {
+          token: author.accessToken,
+          body: { action: 'SUBMIT' },
+        })
+      ).statusCode,
+    ).toBe(200);
+    const approved = await app.request('POST', `/api/listings/${listing.id}/transitions`, {
+      token: moderator.accessToken,
+      body: { action: 'APPROVE' },
+    });
+    expect(approved.statusCode).toBe(200);
+    const published = approved.json<ListingDetail>();
+    expect(published.status).toBe('PUBLISHED');
+    expect(published.reviewedAt).not.toBeNull();
+
+    expect((await app.request('GET', `/api/listings/${listing.id}`)).statusCode).toBe(200);
+  });
+
+  it('stops a regular user at three live listings', async () => {
+    const author = await registerUser(app);
+    const agent = await registerUser(app, { role: 'AGENT' });
+    const building = (
+      await app.request('POST', '/api/buildings', {
+        token: agent.accessToken,
+        body: buildingBody(),
+      })
+    ).json<Building>();
+
+    for (let i = 0; i < 3; i += 1) {
+      const response = await app.request('POST', '/api/listings', {
+        token: author.accessToken,
+        body: listingBody(building.id),
+      });
+      expect(response.statusCode).toBe(201);
+    }
+    const fourth = await app.request('POST', '/api/listings', {
+      token: author.accessToken,
+      body: listingBody(building.id),
+    });
+    expect(fourth.statusCode).toBe(409);
+    const error = fourth.json<ApiError>();
+    expect(error.code).toBe('LISTING_QUOTA_EXCEEDED');
+    expect(error.context).toMatchObject({ limit: 3, current: 3 });
+  });
+
+  it('lets an administrator delete a listing permanently, and nobody else', async () => {
+    const agent = await registerUser(app, { role: 'AGENT' });
+    const admin = await registerUser(app, { role: 'ADMIN' });
+    const building = (
+      await app.request('POST', '/api/buildings', {
+        token: agent.accessToken,
+        body: buildingBody(),
+      })
+    ).json<Building>();
+    const listing = (
+      await app.request('POST', '/api/listings', {
+        token: agent.accessToken,
+        body: listingBody(building.id),
+      })
+    ).json<ListingDetail>();
+    expect(listing.status).toBe('PUBLISHED');
+
+    expect(
+      (
+        await app.request('DELETE', `/api/listings/${listing.id}/permanent`, {
+          token: agent.accessToken,
+        })
+      ).statusCode,
+    ).toBe(403);
+
+    expect(
+      (
+        await app.request('DELETE', `/api/listings/${listing.id}/permanent`, {
+          token: admin.accessToken,
+        })
+      ).statusCode,
+    ).toBe(204);
+    expect(
+      (await app.request('GET', `/api/listings/${listing.id}`, { token: admin.accessToken }))
+        .statusCode,
+    ).toBe(404);
   });
 });

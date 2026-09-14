@@ -5,6 +5,7 @@ import {
   listingDetailSchema,
   listingSearchQuerySchema,
   listingSummarySchema,
+  listingTransitionBodySchema,
   listingsPageSchema,
   publicIdSchema,
   updateListingBodySchema,
@@ -21,6 +22,9 @@ export class CreateListingBodyDto extends createZodDto(createListingBodySchema, 
 }) {}
 export class UpdateListingBodyDto extends createZodDto(updateListingBodySchema, {
   name: 'UpdateListingBodyDto',
+}) {}
+export class ListingTransitionBodyDto extends createZodDto(listingTransitionBodySchema, {
+  name: 'ListingTransitionBodyDto',
 }) {}
 export class ListingSummaryDto extends createZodDto(listingSummarySchema, {
   name: 'ListingSummaryDto',

@@ -13,6 +13,7 @@ import {
 } from '@nestjs/common';
 import {
   ApiBearerAuth,
+  ApiConflictResponse,
   ApiCreatedResponse,
   ApiForbiddenResponse,
   ApiNoContentResponse,
@@ -38,6 +39,7 @@ import {
   ListingLookupParamsDto,
   ListingParamsDto,
   ListingSearchQueryDto,
+  ListingTransitionBodyDto,
   ListingsPageDto,
   UpdateListingBodyDto,
 } from './listings.dto.js';
@@ -59,7 +61,11 @@ export class ListingsController {
 
   @Public()
   @Get()
-  @ApiOperation({ summary: 'Structured search with filters, sorting and cursor pagination' })
+  @ApiOperation({
+    summary: 'Structured search with filters, sorting and cursor pagination',
+    description:
+      'Returns published listings. With mine=true it returns the caller’s own listings in any status; moderators may filter by any status.',
+  })
   @ApiOkResponse({ type: ListingsPageDto })
   search(
     @Query() query: ListingSearchQueryDto,
@@ -68,6 +74,7 @@ export class ListingsController {
   ): Promise<Page<ListingSummary>> {
     return this.listings.search(
       query,
+      user,
       resolveLocale({ query: query.locale, userLocale: user?.locale, acceptLanguage }),
     );
   }
@@ -92,12 +99,15 @@ export class ListingsController {
   }
 
   @Post()
-  @Roles('AGENT', 'MODERATOR', 'ADMIN')
   @ApiBearerAuth()
-  @ApiOperation({ summary: 'Publish a listing for an existing building' })
+  @ApiOperation({
+    summary: 'Create a listing for an existing building',
+    description:
+      'Any signed-in account may create one. A regular user’s listing enters the review queue; a verified agent’s is published immediately.',
+  })
   @ApiQuery(LOCALE_QUERY)
   @ApiCreatedResponse({ type: ListingDetailDto })
-  @ApiForbiddenResponse({ description: 'Requires AGENT, MODERATOR or ADMIN' })
+  @ApiConflictResponse({ description: 'The account already holds its maximum of live listings' })
   create(
     @Body() body: CreateListingBodyDto,
     @CurrentUser() user: AuthenticatedUser,
@@ -114,12 +124,14 @@ export class ListingsController {
   }
 
   @Patch(':id')
-  @Roles('AGENT', 'MODERATOR', 'ADMIN')
   @ApiBearerAuth()
-  @ApiOperation({ summary: 'Update attributes, status or translations of an own listing' })
+  @ApiOperation({
+    summary: 'Update attributes or translations of a listing',
+    description: 'Status is not editable here; use the transitions endpoint.',
+  })
   @ApiQuery(LOCALE_QUERY)
   @ApiOkResponse({ type: ListingDetailDto })
-  @ApiForbiddenResponse({ description: 'Not the owner and not a moderator' })
+  @ApiForbiddenResponse({ description: 'Not the owner' })
   update(
     @Param() params: ListingParamsDto,
     @Body() body: UpdateListingBodyDto,
@@ -137,18 +149,65 @@ export class ListingsController {
     );
   }
 
+  @Post(':id/transitions')
+  // A transition changes an existing listing; it does not create a resource.
+  @HttpCode(200)
+  @ApiBearerAuth()
+  @ApiOperation({
+    summary: 'Move a listing through the moderation lifecycle',
+    description:
+      'SUBMIT, PUBLISH, APPROVE, REJECT, REVISE and ARCHIVE. A transition that is not legal from the current status is a conflict, not a bad request.',
+  })
+  @ApiQuery(LOCALE_QUERY)
+  @ApiOkResponse({ type: ListingDetailDto })
+  @ApiForbiddenResponse({ description: 'The caller may not perform this transition' })
+  @ApiConflictResponse({ description: 'Illegal from the listing’s current status' })
+  transition(
+    @Param() params: ListingParamsDto,
+    @Body() body: ListingTransitionBodyDto,
+    @CurrentUser() user: AuthenticatedUser,
+    @Req() request: FastifyRequest,
+    @Query('locale') locale: string | undefined,
+    @Headers('accept-language') acceptLanguage: string | undefined,
+  ): Promise<ListingDetail> {
+    return this.listings.transition(
+      params.id,
+      body,
+      user,
+      request.ip,
+      resolveLocale({ query: locale, userLocale: user.locale, acceptLanguage }),
+    );
+  }
+
   @Delete(':id')
   @HttpCode(204)
-  @Roles('AGENT', 'MODERATOR', 'ADMIN')
   @ApiBearerAuth()
-  @ApiOperation({ summary: 'Withdraw a listing (soft delete)' })
+  @ApiOperation({ summary: 'Archive a listing (soft delete)' })
   @ApiNoContentResponse()
   @ApiForbiddenResponse({ description: 'Not the owner and not a moderator' })
-  withdraw(
+  archive(
     @Param() params: ListingParamsDto,
     @CurrentUser() user: AuthenticatedUser,
     @Req() request: FastifyRequest,
   ): Promise<void> {
-    return this.listings.withdraw(params.id, user, request.ip);
+    return this.listings.archive(params.id, user, request.ip);
+  }
+
+  @Delete(':id/permanent')
+  @HttpCode(204)
+  @Roles('ADMIN')
+  @ApiBearerAuth()
+  @ApiOperation({
+    summary: 'Delete a listing and all of its history, permanently',
+    description: 'Administrators only. Archiving is the reversible option.',
+  })
+  @ApiNoContentResponse()
+  @ApiForbiddenResponse({ description: 'Requires ADMIN' })
+  destroy(
+    @Param() params: ListingParamsDto,
+    @CurrentUser() user: AuthenticatedUser,
+    @Req() request: FastifyRequest,
+  ): Promise<void> {
+    return this.listings.destroy(params.id, user, request.ip);
   }
 }

@@ -70,7 +70,8 @@ export const LISTING_SELECT = Prisma.sql`
          l.price_negotiable, l.rooms, l.bathrooms, l.total_area, l.living_area, l.kitchen_area, l.ceiling_height,
          l.floor, l.balcony_count, l.has_loggia, l.has_parking, l.has_storage, l.condition, l.heating,
          l.ownership_docs, ST_X(l.location) AS lon, ST_Y(l.location) AS lat,
-         l.published_at, l.created_at, l.updated_at, l.created_by_id, l.building_id, l.district_id,
+         l.published_at, l.submitted_at, l.reviewed_at, l.reviewed_by_id, l.rejection_reason,
+         l.created_at, l.updated_at, l.created_by_id, l.building_id, l.district_id,
          b.address_line AS b_address_line, b.street_hy AS b_street_hy, b.street_ru AS b_street_ru,
          b.street_en AS b_street_en, b.house_number AS b_house_number, b.building_type AS b_building_type,
          b.construction_year AS b_construction_year, b.total_floors AS b_total_floors,
@@ -81,9 +82,22 @@ export const LISTING_SELECT = Prisma.sql`
   JOIN buildings b ON b.id = l.building_id
   JOIN districts d ON d.id = l.district_id`;
 
+/**
+ * Narrows a search to one owner. The service supplies it when the caller asked
+ * for their own listings; without it, the status filter is the only thing
+ * standing between a visitor and someone else's drafts, which is why the service
+ * also forces the status for callers who may not moderate.
+ */
+export interface SearchScope {
+  readonly ownerId?: string | undefined;
+}
+
 /** WHERE predicates for every filter present in the query (status always included). */
-export function buildFilters(query: ListingSearchQuery): Prisma.Sql[] {
+export function buildFilters(query: ListingSearchQuery, scope: SearchScope = {}): Prisma.Sql[] {
   const where: Prisma.Sql[] = [Prisma.sql`l.status = ${query.status}::"ListingStatus"`];
+  if (scope.ownerId !== undefined) {
+    where.push(Prisma.sql`l.created_by_id = ${scope.ownerId}::uuid`);
+  }
   const range = (column: Prisma.Sql, min: number | undefined, max: number | undefined): void => {
     if (min !== undefined) {
       where.push(Prisma.sql`${column} >= ${min}`);
@@ -197,8 +211,11 @@ export function buildOrderBy(sort: ListingSort): Prisma.Sql {
 }
 
 /** Complete search statement fetching `limit + 1` rows for continuation detection. */
-export function buildSearchStatement(query: ListingSearchQuery): Prisma.Sql {
-  const where = buildFilters(query);
+export function buildSearchStatement(
+  query: ListingSearchQuery,
+  scope: SearchScope = {},
+): Prisma.Sql {
+  const where = buildFilters(query, scope);
   if (query.cursor !== undefined) {
     where.push(buildKeysetPredicate(query.sort, decodeCursor(query.cursor)));
   }

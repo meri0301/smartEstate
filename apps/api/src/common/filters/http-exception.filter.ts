@@ -9,6 +9,7 @@ import {
 import type { ApiError } from '@smartestate/contracts';
 import type { FastifyReply, FastifyRequest } from 'fastify';
 import { Prisma } from '../../generated/prisma/client.js';
+import { isDomainError, type DomainError } from '../errors/domain-error.js';
 
 /**
  * Shapes every error into the shared `ApiError` envelope. Known database
@@ -36,6 +37,9 @@ export class HttpExceptionFilter implements ExceptionFilter {
   }
 
   private toApiError(exception: unknown, request: FastifyRequest): ApiError {
+    if (isDomainError(exception)) {
+      return domainError(exception);
+    }
     if (exception instanceof HttpException) {
       return normaliseHttpException(exception);
     }
@@ -149,6 +153,21 @@ function normaliseHttpException(exception: HttpException): ApiError {
     message,
     ...(code === undefined ? {} : { code }),
     ...(Array.isArray(record.details) ? { details: record.details as ApiError['details'] } : {}),
+  };
+}
+
+/**
+ * Domain services throw transport-free errors (see `DomainError`); this is the
+ * single place where they acquire a status code.
+ */
+function domainError(exception: DomainError): ApiError {
+  const hasContext = Object.keys(exception.context).length > 0;
+  return {
+    statusCode: exception.status,
+    error: reasonPhrase(exception.status),
+    message: exception.message,
+    code: exception.code,
+    ...(hasContext ? { context: exception.context } : {}),
   };
 }
 

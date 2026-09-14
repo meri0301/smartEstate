@@ -126,24 +126,56 @@ Base URL `http://localhost:3000/api`; interactive docs at `http://localhost:3000
 document at `/docs/openapi.json` (exported copy: [`docs/api/openapi.json`](docs/api/openapi.json)).
 Health probes live outside the prefix: `/health` (liveness) and `/health/ready` (database).
 
-| Area      | Endpoints                                                                                                          |
-| --------- | ------------------------------------------------------------------------------------------------------------------ |
-| auth      | `POST /auth/register`, `/auth/login`, `/auth/refresh`, `/auth/logout`, `/auth/logout-all`                          |
-| users     | `GET/PATCH /users/me`, `PUT /users/me/preferences`, admin: `GET /users`, `PATCH /users/:id/role`                   |
-| listings  | `GET /listings` (filters, sort, cursor), `GET /listings/:idOrPublicId`, agent: `POST`, `PATCH /:id`, `DELETE /:id` |
-| buildings | `GET /buildings/:id`, agent: `POST /buildings` (district derived from coordinates)                                 |
-| geo       | `GET /districts`, `GET /districts/:slug/boundary` (GeoJSON)                                                        |
+| Area      | Endpoints                                                                                                                                                                                   |
+| --------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| auth      | `POST /auth/register`, `/auth/login`, `/auth/refresh`, `/auth/logout`, `/auth/logout-all`                                                                                                   |
+| users     | `GET/PATCH /users/me`, `PUT /users/me/preferences`, admin: `GET /users`, `PATCH /users/:id/role`                                                                                            |
+| listings  | `GET /listings` (filters, sort, cursor, `mine=true`), `GET /listings/:idOrPublicId`, `POST`, `PATCH /:id`, `POST /:id/transitions`, `DELETE /:id` (archive), admin: `DELETE /:id/permanent` |
+| buildings | `GET /buildings/:id`, agent: `POST /buildings` (district derived from coordinates)                                                                                                          |
+| geo       | `GET /districts`, `GET /districts/:slug/boundary` (GeoJSON)                                                                                                                                 |
 
 - **Sessions.** Access token: 15-minute JWT in `Authorization: Bearer`. Refresh token: httpOnly,
   SameSite=Strict cookie scoped to `/api/auth`, rotated on every refresh; replaying a consumed
   token revokes the whole session family. Passwords are Argon2id.
-- **Roles.** `USER` (buyer), `AGENT` (publishes listings), `MODERATOR`, `ADMIN`. Agents may edit
-  only their own listings; moderators and admins may edit any.
+- **Roles.** `USER` (buyer, may also offer a property), `AGENT` (verified, publishes directly),
+  `MODERATOR` (reviews the queue), `ADMIN`. Role decides which endpoints are reachable; ownership
+  and listing status decide what may be done to a particular listing (see below).
 - **Contracts.** Every request and response shape is a Zod schema in
   [`packages/contracts`](packages/contracts/src); the API validates with them and the OpenAPI
   components are generated from them (see [ADR-0005](docs/adr/0005-zod-first-api-contracts-and-session-design.md)).
-- **Errors** always have the shape `{ statusCode, error, message, code?, details? }`.
+- **Errors** always have the shape `{ statusCode, error, message, code?, details?, context? }`.
+  `context` carries machine-readable detail from a domain rule, such as the transitions that would
+  have been legal.
 - **Locale** of listing texts: `?locale=` → user preference → `Accept-Language` → Armenian.
+
+### Listing lifecycle
+
+A listing's status describes its moderation state, not the state of a deal:
+
+```
+DRAFT ──SUBMIT──▶ PENDING_REVIEW ──APPROVE──▶ PUBLISHED ──ARCHIVE──▶ ARCHIVED
+  │                     │                                               ▲
+  │                  REJECT                                             │
+  └──PUBLISH──▶ ...      ▼                                              │
+              REJECTED ──REVISE──▶ DRAFT        (ARCHIVE from any live status)
+```
+
+- **Creating.** A listing from a `USER` enters `PENDING_REVIEW` immediately; one from an `AGENT`
+  or staff is `PUBLISHED` at once. `PUBLISH` is the same step for a draft an agent already holds.
+- **Moving.** Status changes only through `POST /listings/:id/transitions` with
+  `{ action, reason? }`. `PATCH` does not accept a status. `REJECT` requires a reason, which is
+  stored and shown back to the owner. A transition that is not legal from the current status is
+  **409**, not 400.
+- **Quotas.** A `USER` may hold three listings in `PENDING_REVIEW` or `PUBLISHED` at once, an
+  `AGENT` fifty; exceeding it is **409** with code `LISTING_QUOTA_EXCEEDED`.
+- **Who may do what** is decided in one place,
+  [`listing.policy.ts`](apps/api/src/modules/listings/listing.policy.ts), from the role _and_ the
+  row. Owners edit their own listings, moderators approve, reject and archive but do not rewrite,
+  and only an administrator can delete permanently. A listing the caller may not see is reported
+  as 404 rather than 403.
+- **Searching.** `GET /listings` returns published listings; `mine=true` returns the caller's own
+  in any status. Only a moderator may filter the whole catalogue by status. See
+  [ADR-0009](docs/adr/0009-listing-lifecycle-rbac-abac.md).
 
 Tests: `pnpm --filter @smartestate/api test:unit` (no I/O) and `test:integration` (boots the
 real app against a Testcontainers PostgreSQL built from `docker/postgres`, migrated and seeded;

@@ -15,7 +15,17 @@ export type Locale = z.infer<typeof localeSchema>;
 export const DEFAULT_LOCALE: Locale = 'hy';
 export const FALLBACK_LOCALE: Locale = 'en';
 
-export const LISTING_STATUSES = ['DRAFT', 'ACTIVE', 'RESERVED', 'SOLD', 'WITHDRAWN'] as const;
+/**
+ * Moderation lifecycle of a listing. These are review states, not market states:
+ * a sale or a reservation ends with the listing ARCHIVED.
+ */
+export const LISTING_STATUSES = [
+  'DRAFT',
+  'PENDING_REVIEW',
+  'PUBLISHED',
+  'REJECTED',
+  'ARCHIVED',
+] as const;
 export const listingStatusSchema = z.enum(LISTING_STATUSES);
 export type ListingStatus = z.infer<typeof listingStatusSchema>;
 

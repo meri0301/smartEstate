@@ -7,6 +7,12 @@ export const apiErrorSchema = z.object({
   message: z.string(),
   /** Machine-readable code for client branching, e.g. "VALIDATION_FAILED". */
   code: z.string().optional(),
+  /**
+   * Machine-readable context a domain rule attached, such as the transitions
+   * that would have been legal or the quota that was reached. Free-form by
+   * design: each `code` documents its own keys.
+   */
+  context: z.record(z.string(), z.unknown()).optional(),
   /** Field-level issues for validation errors. */
   details: z
     .array(
