@@ -1,6 +1,6 @@
 [project]
 name = "smartestate-ml"
-version = "0.1.0"
+version = "0.2.0"
 description = "SmartEstate ML service — price valuation, explanations and multilingual embeddings."
 readme = "README.md"
 requires-python = ">=3.12,<3.13"
@@ -10,14 +10,34 @@ dependencies = [
   "uvicorn[standard]>=0.52,<1.0",
   "pydantic>=2.13,<3.0",
   "pydantic-settings>=2.15,<3.0",
+  # Inference needs the booster and a frame to feed it, and nothing else:
+  # SHAP values come from LightGBM's own exact TreeSHAP implementation.
+  "lightgbm>=4.7,<5.0",
+  "numpy>=2.5,<3.0",
+  "pandas>=3.0,<4.0",
 ]
 
 [project.optional-dependencies]
+# Everything the training CLI needs and the service does not, kept apart so the
+# runtime image carries neither a database driver nor a plotting stack.
+train = [
+  "scikit-learn>=1.9,<2.0",
+  "psycopg[binary]>=3.3,<4.0",
+  "shap>=0.52,<1.0",
+]
+notebook = [
+  "jupyterlab>=4.6,<5.0",
+  "matplotlib>=3.11,<4.0",
+]
 dev = [
+  "smartestate-ml[train]",
   "pytest>=9.1,<10",
   "httpx>=0.28,<1.0",
   "ruff>=0.16,<1.0",
 ]
+
+[project.scripts]
+smartestate-train = "app.pipelines.train:main"
 
 [build-system]
 requires = ["setuptools>=75"]
@@ -25,6 +45,10 @@ build-backend = "setuptools.build_meta"
 
 [tool.setuptools.packages.find]
 include = ["app*"]
+
+[tool.setuptools.package-data]
+# Trained artefacts ship with the image so `/predict` works without a training run.
+"app.models" = ["*.txt", "*.json"]
 
 [tool.pytest.ini_options]
 testpaths = ["tests"]

@@ -4,6 +4,10 @@ ENV PYTHONDONTWRITEBYTECODE=1 \
     PYTHONUNBUFFERED=1 \
     PIP_DISABLE_PIP_VERSION_CHECK=1 \
     PIP_NO_CACHE_DIR=1
+# LightGBM's wheels link against OpenMP at runtime, which the slim image omits.
+RUN apt-get update \
+ && apt-get install -y --no-install-recommends libgomp1 \
+ && rm -rf /var/lib/apt/lists/*
 WORKDIR /srv
 COPY pyproject.toml README.md ./
 COPY app ./app
@@ -14,6 +18,11 @@ FROM base AS test
 RUN pip install ".[dev]"
 COPY tests ./tests
 CMD ["pytest"]
+
+# --- training stage: the database driver and the analysis stack, never shipped
+FROM base AS train
+RUN pip install ".[train]"
+ENTRYPOINT ["python", "-m", "app.pipelines.train"]
 
 # --- runtime stage
 FROM base AS runtime

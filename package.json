@@ -36,6 +36,7 @@
     "docker:logs": "docker compose logs -f",
     "ml:test": "docker build --target test -t smartestate-ml-test apps/ml && docker run --rm smartestate-ml-test",
     "ml:lint": "docker build --target test -t smartestate-ml-test apps/ml && docker run --rm smartestate-ml-test ruff check . && docker run --rm smartestate-ml-test ruff format --check .",
+    "ml:train": "docker build --target train -t smartestate-ml-train apps/ml && docker run --rm -v \"$PWD/apps/ml/app/models:/srv/app/models\" -v \"$PWD/docs:/docs\" -e DATABASE_URL=postgresql://smartestate:smartestate@host.docker.internal:5432/smartestate smartestate-ml-train --report /docs/thesis/evaluation.md",
     "prepare": "husky"
   },
   "devDependencies": {

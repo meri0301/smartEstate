@@ -134,6 +134,8 @@ Health probes live outside the prefix: `/health` (liveness) and `/health/ready` 
 | buildings | `GET /buildings/:id`, agent: `POST /buildings` (district derived from coordinates)                                                                                                          |
 | geo       | `GET /districts`, `GET /districts/:slug/boundary` (GeoJSON)                                                                                                                                 |
 
+The ML service has its own section below; the API does not call it yet.
+
 - **Sessions.** Access token: 15-minute JWT in `Authorization: Bearer`. Refresh token: httpOnly,
   SameSite=Strict cookie scoped to `/api/auth`, rotated on every refresh; replaying a consumed
   token revokes the whole session family. Passwords are Argon2id.
@@ -180,6 +182,42 @@ DRAFT ──SUBMIT──▶ PENDING_REVIEW ──APPROVE──▶ PUBLISHED ─�
 Tests: `pnpm --filter @smartestate/api test:unit` (no I/O) and `test:integration` (boots the
 real app against a Testcontainers PostgreSQL built from `docker/postgres`, migrated and seeded;
 needs Docker). `pnpm test` runs both.
+
+## ML service
+
+FastAPI on `http://localhost:8000`, started by `docker compose up`. It values listings and
+explains the valuation; it never reads the database. See
+[`apps/ml/README.md`](apps/ml/README.md) and
+[ADR-0010](docs/adr/0010-price-valuation-model.md).
+
+| Route               | What it does                                         |
+| ------------------- | ---------------------------------------------------- |
+| `GET /health`       | Liveness                                             |
+| `GET /health/ready` | Readiness: 503 and a reason when no model is loaded  |
+| `POST /predict`     | Values a batch of listings, with an 80% interval     |
+| `POST /explain`     | Values one listing and names what moved the estimate |
+| `GET /model`        | The deployed model: version, training set, metrics   |
+
+- **What it predicts.** The log of price per m², converted back to dram before anything is
+  reported. Area is divided out so the model cannot score well on floor area alone, and the log
+  matches a market whose effects are proportional.
+- **How good it is.** Measured two ways in every run, random k-fold and leave-one-district-out,
+  both against a linear regression on area alone. The second is the honest one and is always
+  worse. Figures are in [`docs/thesis/evaluation.md`](docs/thesis/evaluation.md), which the
+  training run writes itself so the numbers and the deployed model cannot drift apart.
+- **Why this price.** Exact TreeSHAP from LightGBM, expressed as a percentage effect per feature.
+- **How certain.** Quantile boosters give a range, widened by a conformal factor measured out of
+  fold, because the raw range covers well under its nominal 80%.
+- **No model is a supported state.** The service starts, reports itself degraded and answers 503,
+  rather than taking the stack down.
+
+Training needs a seeded database and writes the artefact and the evaluation chapter together:
+
+```bash
+pnpm ml:train
+```
+
+Tests and lint run in Docker, so no local Python is needed: `pnpm ml:test`, `pnpm ml:lint`.
 
 ## Frontend data access
 

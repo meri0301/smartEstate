@@ -1,6 +1,6 @@
 # Local infrastructure for SmartEstate.
-# Application containers (api, web, ml) are added as those apps gain real code;
-# Phase 0 provides the stateful services every later phase depends on.
+# The ML service runs here because it is a deployable in its own right. The API
+# and the web app still run from the workspace with `pnpm dev` in development.
 #
 #   pnpm docker:up      start (builds the Postgres image on first run) and wait for health
 #   pnpm docker:down    stop, keep data
@@ -45,6 +45,21 @@ services:
       interval: 5s
       timeout: 3s
       retries: 12
+
+  ml:
+    build:
+      context: ./apps/ml
+      target: runtime
+    image: smartestate/ml:0.2.0
+    container_name: smartestate-ml
+    restart: unless-stopped
+    # No database and no secrets: the service is handed features over HTTP and
+    # answers with a valuation. Training is a separate image and a separate,
+    # manual step, so nothing here needs a connection string.
+    environment:
+      ML_LOG_LEVEL: ${ML_LOG_LEVEL:-info}
+    ports:
+      - '${ML_PORT:-8000}:8000'
 
 volumes:
   postgres-data:

@@ -1,0 +1,102 @@
+{
+  "schemaVersion": 1,
+  "modelVersion": "valuation-lgbm-20260914-65982e00",
+  "trainedAt": "2026-09-14T12:43:28+00:00",
+  "featureColumns": [
+    "total_area",
+    "rooms",
+    "bathrooms",
+    "ceiling_height",
+    "floor",
+    "total_floors",
+    "floor_ratio",
+    "balcony_count",
+    "building_age",
+    "area_per_room",
+    "living_ratio",
+    "kitchen_ratio",
+    "distance_to_centre_m",
+    "condition_rank",
+    "has_loggia",
+    "has_parking",
+    "has_storage",
+    "has_elevator",
+    "seismic_retrofit",
+    "is_ground_floor",
+    "is_top_floor",
+    "district_slug",
+    "building_type",
+    "condition",
+    "heating",
+    "ownership_docs"
+  ],
+  "districts": [
+    "ajapnyak",
+    "arabkir",
+    "avan",
+    "davtashen",
+    "erebuni",
+    "kanaker-zeytun",
+    "kentron",
+    "malatia-sebastia",
+    "nor-nork",
+    "nork-marash",
+    "nubarashen",
+    "shengavit"
+  ],
+  "marketReferenceYear": 2026,
+  "target": "log_price_per_sqm_amd",
+  "quantiles": {
+    "low": 0.1,
+    "high": 0.9
+  },
+  "intervalLogOffset": 0.08563832379808636,
+  "targetCoverage": 0.8,
+  "trainingRows": 300,
+  "datasetFingerprint": "65982e00a65747656c1ab7a130d70f79a31b7ccb3fcbb8b7aab4f6bfbbdc23f4",
+  "lightgbmVersion": "4.7.0",
+  "metrics": {
+    "random": {
+      "scheme": "random",
+      "folds": 5,
+      "model": {
+        "n": 300,
+        "maeAmd": 6544232,
+        "rmseAmd": 9545877,
+        "mape": 0.1283,
+        "r2": 0.9325
+      },
+      "baselineAreaOnly": {
+        "n": 300,
+        "maeAmd": 19470092,
+        "rmseAmd": 27522975,
+        "mape": 0.4088,
+        "r2": 0.4393
+      },
+      "intervalCoverage": 0.6033,
+      "intervalCoverageCalibrated": 0.8067,
+      "intervalLogOffset": 0.0856
+    },
+    "grouped": {
+      "scheme": "grouped",
+      "folds": 12,
+      "model": {
+        "n": 300,
+        "maeAmd": 15398059,
+        "rmseAmd": 25195403,
+        "mape": 0.244,
+        "r2": 0.5301
+      },
+      "baselineAreaOnly": {
+        "n": 300,
+        "maeAmd": 21403874,
+        "rmseAmd": 29743719,
+        "mape": 0.4458,
+        "r2": 0.3451
+      },
+      "intervalCoverage": 0.4067,
+      "intervalCoverageCalibrated": 0.8067,
+      "intervalLogOffset": 0.3643
+    }
+  }
+}

@@ -15,5 +15,6 @@ direction is a new record that supersedes the old one.
 | [0007](0007-design-system-tokens-and-multi-script-typography.md) | Design system: generated tokens, Tailwind v4, and multi-script typography      | Accepted |
 | [0008](0008-internationalisation.md)                             | Internationalisation: locale in the URL, ICU messages, and a checked catalogue | Accepted |
 | [0009](0009-listing-lifecycle-rbac-abac.md)                      | Listing lifecycle: a state machine, and ABAC layered on RBAC                   | Accepted |
+| [0010](0010-price-valuation-model.md)                            | Price valuation: target, validation, explanations and interval                 | Accepted |
 
 Template: [0000-template.md](0000-template.md)
