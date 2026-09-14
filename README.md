@@ -120,6 +120,35 @@ docker/       Purpose-built images (postgres with PostGIS + pgvector)
 - Schema change workflow: edit `schema.prisma` → `pnpm db:migrate:dev -- --name <change>` →
   review the SQL → commit schema, migration and the regenerated ERD.
 
+## API
+
+Base URL `http://localhost:3000/api`; interactive docs at `http://localhost:3000/docs`, raw
+document at `/docs/openapi.json` (exported copy: [`docs/api/openapi.json`](docs/api/openapi.json)).
+Health probes live outside the prefix: `/health` (liveness) and `/health/ready` (database).
+
+| Area      | Endpoints                                                                                                          |
+| --------- | ------------------------------------------------------------------------------------------------------------------ |
+| auth      | `POST /auth/register`, `/auth/login`, `/auth/refresh`, `/auth/logout`, `/auth/logout-all`                          |
+| users     | `GET/PATCH /users/me`, `PUT /users/me/preferences`, admin: `GET /users`, `PATCH /users/:id/role`                   |
+| listings  | `GET /listings` (filters, sort, cursor), `GET /listings/:idOrPublicId`, agent: `POST`, `PATCH /:id`, `DELETE /:id` |
+| buildings | `GET /buildings/:id`, agent: `POST /buildings` (district derived from coordinates)                                 |
+| geo       | `GET /districts`, `GET /districts/:slug/boundary` (GeoJSON)                                                        |
+
+- **Sessions.** Access token: 15-minute JWT in `Authorization: Bearer`. Refresh token: httpOnly,
+  SameSite=Strict cookie scoped to `/api/auth`, rotated on every refresh; replaying a consumed
+  token revokes the whole session family. Passwords are Argon2id.
+- **Roles.** `USER` (buyer), `AGENT` (publishes listings), `MODERATOR`, `ADMIN`. Agents may edit
+  only their own listings; moderators and admins may edit any.
+- **Contracts.** Every request and response shape is a Zod schema in
+  [`packages/contracts`](packages/contracts/src); the API validates with them and the OpenAPI
+  components are generated from them (see [ADR-0005](docs/adr/0005-zod-first-api-contracts-and-session-design.md)).
+- **Errors** always have the shape `{ statusCode, error, message, code?, details? }`.
+- **Locale** of listing texts: `?locale=` → user preference → `Accept-Language` → Armenian.
+
+Tests: `pnpm --filter @smartestate/api test:unit` (no I/O) and `test:integration` (boots the
+real app against a Testcontainers PostgreSQL built from `docker/postgres`, migrated and seeded;
+needs Docker). `pnpm test` runs both.
+
 ## Conventions
 
 - **Commits** follow [Conventional Commits](https://www.conventionalcommits.org). Allowed

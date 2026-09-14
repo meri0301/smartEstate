@@ -7,7 +7,7 @@ import {
   readFeatureCollection,
   type MultiPolygonGeometry,
 } from '../lib/geojson.js';
-import { uuidV7 } from '../lib/uuid.js';
+import { uuidV7 } from '../../../src/common/ids/uuid-v7.js';
 
 export interface SeededDistrict {
   id: string;

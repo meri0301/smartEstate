@@ -1,0 +1,3029 @@
+{
+  "openapi": "3.0.0",
+  "paths": {
+    "/api/auth/register": {
+      "post": {
+        "operationId": "Auth.register",
+        "parameters": [],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/RegisterBodyDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AuthResponseDto"
+                }
+              }
+            }
+          },
+          "429": {
+            "description": "Rate limit exceeded"
+          }
+        },
+        "summary": "Create an account and start a session",
+        "tags": [
+          "auth"
+        ]
+      }
+    },
+    "/api/auth/login": {
+      "post": {
+        "operationId": "Auth.login",
+        "parameters": [],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/LoginBodyDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AuthResponseDto"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Invalid credentials or disabled account"
+          },
+          "429": {
+            "description": "Rate limit exceeded"
+          }
+        },
+        "summary": "Authenticate with email and password",
+        "tags": [
+          "auth"
+        ]
+      }
+    },
+    "/api/auth/refresh": {
+      "post": {
+        "operationId": "Auth.refresh",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AuthResponseDto"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Missing, invalid, expired or replayed refresh token"
+          }
+        },
+        "security": [
+          {
+            "cookie": []
+          }
+        ],
+        "summary": "Rotate the refresh token and issue a new access token",
+        "tags": [
+          "auth"
+        ]
+      }
+    },
+    "/api/auth/logout": {
+      "post": {
+        "operationId": "Auth.logout",
+        "parameters": [],
+        "responses": {
+          "204": {
+            "description": ""
+          }
+        },
+        "security": [
+          {
+            "cookie": []
+          }
+        ],
+        "summary": "End the current session",
+        "tags": [
+          "auth"
+        ]
+      }
+    },
+    "/api/auth/logout-all": {
+      "post": {
+        "operationId": "Auth.logoutAll",
+        "parameters": [],
+        "responses": {
+          "204": {
+            "description": ""
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "End every session of the current user",
+        "tags": [
+          "auth"
+        ]
+      }
+    },
+    "/api/users/me": {
+      "get": {
+        "operationId": "Users.getMe",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/MeResponseDto"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Current account and buyer profile",
+        "tags": [
+          "users"
+        ]
+      },
+      "patch": {
+        "operationId": "Users.updateMe",
+        "parameters": [],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/UpdateMeBodyDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/MeResponseDto"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Update display name, phone or interface locale",
+        "tags": [
+          "users"
+        ]
+      }
+    },
+    "/api/users/me/preferences": {
+      "put": {
+        "operationId": "Users.updatePreferences",
+        "parameters": [],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/PreferencesBodyDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/MeResponseDto"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Save onboarding preferences (budget, rooms, priorities, commute anchor)",
+        "tags": [
+          "users"
+        ]
+      }
+    },
+    "/api/users": {
+      "get": {
+        "operationId": "Users.listUsers",
+        "parameters": [
+          {
+            "name": "limit",
+            "required": false,
+            "in": "query",
+            "schema": {
+              "minimum": 1,
+              "maximum": 50,
+              "default": 20,
+              "type": "integer"
+            }
+          },
+          {
+            "name": "cursor",
+            "required": false,
+            "in": "query",
+            "schema": {
+              "minLength": 1,
+              "maxLength": 512,
+              "type": "string"
+            }
+          },
+          {
+            "name": "role",
+            "required": false,
+            "in": "query",
+            "schema": {
+              "type": "string",
+              "enum": [
+                "USER",
+                "AGENT",
+                "MODERATOR",
+                "ADMIN"
+              ]
+            }
+          },
+          {
+            "name": "search",
+            "required": false,
+            "in": "query",
+            "schema": {
+              "minLength": 1,
+              "maxLength": 80,
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AdminUsersPageDto"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Requires the ADMIN role"
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "List accounts (admin)",
+        "tags": [
+          "users"
+        ]
+      }
+    },
+    "/api/users/{id}/role": {
+      "patch": {
+        "operationId": "Users.updateRole",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "format": "uuid",
+              "pattern": "^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}|00000000-0000-0000-0000-000000000000|ffffffff-ffff-ffff-ffff-ffffffffffff)$",
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/UpdateUserRoleBodyDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AdminUserDto"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Requires the ADMIN role"
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Change the role of an account (admin)",
+        "tags": [
+          "users"
+        ]
+      }
+    },
+    "/api/districts": {
+      "get": {
+        "operationId": "Geo.listDistricts",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/DistrictDto"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "summary": "All districts and towns with trilingual names and centroids",
+        "tags": [
+          "geo"
+        ]
+      }
+    },
+    "/api/districts/{slug}/boundary": {
+      "get": {
+        "operationId": "Geo.getBoundary",
+        "parameters": [
+          {
+            "name": "slug",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "pattern": "^[a-z][a-z0-9-]{1,40}$",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/DistrictBoundaryResponseDto"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Unknown district slug"
+          }
+        },
+        "summary": "District boundary as a GeoJSON MultiPolygon",
+        "tags": [
+          "geo"
+        ]
+      }
+    },
+    "/api/listings": {
+      "get": {
+        "operationId": "Listings.search",
+        "parameters": [
+          {
+            "name": "limit",
+            "required": false,
+            "in": "query",
+            "schema": {
+              "minimum": 1,
+              "maximum": 50,
+              "default": 20,
+              "type": "integer"
+            }
+          },
+          {
+            "name": "cursor",
+            "required": false,
+            "in": "query",
+            "schema": {
+              "minLength": 1,
+              "maxLength": 512,
+              "type": "string"
+            }
+          },
+          {
+            "name": "locale",
+            "required": false,
+            "in": "query",
+            "schema": {
+              "type": "string",
+              "enum": [
+                "hy",
+                "ru",
+                "en"
+              ]
+            }
+          },
+          {
+            "name": "sort",
+            "required": false,
+            "in": "query",
+            "schema": {
+              "default": "published_desc",
+              "type": "string",
+              "enum": [
+                "published_desc",
+                "price_asc",
+                "price_desc",
+                "price_per_sqm_asc",
+                "price_per_sqm_desc",
+                "area_asc",
+                "area_desc"
+              ]
+            }
+          },
+          {
+            "name": "status",
+            "required": false,
+            "in": "query",
+            "schema": {
+              "default": "ACTIVE",
+              "type": "string",
+              "enum": [
+                "DRAFT",
+                "ACTIVE",
+                "RESERVED",
+                "SOLD",
+                "WITHDRAWN"
+              ]
+            }
+          },
+          {
+            "name": "priceMin",
+            "required": false,
+            "in": "query",
+            "schema": {
+              "minimum": 0,
+              "maximum": 9007199254740991,
+              "type": "integer"
+            }
+          },
+          {
+            "name": "priceMax",
+            "required": false,
+            "in": "query",
+            "schema": {
+              "minimum": 0,
+              "maximum": 9007199254740991,
+              "type": "integer"
+            }
+          },
+          {
+            "name": "pricePerSqmMax",
+            "required": false,
+            "in": "query",
+            "schema": {
+              "minimum": 0,
+              "maximum": 9007199254740991,
+              "type": "integer"
+            }
+          },
+          {
+            "name": "roomsMin",
+            "required": false,
+            "in": "query",
+            "schema": {
+              "minimum": 1,
+              "maximum": 10,
+              "type": "integer"
+            }
+          },
+          {
+            "name": "roomsMax",
+            "required": false,
+            "in": "query",
+            "schema": {
+              "minimum": 1,
+              "maximum": 10,
+              "type": "integer"
+            }
+          },
+          {
+            "name": "areaMin",
+            "required": false,
+            "in": "query",
+            "schema": {
+              "minimum": 0,
+              "type": "number"
+            }
+          },
+          {
+            "name": "areaMax",
+            "required": false,
+            "in": "query",
+            "schema": {
+              "minimum": 0,
+              "type": "number"
+            }
+          },
+          {
+            "name": "floorMin",
+            "required": false,
+            "in": "query",
+            "schema": {
+              "minimum": 1,
+              "maximum": 9007199254740991,
+              "type": "integer"
+            }
+          },
+          {
+            "name": "floorMax",
+            "required": false,
+            "in": "query",
+            "schema": {
+              "minimum": 1,
+              "maximum": 9007199254740991,
+              "type": "integer"
+            }
+          },
+          {
+            "name": "ceilingMin",
+            "required": false,
+            "in": "query",
+            "schema": {
+              "minimum": 2,
+              "maximum": 5,
+              "type": "number"
+            }
+          },
+          {
+            "name": "yearMin",
+            "required": false,
+            "in": "query",
+            "schema": {
+              "minimum": 1850,
+              "maximum": 9007199254740991,
+              "type": "integer"
+            }
+          },
+          {
+            "name": "yearMax",
+            "required": false,
+            "in": "query",
+            "schema": {
+              "minimum": 1850,
+              "maximum": 9007199254740991,
+              "type": "integer"
+            }
+          },
+          {
+            "name": "districts",
+            "required": false,
+            "in": "query",
+            "schema": {
+              "oneOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "array",
+                  "items": {
+                    "type": "string"
+                  }
+                }
+              ]
+            }
+          },
+          {
+            "name": "buildingTypes",
+            "required": false,
+            "in": "query",
+            "schema": {
+              "oneOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "array",
+                  "items": {
+                    "type": "string"
+                  }
+                }
+              ]
+            }
+          },
+          {
+            "name": "conditions",
+            "required": false,
+            "in": "query",
+            "schema": {
+              "oneOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "array",
+                  "items": {
+                    "type": "string"
+                  }
+                }
+              ]
+            }
+          },
+          {
+            "name": "heating",
+            "required": false,
+            "in": "query",
+            "schema": {
+              "oneOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "array",
+                  "items": {
+                    "type": "string"
+                  }
+                }
+              ]
+            }
+          },
+          {
+            "name": "excludeGroundFloor",
+            "required": false,
+            "in": "query",
+            "schema": {
+              "type": "string",
+              "enum": [
+                "true",
+                "false"
+              ]
+            }
+          },
+          {
+            "name": "excludeTopFloor",
+            "required": false,
+            "in": "query",
+            "schema": {
+              "type": "string",
+              "enum": [
+                "true",
+                "false"
+              ]
+            }
+          },
+          {
+            "name": "hasElevator",
+            "required": false,
+            "in": "query",
+            "schema": {
+              "type": "string",
+              "enum": [
+                "true",
+                "false"
+              ]
+            }
+          },
+          {
+            "name": "hasParking",
+            "required": false,
+            "in": "query",
+            "schema": {
+              "type": "string",
+              "enum": [
+                "true",
+                "false"
+              ]
+            }
+          },
+          {
+            "name": "hasBalcony",
+            "required": false,
+            "in": "query",
+            "schema": {
+              "type": "string",
+              "enum": [
+                "true",
+                "false"
+              ]
+            }
+          },
+          {
+            "name": "hasStorage",
+            "required": false,
+            "in": "query",
+            "schema": {
+              "type": "string",
+              "enum": [
+                "true",
+                "false"
+              ]
+            }
+          },
+          {
+            "name": "seismicRetrofit",
+            "required": false,
+            "in": "query",
+            "schema": {
+              "type": "string",
+              "enum": [
+                "true",
+                "false"
+              ]
+            }
+          },
+          {
+            "name": "docsVerified",
+            "required": false,
+            "in": "query",
+            "schema": {
+              "type": "string",
+              "enum": [
+                "true",
+                "false"
+              ]
+            }
+          },
+          {
+            "name": "priceNegotiable",
+            "required": false,
+            "in": "query",
+            "schema": {
+              "type": "string",
+              "enum": [
+                "true",
+                "false"
+              ]
+            }
+          },
+          {
+            "name": "nearLat",
+            "required": false,
+            "in": "query",
+            "schema": {
+              "minimum": -90,
+              "maximum": 90,
+              "type": "number"
+            }
+          },
+          {
+            "name": "nearLon",
+            "required": false,
+            "in": "query",
+            "schema": {
+              "minimum": -180,
+              "maximum": 180,
+              "type": "number"
+            }
+          },
+          {
+            "name": "radiusM",
+            "required": false,
+            "in": "query",
+            "schema": {
+              "minimum": 100,
+              "maximum": 20000,
+              "type": "integer"
+            }
+          },
+          {
+            "name": "bbox",
+            "required": false,
+            "in": "query",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ListingsPageDto"
+                }
+              }
+            }
+          }
+        },
+        "summary": "Structured search with filters, sorting and cursor pagination",
+        "tags": [
+          "listings"
+        ]
+      },
+      "post": {
+        "operationId": "Listings.create",
+        "parameters": [
+          {
+            "name": "locale",
+            "required": false,
+            "in": "query",
+            "description": "Response locale for listing texts; falls back to the account preference, then Accept-Language, then hy",
+            "schema": {
+              "enum": [
+                "hy",
+                "ru",
+                "en"
+              ],
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CreateListingBodyDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ListingDetailDto"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Requires AGENT, MODERATOR or ADMIN"
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Publish a listing for an existing building",
+        "tags": [
+          "listings"
+        ]
+      }
+    },
+    "/api/listings/{idOrPublicId}": {
+      "get": {
+        "operationId": "Listings.getOne",
+        "parameters": [
+          {
+            "name": "idOrPublicId",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "oneOf": [
+                {
+                  "format": "uuid",
+                  "pattern": "^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}|00000000-0000-0000-0000-000000000000|ffffffff-ffff-ffff-ffff-ffffffffffff)$",
+                  "type": "string"
+                },
+                {
+                  "pattern": "^L-[A-HJ-NP-Z2-9]{6}$",
+                  "type": "string"
+                }
+              ]
+            }
+          },
+          {
+            "name": "locale",
+            "required": false,
+            "in": "query",
+            "description": "Response locale for listing texts; falls back to the account preference, then Accept-Language, then hy",
+            "schema": {
+              "enum": [
+                "hy",
+                "ru",
+                "en"
+              ],
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ListingDetailDto"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Unknown, or not visible to the caller"
+          }
+        },
+        "summary": "Listing detail by id or public id",
+        "tags": [
+          "listings"
+        ]
+      }
+    },
+    "/api/listings/{id}": {
+      "patch": {
+        "operationId": "Listings.update",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "format": "uuid",
+              "pattern": "^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}|00000000-0000-0000-0000-000000000000|ffffffff-ffff-ffff-ffff-ffffffffffff)$",
+              "type": "string"
+            }
+          },
+          {
+            "name": "locale",
+            "required": false,
+            "in": "query",
+            "description": "Response locale for listing texts; falls back to the account preference, then Accept-Language, then hy",
+            "schema": {
+              "enum": [
+                "hy",
+                "ru",
+                "en"
+              ],
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/UpdateListingBodyDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ListingDetailDto"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Not the owner and not a moderator"
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Update attributes, status or translations of an own listing",
+        "tags": [
+          "listings"
+        ]
+      },
+      "delete": {
+        "operationId": "Listings.withdraw",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "format": "uuid",
+              "pattern": "^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}|00000000-0000-0000-0000-000000000000|ffffffff-ffff-ffff-ffff-ffffffffffff)$",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "204": {
+            "description": ""
+          },
+          "403": {
+            "description": "Not the owner and not a moderator"
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Withdraw a listing (soft delete)",
+        "tags": [
+          "listings"
+        ]
+      }
+    },
+    "/api/buildings/{id}": {
+      "get": {
+        "operationId": "Buildings.get",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "format": "uuid",
+              "pattern": "^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}|00000000-0000-0000-0000-000000000000|ffffffff-ffff-ffff-ffff-ffffffffffff)$",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/BuildingDto"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": ""
+          }
+        },
+        "summary": "Building details",
+        "tags": [
+          "buildings"
+        ]
+      }
+    },
+    "/api/buildings": {
+      "post": {
+        "operationId": "Buildings.create",
+        "parameters": [],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CreateBuildingBodyDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/BuildingDto"
+                }
+              }
+            }
+          },
+          "409": {
+            "description": "Address already registered in that district"
+          },
+          "422": {
+            "description": "Coordinates fall outside every supported district"
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Register a building; its district is derived from the coordinates",
+        "tags": [
+          "buildings"
+        ]
+      }
+    },
+    "/health": {
+      "get": {
+        "operationId": "Health.check",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": "Process is running"
+          }
+        },
+        "summary": "Liveness probe",
+        "tags": [
+          "health"
+        ]
+      }
+    },
+    "/health/ready": {
+      "get": {
+        "operationId": "Health.ready",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": "Ready to serve traffic"
+          },
+          "503": {
+            "description": "Database unreachable"
+          }
+        },
+        "summary": "Readiness probe (database reachable)",
+        "tags": [
+          "health"
+        ]
+      }
+    }
+  },
+  "info": {
+    "title": "SmartEstate API",
+    "description": "AI-assisted apartment search and buying advisor for the Armenian market. All request and response shapes are defined once as Zod schemas in @smartestate/contracts; this document is generated from them.",
+    "version": "0.2.0",
+    "contact": {}
+  },
+  "tags": [],
+  "servers": [],
+  "components": {
+    "securitySchemes": {
+      "bearer": {
+        "scheme": "bearer",
+        "bearerFormat": "JWT",
+        "type": "http",
+        "description": "Short-lived access token"
+      },
+      "cookie": {
+        "type": "apiKey",
+        "in": "cookie",
+        "name": "smartestate_refresh"
+      }
+    },
+    "schemas": {
+      "RegisterBodyDto": {
+        "type": "object",
+        "properties": {
+          "email": {
+            "type": "string"
+          },
+          "password": {
+            "type": "string",
+            "minLength": 10,
+            "maxLength": 128
+          },
+          "displayName": {
+            "type": "string",
+            "minLength": 2,
+            "maxLength": 80
+          },
+          "locale": {
+            "default": "hy",
+            "type": "string",
+            "enum": [
+              "hy",
+              "ru",
+              "en"
+            ]
+          }
+        },
+        "required": [
+          "email",
+          "password",
+          "displayName"
+        ]
+      },
+      "AuthResponseDto": {
+        "type": "object",
+        "properties": {
+          "user": {
+            "type": "object",
+            "properties": {
+              "id": {
+                "type": "string",
+                "format": "uuid",
+                "pattern": "^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}|00000000-0000-0000-0000-000000000000|ffffffff-ffff-ffff-ffff-ffffffffffff)$"
+              },
+              "email": {
+                "type": "string"
+              },
+              "role": {
+                "type": "string",
+                "enum": [
+                  "USER",
+                  "AGENT",
+                  "MODERATOR",
+                  "ADMIN"
+                ]
+              },
+              "locale": {
+                "type": "string",
+                "enum": [
+                  "hy",
+                  "ru",
+                  "en"
+                ]
+              },
+              "displayName": {
+                "type": "string"
+              },
+              "createdAt": {
+                "type": "string",
+                "format": "date-time",
+                "pattern": "^(?:(?:\\d\\d[2468][048]|\\d\\d[13579][26]|\\d\\d0[48]|[02468][048]00|[13579][26]00)-02-29|\\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\\d|30)|(?:02)-(?:0[1-9]|1\\d|2[0-8])))T(?:(?:[01]\\d|2[0-3]):[0-5]\\d:[0-5]\\d(?:\\.\\d+)?(?:Z|([+-](?:[01]\\d|2[0-3]):[0-5]\\d)))$"
+              }
+            },
+            "required": [
+              "id",
+              "email",
+              "role",
+              "locale",
+              "displayName",
+              "createdAt"
+            ],
+            "additionalProperties": false
+          },
+          "accessToken": {
+            "type": "string"
+          },
+          "tokenType": {
+            "type": "string",
+            "enum": [
+              "Bearer"
+            ]
+          },
+          "expiresIn": {
+            "type": "integer",
+            "minimum": 0,
+            "exclusiveMinimum": true,
+            "maximum": 9007199254740991
+          }
+        },
+        "required": [
+          "user",
+          "accessToken",
+          "tokenType",
+          "expiresIn"
+        ],
+        "additionalProperties": false
+      },
+      "LoginBodyDto": {
+        "type": "object",
+        "properties": {
+          "email": {
+            "type": "string"
+          },
+          "password": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 128
+          }
+        },
+        "required": [
+          "email",
+          "password"
+        ]
+      },
+      "MeResponseDto": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid",
+            "pattern": "^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}|00000000-0000-0000-0000-000000000000|ffffffff-ffff-ffff-ffff-ffffffffffff)$"
+          },
+          "email": {
+            "type": "string"
+          },
+          "role": {
+            "type": "string",
+            "enum": [
+              "USER",
+              "AGENT",
+              "MODERATOR",
+              "ADMIN"
+            ]
+          },
+          "locale": {
+            "type": "string",
+            "enum": [
+              "hy",
+              "ru",
+              "en"
+            ]
+          },
+          "displayName": {
+            "type": "string"
+          },
+          "createdAt": {
+            "type": "string",
+            "format": "date-time",
+            "pattern": "^(?:(?:\\d\\d[2468][048]|\\d\\d[13579][26]|\\d\\d0[48]|[02468][048]00|[13579][26]00)-02-29|\\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\\d|30)|(?:02)-(?:0[1-9]|1\\d|2[0-8])))T(?:(?:[01]\\d|2[0-3]):[0-5]\\d:[0-5]\\d(?:\\.\\d+)?(?:Z|([+-](?:[01]\\d|2[0-3]):[0-5]\\d)))$"
+          },
+          "profile": {
+            "nullable": true,
+            "type": "object",
+            "properties": {
+              "displayName": {
+                "type": "string"
+              },
+              "phone": {
+                "nullable": true,
+                "type": "string"
+              },
+              "budgetMinAmd": {
+                "nullable": true,
+                "type": "integer",
+                "minimum": 0,
+                "maximum": 9007199254740991
+              },
+              "budgetMaxAmd": {
+                "nullable": true,
+                "type": "integer",
+                "minimum": 0,
+                "maximum": 9007199254740991
+              },
+              "preferredRooms": {
+                "type": "array",
+                "items": {
+                  "type": "integer",
+                  "minimum": -9007199254740991,
+                  "maximum": 9007199254740991
+                }
+              },
+              "priorities": {
+                "type": "object",
+                "additionalProperties": {
+                  "type": "number",
+                  "minimum": 0,
+                  "maximum": 1
+                }
+              },
+              "commuteAnchor": {
+                "nullable": true,
+                "type": "object",
+                "properties": {
+                  "lat": {
+                    "type": "number",
+                    "minimum": -90,
+                    "maximum": 90
+                  },
+                  "lon": {
+                    "type": "number",
+                    "minimum": -180,
+                    "maximum": 180
+                  },
+                  "label": {
+                    "type": "string",
+                    "minLength": 1,
+                    "maxLength": 120
+                  }
+                },
+                "required": [
+                  "lat",
+                  "lon",
+                  "label"
+                ],
+                "additionalProperties": false
+              },
+              "onboardingCompletedAt": {
+                "nullable": true,
+                "type": "string",
+                "format": "date-time",
+                "pattern": "^(?:(?:\\d\\d[2468][048]|\\d\\d[13579][26]|\\d\\d0[48]|[02468][048]00|[13579][26]00)-02-29|\\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\\d|30)|(?:02)-(?:0[1-9]|1\\d|2[0-8])))T(?:(?:[01]\\d|2[0-3]):[0-5]\\d:[0-5]\\d(?:\\.\\d+)?(?:Z|([+-](?:[01]\\d|2[0-3]):[0-5]\\d)))$"
+              }
+            },
+            "required": [
+              "displayName",
+              "phone",
+              "budgetMinAmd",
+              "budgetMaxAmd",
+              "preferredRooms",
+              "priorities",
+              "commuteAnchor",
+              "onboardingCompletedAt"
+            ],
+            "additionalProperties": false
+          }
+        },
+        "required": [
+          "id",
+          "email",
+          "role",
+          "locale",
+          "displayName",
+          "createdAt",
+          "profile"
+        ],
+        "additionalProperties": false
+      },
+      "UpdateMeBodyDto": {
+        "type": "object",
+        "properties": {
+          "displayName": {
+            "type": "string",
+            "minLength": 2,
+            "maxLength": 80
+          },
+          "phone": {
+            "nullable": true,
+            "type": "string",
+            "pattern": "^\\+?[1-9][0-9]{7,14}$"
+          },
+          "locale": {
+            "type": "string",
+            "enum": [
+              "hy",
+              "ru",
+              "en"
+            ]
+          }
+        }
+      },
+      "PreferencesBodyDto": {
+        "type": "object",
+        "properties": {
+          "budgetMinAmd": {
+            "nullable": true,
+            "type": "integer",
+            "minimum": 0,
+            "maximum": 9007199254740991
+          },
+          "budgetMaxAmd": {
+            "nullable": true,
+            "type": "integer",
+            "minimum": 0,
+            "maximum": 9007199254740991
+          },
+          "preferredRooms": {
+            "maxItems": 10,
+            "type": "array",
+            "items": {
+              "type": "integer",
+              "minimum": 1,
+              "maximum": 10
+            }
+          },
+          "priorities": {
+            "type": "object",
+            "additionalProperties": {
+              "type": "number",
+              "minimum": 0,
+              "maximum": 1
+            }
+          },
+          "commuteAnchor": {
+            "nullable": true,
+            "type": "object",
+            "properties": {
+              "lat": {
+                "type": "number",
+                "minimum": -90,
+                "maximum": 90
+              },
+              "lon": {
+                "type": "number",
+                "minimum": -180,
+                "maximum": 180
+              },
+              "label": {
+                "type": "string",
+                "minLength": 1,
+                "maxLength": 120
+              }
+            },
+            "required": [
+              "lat",
+              "lon",
+              "label"
+            ]
+          }
+        },
+        "required": [
+          "budgetMinAmd",
+          "budgetMaxAmd",
+          "preferredRooms",
+          "priorities",
+          "commuteAnchor"
+        ]
+      },
+      "AdminUsersPageDto": {
+        "type": "object",
+        "properties": {
+          "items": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "id": {
+                  "type": "string",
+                  "format": "uuid",
+                  "pattern": "^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}|00000000-0000-0000-0000-000000000000|ffffffff-ffff-ffff-ffff-ffffffffffff)$"
+                },
+                "email": {
+                  "type": "string"
+                },
+                "role": {
+                  "type": "string",
+                  "enum": [
+                    "USER",
+                    "AGENT",
+                    "MODERATOR",
+                    "ADMIN"
+                  ]
+                },
+                "locale": {
+                  "type": "string",
+                  "enum": [
+                    "hy",
+                    "ru",
+                    "en"
+                  ]
+                },
+                "displayName": {
+                  "type": "string"
+                },
+                "createdAt": {
+                  "type": "string",
+                  "format": "date-time",
+                  "pattern": "^(?:(?:\\d\\d[2468][048]|\\d\\d[13579][26]|\\d\\d0[48]|[02468][048]00|[13579][26]00)-02-29|\\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\\d|30)|(?:02)-(?:0[1-9]|1\\d|2[0-8])))T(?:(?:[01]\\d|2[0-3]):[0-5]\\d:[0-5]\\d(?:\\.\\d+)?(?:Z|([+-](?:[01]\\d|2[0-3]):[0-5]\\d)))$"
+                },
+                "isActive": {
+                  "type": "boolean"
+                },
+                "updatedAt": {
+                  "type": "string",
+                  "format": "date-time",
+                  "pattern": "^(?:(?:\\d\\d[2468][048]|\\d\\d[13579][26]|\\d\\d0[48]|[02468][048]00|[13579][26]00)-02-29|\\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\\d|30)|(?:02)-(?:0[1-9]|1\\d|2[0-8])))T(?:(?:[01]\\d|2[0-3]):[0-5]\\d:[0-5]\\d(?:\\.\\d+)?(?:Z|([+-](?:[01]\\d|2[0-3]):[0-5]\\d)))$"
+                }
+              },
+              "required": [
+                "id",
+                "email",
+                "role",
+                "locale",
+                "displayName",
+                "createdAt",
+                "isActive",
+                "updatedAt"
+              ],
+              "additionalProperties": false
+            }
+          },
+          "nextCursor": {
+            "nullable": true,
+            "type": "string"
+          }
+        },
+        "required": [
+          "items",
+          "nextCursor"
+        ],
+        "additionalProperties": false
+      },
+      "UpdateUserRoleBodyDto": {
+        "type": "object",
+        "properties": {
+          "role": {
+            "type": "string",
+            "enum": [
+              "USER",
+              "AGENT",
+              "MODERATOR",
+              "ADMIN"
+            ]
+          }
+        },
+        "required": [
+          "role"
+        ]
+      },
+      "AdminUserDto": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid",
+            "pattern": "^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}|00000000-0000-0000-0000-000000000000|ffffffff-ffff-ffff-ffff-ffffffffffff)$"
+          },
+          "email": {
+            "type": "string"
+          },
+          "role": {
+            "type": "string",
+            "enum": [
+              "USER",
+              "AGENT",
+              "MODERATOR",
+              "ADMIN"
+            ]
+          },
+          "locale": {
+            "type": "string",
+            "enum": [
+              "hy",
+              "ru",
+              "en"
+            ]
+          },
+          "displayName": {
+            "type": "string"
+          },
+          "createdAt": {
+            "type": "string",
+            "format": "date-time",
+            "pattern": "^(?:(?:\\d\\d[2468][048]|\\d\\d[13579][26]|\\d\\d0[48]|[02468][048]00|[13579][26]00)-02-29|\\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\\d|30)|(?:02)-(?:0[1-9]|1\\d|2[0-8])))T(?:(?:[01]\\d|2[0-3]):[0-5]\\d:[0-5]\\d(?:\\.\\d+)?(?:Z|([+-](?:[01]\\d|2[0-3]):[0-5]\\d)))$"
+          },
+          "isActive": {
+            "type": "boolean"
+          },
+          "updatedAt": {
+            "type": "string",
+            "format": "date-time",
+            "pattern": "^(?:(?:\\d\\d[2468][048]|\\d\\d[13579][26]|\\d\\d0[48]|[02468][048]00|[13579][26]00)-02-29|\\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\\d|30)|(?:02)-(?:0[1-9]|1\\d|2[0-8])))T(?:(?:[01]\\d|2[0-3]):[0-5]\\d:[0-5]\\d(?:\\.\\d+)?(?:Z|([+-](?:[01]\\d|2[0-3]):[0-5]\\d)))$"
+          }
+        },
+        "required": [
+          "id",
+          "email",
+          "role",
+          "locale",
+          "displayName",
+          "createdAt",
+          "isActive",
+          "updatedAt"
+        ],
+        "additionalProperties": false
+      },
+      "DistrictDto": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid",
+            "pattern": "^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}|00000000-0000-0000-0000-000000000000|ffffffff-ffff-ffff-ffff-ffffffffffff)$"
+          },
+          "slug": {
+            "type": "string",
+            "pattern": "^[a-z][a-z0-9-]{1,40}$"
+          },
+          "kind": {
+            "type": "string",
+            "enum": [
+              "CITY_DISTRICT",
+              "TOWN"
+            ]
+          },
+          "name": {
+            "type": "object",
+            "properties": {
+              "hy": {
+                "type": "string"
+              },
+              "ru": {
+                "type": "string"
+              },
+              "en": {
+                "type": "string"
+              }
+            },
+            "required": [
+              "hy",
+              "ru",
+              "en"
+            ],
+            "additionalProperties": false
+          },
+          "city": {
+            "type": "string"
+          },
+          "marz": {
+            "type": "string"
+          },
+          "centroid": {
+            "type": "object",
+            "properties": {
+              "lat": {
+                "type": "number",
+                "minimum": -90,
+                "maximum": 90
+              },
+              "lon": {
+                "type": "number",
+                "minimum": -180,
+                "maximum": 180
+              }
+            },
+            "required": [
+              "lat",
+              "lon"
+            ],
+            "additionalProperties": false
+          }
+        },
+        "required": [
+          "id",
+          "slug",
+          "kind",
+          "name",
+          "city",
+          "marz",
+          "centroid"
+        ],
+        "additionalProperties": false
+      },
+      "DistrictBoundaryResponseDto": {
+        "type": "object",
+        "properties": {
+          "slug": {
+            "type": "string",
+            "pattern": "^[a-z][a-z0-9-]{1,40}$"
+          },
+          "boundary": {
+            "type": "object",
+            "properties": {
+              "type": {
+                "type": "string",
+                "enum": [
+                  "MultiPolygon"
+                ]
+              },
+              "coordinates": {
+                "minItems": 1,
+                "type": "array",
+                "items": {
+                  "minItems": 1,
+                  "type": "array",
+                  "items": {
+                    "minItems": 4,
+                    "type": "array",
+                    "items": {
+                      "type": "array",
+                      "items": {
+                        "anyOf": [
+                          {
+                            "type": "number"
+                          },
+                          {
+                            "type": "number"
+                          }
+                        ]
+                      },
+                      "minItems": 2,
+                      "maxItems": 2
+                    }
+                  }
+                }
+              }
+            },
+            "required": [
+              "type",
+              "coordinates"
+            ],
+            "additionalProperties": false
+          }
+        },
+        "required": [
+          "slug",
+          "boundary"
+        ],
+        "additionalProperties": false
+      },
+      "ListingsPageDto": {
+        "type": "object",
+        "properties": {
+          "items": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "id": {
+                  "type": "string",
+                  "format": "uuid",
+                  "pattern": "^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}|00000000-0000-0000-0000-000000000000|ffffffff-ffff-ffff-ffff-ffffffffffff)$"
+                },
+                "publicId": {
+                  "type": "string",
+                  "pattern": "^L-[A-HJ-NP-Z2-9]{6}$"
+                },
+                "status": {
+                  "type": "string",
+                  "enum": [
+                    "DRAFT",
+                    "ACTIVE",
+                    "RESERVED",
+                    "SOLD",
+                    "WITHDRAWN"
+                  ]
+                },
+                "locale": {
+                  "type": "string",
+                  "enum": [
+                    "hy",
+                    "ru",
+                    "en"
+                  ]
+                },
+                "title": {
+                  "type": "string"
+                },
+                "priceAmd": {
+                  "type": "integer",
+                  "minimum": 0,
+                  "maximum": 9007199254740991
+                },
+                "pricePerSqmAmd": {
+                  "type": "integer",
+                  "minimum": 0,
+                  "maximum": 9007199254740991
+                },
+                "originalCurrency": {
+                  "type": "string",
+                  "enum": [
+                    "AMD",
+                    "USD",
+                    "EUR"
+                  ]
+                },
+                "originalPrice": {
+                  "nullable": true,
+                  "type": "number"
+                },
+                "priceNegotiable": {
+                  "type": "boolean"
+                },
+                "rooms": {
+                  "type": "integer",
+                  "minimum": -9007199254740991,
+                  "maximum": 9007199254740991
+                },
+                "totalArea": {
+                  "type": "number"
+                },
+                "floor": {
+                  "type": "integer",
+                  "minimum": -9007199254740991,
+                  "maximum": 9007199254740991
+                },
+                "totalFloors": {
+                  "type": "integer",
+                  "minimum": -9007199254740991,
+                  "maximum": 9007199254740991
+                },
+                "buildingType": {
+                  "type": "string",
+                  "enum": [
+                    "STONE",
+                    "PANEL",
+                    "MONOLITH",
+                    "KHRUSHCHYOVKA",
+                    "STALINKA",
+                    "NEW_BUILD"
+                  ]
+                },
+                "condition": {
+                  "type": "string",
+                  "enum": [
+                    "NEEDS_REPAIR",
+                    "OLD_RENOVATION",
+                    "GOOD",
+                    "EURO_RENOVATION",
+                    "DESIGNER"
+                  ]
+                },
+                "district": {
+                  "type": "object",
+                  "properties": {
+                    "slug": {
+                      "type": "string",
+                      "pattern": "^[a-z][a-z0-9-]{1,40}$"
+                    },
+                    "name": {
+                      "type": "object",
+                      "properties": {
+                        "hy": {
+                          "type": "string"
+                        },
+                        "ru": {
+                          "type": "string"
+                        },
+                        "en": {
+                          "type": "string"
+                        }
+                      },
+                      "required": [
+                        "hy",
+                        "ru",
+                        "en"
+                      ],
+                      "additionalProperties": false
+                    }
+                  },
+                  "required": [
+                    "slug",
+                    "name"
+                  ],
+                  "additionalProperties": false
+                },
+                "location": {
+                  "type": "object",
+                  "properties": {
+                    "lat": {
+                      "type": "number",
+                      "minimum": -90,
+                      "maximum": 90
+                    },
+                    "lon": {
+                      "type": "number",
+                      "minimum": -180,
+                      "maximum": 180
+                    }
+                  },
+                  "required": [
+                    "lat",
+                    "lon"
+                  ],
+                  "additionalProperties": false
+                },
+                "thumbnailUrl": {
+                  "nullable": true,
+                  "type": "string",
+                  "format": "uri"
+                },
+                "publishedAt": {
+                  "type": "string",
+                  "format": "date-time",
+                  "pattern": "^(?:(?:\\d\\d[2468][048]|\\d\\d[13579][26]|\\d\\d0[48]|[02468][048]00|[13579][26]00)-02-29|\\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\\d|30)|(?:02)-(?:0[1-9]|1\\d|2[0-8])))T(?:(?:[01]\\d|2[0-3]):[0-5]\\d:[0-5]\\d(?:\\.\\d+)?(?:Z|([+-](?:[01]\\d|2[0-3]):[0-5]\\d)))$"
+                }
+              },
+              "required": [
+                "id",
+                "publicId",
+                "status",
+                "locale",
+                "title",
+                "priceAmd",
+                "pricePerSqmAmd",
+                "originalCurrency",
+                "originalPrice",
+                "priceNegotiable",
+                "rooms",
+                "totalArea",
+                "floor",
+                "totalFloors",
+                "buildingType",
+                "condition",
+                "district",
+                "location",
+                "thumbnailUrl",
+                "publishedAt"
+              ],
+              "additionalProperties": false
+            }
+          },
+          "nextCursor": {
+            "nullable": true,
+            "type": "string"
+          }
+        },
+        "required": [
+          "items",
+          "nextCursor"
+        ],
+        "additionalProperties": false
+      },
+      "ListingDetailDto": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid",
+            "pattern": "^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}|00000000-0000-0000-0000-000000000000|ffffffff-ffff-ffff-ffff-ffffffffffff)$"
+          },
+          "publicId": {
+            "type": "string",
+            "pattern": "^L-[A-HJ-NP-Z2-9]{6}$"
+          },
+          "status": {
+            "type": "string",
+            "enum": [
+              "DRAFT",
+              "ACTIVE",
+              "RESERVED",
+              "SOLD",
+              "WITHDRAWN"
+            ]
+          },
+          "locale": {
+            "type": "string",
+            "enum": [
+              "hy",
+              "ru",
+              "en"
+            ]
+          },
+          "title": {
+            "type": "string"
+          },
+          "priceAmd": {
+            "type": "integer",
+            "minimum": 0,
+            "maximum": 9007199254740991
+          },
+          "pricePerSqmAmd": {
+            "type": "integer",
+            "minimum": 0,
+            "maximum": 9007199254740991
+          },
+          "originalCurrency": {
+            "type": "string",
+            "enum": [
+              "AMD",
+              "USD",
+              "EUR"
+            ]
+          },
+          "originalPrice": {
+            "nullable": true,
+            "type": "number"
+          },
+          "priceNegotiable": {
+            "type": "boolean"
+          },
+          "rooms": {
+            "type": "integer",
+            "minimum": -9007199254740991,
+            "maximum": 9007199254740991
+          },
+          "totalArea": {
+            "type": "number"
+          },
+          "floor": {
+            "type": "integer",
+            "minimum": -9007199254740991,
+            "maximum": 9007199254740991
+          },
+          "totalFloors": {
+            "type": "integer",
+            "minimum": -9007199254740991,
+            "maximum": 9007199254740991
+          },
+          "buildingType": {
+            "type": "string",
+            "enum": [
+              "STONE",
+              "PANEL",
+              "MONOLITH",
+              "KHRUSHCHYOVKA",
+              "STALINKA",
+              "NEW_BUILD"
+            ]
+          },
+          "condition": {
+            "type": "string",
+            "enum": [
+              "NEEDS_REPAIR",
+              "OLD_RENOVATION",
+              "GOOD",
+              "EURO_RENOVATION",
+              "DESIGNER"
+            ]
+          },
+          "district": {
+            "type": "object",
+            "properties": {
+              "slug": {
+                "type": "string",
+                "pattern": "^[a-z][a-z0-9-]{1,40}$"
+              },
+              "name": {
+                "type": "object",
+                "properties": {
+                  "hy": {
+                    "type": "string"
+                  },
+                  "ru": {
+                    "type": "string"
+                  },
+                  "en": {
+                    "type": "string"
+                  }
+                },
+                "required": [
+                  "hy",
+                  "ru",
+                  "en"
+                ],
+                "additionalProperties": false
+              }
+            },
+            "required": [
+              "slug",
+              "name"
+            ],
+            "additionalProperties": false
+          },
+          "location": {
+            "type": "object",
+            "properties": {
+              "lat": {
+                "type": "number",
+                "minimum": -90,
+                "maximum": 90
+              },
+              "lon": {
+                "type": "number",
+                "minimum": -180,
+                "maximum": 180
+              }
+            },
+            "required": [
+              "lat",
+              "lon"
+            ],
+            "additionalProperties": false
+          },
+          "thumbnailUrl": {
+            "nullable": true,
+            "type": "string",
+            "format": "uri"
+          },
+          "publishedAt": {
+            "type": "string",
+            "format": "date-time",
+            "pattern": "^(?:(?:\\d\\d[2468][048]|\\d\\d[13579][26]|\\d\\d0[48]|[02468][048]00|[13579][26]00)-02-29|\\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\\d|30)|(?:02)-(?:0[1-9]|1\\d|2[0-8])))T(?:(?:[01]\\d|2[0-3]):[0-5]\\d:[0-5]\\d(?:\\.\\d+)?(?:Z|([+-](?:[01]\\d|2[0-3]):[0-5]\\d)))$"
+          },
+          "description": {
+            "type": "string"
+          },
+          "livingArea": {
+            "nullable": true,
+            "type": "number"
+          },
+          "kitchenArea": {
+            "nullable": true,
+            "type": "number"
+          },
+          "bathrooms": {
+            "type": "integer",
+            "minimum": -9007199254740991,
+            "maximum": 9007199254740991
+          },
+          "ceilingHeight": {
+            "nullable": true,
+            "type": "number"
+          },
+          "balconyCount": {
+            "type": "integer",
+            "minimum": -9007199254740991,
+            "maximum": 9007199254740991
+          },
+          "hasLoggia": {
+            "type": "boolean"
+          },
+          "hasParking": {
+            "type": "boolean"
+          },
+          "hasStorage": {
+            "type": "boolean"
+          },
+          "heating": {
+            "type": "string",
+            "enum": [
+              "CENTRAL_GAS",
+              "INDIVIDUAL_GAS_BOILER",
+              "ELECTRIC",
+              "NONE"
+            ]
+          },
+          "ownershipDocs": {
+            "type": "string",
+            "enum": [
+              "VERIFIED",
+              "UNVERIFIED"
+            ]
+          },
+          "building": {
+            "type": "object",
+            "properties": {
+              "id": {
+                "type": "string",
+                "format": "uuid",
+                "pattern": "^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}|00000000-0000-0000-0000-000000000000|ffffffff-ffff-ffff-ffff-ffffffffffff)$"
+              },
+              "districtId": {
+                "type": "string",
+                "format": "uuid",
+                "pattern": "^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}|00000000-0000-0000-0000-000000000000|ffffffff-ffff-ffff-ffff-ffffffffffff)$"
+              },
+              "addressLine": {
+                "type": "string"
+              },
+              "street": {
+                "type": "object",
+                "properties": {
+                  "hy": {
+                    "type": "string"
+                  },
+                  "ru": {
+                    "type": "string"
+                  },
+                  "en": {
+                    "type": "string"
+                  }
+                },
+                "required": [
+                  "hy",
+                  "ru",
+                  "en"
+                ],
+                "additionalProperties": false
+              },
+              "houseNumber": {
+                "type": "string"
+              },
+              "buildingType": {
+                "type": "string",
+                "enum": [
+                  "STONE",
+                  "PANEL",
+                  "MONOLITH",
+                  "KHRUSHCHYOVKA",
+                  "STALINKA",
+                  "NEW_BUILD"
+                ]
+              },
+              "constructionYear": {
+                "type": "integer",
+                "minimum": -9007199254740991,
+                "maximum": 9007199254740991
+              },
+              "totalFloors": {
+                "type": "integer",
+                "minimum": -9007199254740991,
+                "maximum": 9007199254740991
+              },
+              "hasElevator": {
+                "type": "boolean"
+              },
+              "seismicRetrofit": {
+                "type": "boolean"
+              },
+              "location": {
+                "type": "object",
+                "properties": {
+                  "lat": {
+                    "type": "number",
+                    "minimum": -90,
+                    "maximum": 90
+                  },
+                  "lon": {
+                    "type": "number",
+                    "minimum": -180,
+                    "maximum": 180
+                  }
+                },
+                "required": [
+                  "lat",
+                  "lon"
+                ],
+                "additionalProperties": false
+              }
+            },
+            "required": [
+              "id",
+              "districtId",
+              "addressLine",
+              "street",
+              "houseNumber",
+              "buildingType",
+              "constructionYear",
+              "totalFloors",
+              "hasElevator",
+              "seismicRetrofit",
+              "location"
+            ],
+            "additionalProperties": false
+          },
+          "media": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "id": {
+                  "type": "string",
+                  "format": "uuid",
+                  "pattern": "^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}|00000000-0000-0000-0000-000000000000|ffffffff-ffff-ffff-ffff-ffffffffffff)$"
+                },
+                "kind": {
+                  "type": "string",
+                  "enum": [
+                    "PHOTO",
+                    "FLOOR_PLAN",
+                    "VIDEO"
+                  ]
+                },
+                "url": {
+                  "type": "string",
+                  "format": "uri"
+                },
+                "width": {
+                  "nullable": true,
+                  "type": "integer",
+                  "minimum": -9007199254740991,
+                  "maximum": 9007199254740991
+                },
+                "height": {
+                  "nullable": true,
+                  "type": "integer",
+                  "minimum": -9007199254740991,
+                  "maximum": 9007199254740991
+                },
+                "sortOrder": {
+                  "type": "integer",
+                  "minimum": -9007199254740991,
+                  "maximum": 9007199254740991
+                },
+                "isPlaceholder": {
+                  "type": "boolean"
+                }
+              },
+              "required": [
+                "id",
+                "kind",
+                "url",
+                "width",
+                "height",
+                "sortOrder",
+                "isPlaceholder"
+              ],
+              "additionalProperties": false
+            }
+          },
+          "translations": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "locale": {
+                  "type": "string",
+                  "enum": [
+                    "hy",
+                    "ru",
+                    "en"
+                  ]
+                },
+                "title": {
+                  "type": "string",
+                  "minLength": 3,
+                  "maxLength": 160
+                },
+                "description": {
+                  "type": "string",
+                  "minLength": 10,
+                  "maxLength": 5000
+                },
+                "isMachineTranslated": {
+                  "type": "boolean"
+                }
+              },
+              "required": [
+                "locale",
+                "title",
+                "description",
+                "isMachineTranslated"
+              ],
+              "additionalProperties": false
+            }
+          },
+          "priceHistory": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "priceAmd": {
+                  "type": "integer",
+                  "minimum": 0,
+                  "maximum": 9007199254740991
+                },
+                "recordedAt": {
+                  "type": "string",
+                  "format": "date-time",
+                  "pattern": "^(?:(?:\\d\\d[2468][048]|\\d\\d[13579][26]|\\d\\d0[48]|[02468][048]00|[13579][26]00)-02-29|\\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\\d|30)|(?:02)-(?:0[1-9]|1\\d|2[0-8])))T(?:(?:[01]\\d|2[0-3]):[0-5]\\d:[0-5]\\d(?:\\.\\d+)?(?:Z|([+-](?:[01]\\d|2[0-3]):[0-5]\\d)))$"
+                }
+              },
+              "required": [
+                "priceAmd",
+                "recordedAt"
+              ],
+              "additionalProperties": false
+            }
+          },
+          "createdById": {
+            "nullable": true,
+            "type": "string",
+            "format": "uuid",
+            "pattern": "^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}|00000000-0000-0000-0000-000000000000|ffffffff-ffff-ffff-ffff-ffffffffffff)$"
+          },
+          "createdAt": {
+            "type": "string",
+            "format": "date-time",
+            "pattern": "^(?:(?:\\d\\d[2468][048]|\\d\\d[13579][26]|\\d\\d0[48]|[02468][048]00|[13579][26]00)-02-29|\\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\\d|30)|(?:02)-(?:0[1-9]|1\\d|2[0-8])))T(?:(?:[01]\\d|2[0-3]):[0-5]\\d:[0-5]\\d(?:\\.\\d+)?(?:Z|([+-](?:[01]\\d|2[0-3]):[0-5]\\d)))$"
+          },
+          "updatedAt": {
+            "type": "string",
+            "format": "date-time",
+            "pattern": "^(?:(?:\\d\\d[2468][048]|\\d\\d[13579][26]|\\d\\d0[48]|[02468][048]00|[13579][26]00)-02-29|\\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\\d|30)|(?:02)-(?:0[1-9]|1\\d|2[0-8])))T(?:(?:[01]\\d|2[0-3]):[0-5]\\d:[0-5]\\d(?:\\.\\d+)?(?:Z|([+-](?:[01]\\d|2[0-3]):[0-5]\\d)))$"
+          }
+        },
+        "required": [
+          "id",
+          "publicId",
+          "status",
+          "locale",
+          "title",
+          "priceAmd",
+          "pricePerSqmAmd",
+          "originalCurrency",
+          "originalPrice",
+          "priceNegotiable",
+          "rooms",
+          "totalArea",
+          "floor",
+          "totalFloors",
+          "buildingType",
+          "condition",
+          "district",
+          "location",
+          "thumbnailUrl",
+          "publishedAt",
+          "description",
+          "livingArea",
+          "kitchenArea",
+          "bathrooms",
+          "ceilingHeight",
+          "balconyCount",
+          "hasLoggia",
+          "hasParking",
+          "hasStorage",
+          "heating",
+          "ownershipDocs",
+          "building",
+          "media",
+          "translations",
+          "priceHistory",
+          "createdById",
+          "createdAt",
+          "updatedAt"
+        ],
+        "additionalProperties": false
+      },
+      "CreateListingBodyDto": {
+        "type": "object",
+        "properties": {
+          "priceAmd": {
+            "type": "integer",
+            "minimum": 1,
+            "maximum": 9007199254740991
+          },
+          "priceNegotiable": {
+            "default": false,
+            "type": "boolean"
+          },
+          "originalCurrency": {
+            "default": "AMD",
+            "type": "string",
+            "enum": [
+              "AMD",
+              "USD",
+              "EUR"
+            ]
+          },
+          "originalPrice": {
+            "default": null,
+            "nullable": true,
+            "type": "number",
+            "minimum": 0,
+            "exclusiveMinimum": true
+          },
+          "totalArea": {
+            "type": "number",
+            "minimum": 10,
+            "maximum": 1000
+          },
+          "livingArea": {
+            "default": null,
+            "nullable": true,
+            "type": "number",
+            "minimum": 5,
+            "maximum": 1000
+          },
+          "kitchenArea": {
+            "default": null,
+            "nullable": true,
+            "type": "number",
+            "minimum": 2,
+            "maximum": 200
+          },
+          "rooms": {
+            "type": "integer",
+            "minimum": 1,
+            "maximum": 10
+          },
+          "bathrooms": {
+            "default": 1,
+            "type": "integer",
+            "minimum": 1,
+            "maximum": 5
+          },
+          "ceilingHeight": {
+            "default": null,
+            "nullable": true,
+            "type": "number",
+            "minimum": 2,
+            "maximum": 5
+          },
+          "floor": {
+            "type": "integer",
+            "minimum": 1,
+            "maximum": 60
+          },
+          "balconyCount": {
+            "default": 0,
+            "type": "integer",
+            "minimum": 0,
+            "maximum": 5
+          },
+          "hasLoggia": {
+            "default": false,
+            "type": "boolean"
+          },
+          "hasParking": {
+            "default": false,
+            "type": "boolean"
+          },
+          "hasStorage": {
+            "default": false,
+            "type": "boolean"
+          },
+          "condition": {
+            "type": "string",
+            "enum": [
+              "NEEDS_REPAIR",
+              "OLD_RENOVATION",
+              "GOOD",
+              "EURO_RENOVATION",
+              "DESIGNER"
+            ]
+          },
+          "heating": {
+            "type": "string",
+            "enum": [
+              "CENTRAL_GAS",
+              "INDIVIDUAL_GAS_BOILER",
+              "ELECTRIC",
+              "NONE"
+            ]
+          },
+          "ownershipDocs": {
+            "default": "UNVERIFIED",
+            "type": "string",
+            "enum": [
+              "VERIFIED",
+              "UNVERIFIED"
+            ]
+          },
+          "buildingId": {
+            "type": "string",
+            "format": "uuid",
+            "pattern": "^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}|00000000-0000-0000-0000-000000000000|ffffffff-ffff-ffff-ffff-ffffffffffff)$"
+          },
+          "translations": {
+            "minItems": 1,
+            "maxItems": 3,
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "locale": {
+                  "type": "string",
+                  "enum": [
+                    "hy",
+                    "ru",
+                    "en"
+                  ]
+                },
+                "title": {
+                  "type": "string",
+                  "minLength": 3,
+                  "maxLength": 160
+                },
+                "description": {
+                  "type": "string",
+                  "minLength": 10,
+                  "maxLength": 5000
+                }
+              },
+              "required": [
+                "locale",
+                "title",
+                "description"
+              ]
+            }
+          }
+        },
+        "required": [
+          "priceAmd",
+          "totalArea",
+          "rooms",
+          "floor",
+          "condition",
+          "heating",
+          "buildingId",
+          "translations"
+        ]
+      },
+      "UpdateListingBodyDto": {
+        "type": "object",
+        "properties": {
+          "priceAmd": {
+            "type": "integer",
+            "minimum": 1,
+            "maximum": 9007199254740991
+          },
+          "priceNegotiable": {
+            "type": "boolean"
+          },
+          "originalCurrency": {
+            "type": "string",
+            "enum": [
+              "AMD",
+              "USD",
+              "EUR"
+            ]
+          },
+          "originalPrice": {
+            "nullable": true,
+            "type": "number",
+            "minimum": 0,
+            "exclusiveMinimum": true
+          },
+          "totalArea": {
+            "type": "number",
+            "minimum": 10,
+            "maximum": 1000
+          },
+          "livingArea": {
+            "nullable": true,
+            "type": "number",
+            "minimum": 5,
+            "maximum": 1000
+          },
+          "kitchenArea": {
+            "nullable": true,
+            "type": "number",
+            "minimum": 2,
+            "maximum": 200
+          },
+          "rooms": {
+            "type": "integer",
+            "minimum": 1,
+            "maximum": 10
+          },
+          "bathrooms": {
+            "type": "integer",
+            "minimum": 1,
+            "maximum": 5
+          },
+          "ceilingHeight": {
+            "nullable": true,
+            "type": "number",
+            "minimum": 2,
+            "maximum": 5
+          },
+          "floor": {
+            "type": "integer",
+            "minimum": 1,
+            "maximum": 60
+          },
+          "balconyCount": {
+            "type": "integer",
+            "minimum": 0,
+            "maximum": 5
+          },
+          "hasLoggia": {
+            "type": "boolean"
+          },
+          "hasParking": {
+            "type": "boolean"
+          },
+          "hasStorage": {
+            "type": "boolean"
+          },
+          "condition": {
+            "type": "string",
+            "enum": [
+              "NEEDS_REPAIR",
+              "OLD_RENOVATION",
+              "GOOD",
+              "EURO_RENOVATION",
+              "DESIGNER"
+            ]
+          },
+          "heating": {
+            "type": "string",
+            "enum": [
+              "CENTRAL_GAS",
+              "INDIVIDUAL_GAS_BOILER",
+              "ELECTRIC",
+              "NONE"
+            ]
+          },
+          "ownershipDocs": {
+            "type": "string",
+            "enum": [
+              "VERIFIED",
+              "UNVERIFIED"
+            ]
+          },
+          "status": {
+            "type": "string",
+            "enum": [
+              "DRAFT",
+              "ACTIVE",
+              "RESERVED",
+              "SOLD",
+              "WITHDRAWN"
+            ]
+          },
+          "translations": {
+            "minItems": 1,
+            "maxItems": 3,
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "locale": {
+                  "type": "string",
+                  "enum": [
+                    "hy",
+                    "ru",
+                    "en"
+                  ]
+                },
+                "title": {
+                  "type": "string",
+                  "minLength": 3,
+                  "maxLength": 160
+                },
+                "description": {
+                  "type": "string",
+                  "minLength": 10,
+                  "maxLength": 5000
+                }
+              },
+              "required": [
+                "locale",
+                "title",
+                "description"
+              ]
+            }
+          }
+        }
+      },
+      "BuildingDto": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid",
+            "pattern": "^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}|00000000-0000-0000-0000-000000000000|ffffffff-ffff-ffff-ffff-ffffffffffff)$"
+          },
+          "districtId": {
+            "type": "string",
+            "format": "uuid",
+            "pattern": "^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}|00000000-0000-0000-0000-000000000000|ffffffff-ffff-ffff-ffff-ffffffffffff)$"
+          },
+          "addressLine": {
+            "type": "string"
+          },
+          "street": {
+            "type": "object",
+            "properties": {
+              "hy": {
+                "type": "string"
+              },
+              "ru": {
+                "type": "string"
+              },
+              "en": {
+                "type": "string"
+              }
+            },
+            "required": [
+              "hy",
+              "ru",
+              "en"
+            ],
+            "additionalProperties": false
+          },
+          "houseNumber": {
+            "type": "string"
+          },
+          "buildingType": {
+            "type": "string",
+            "enum": [
+              "STONE",
+              "PANEL",
+              "MONOLITH",
+              "KHRUSHCHYOVKA",
+              "STALINKA",
+              "NEW_BUILD"
+            ]
+          },
+          "constructionYear": {
+            "type": "integer",
+            "minimum": -9007199254740991,
+            "maximum": 9007199254740991
+          },
+          "totalFloors": {
+            "type": "integer",
+            "minimum": -9007199254740991,
+            "maximum": 9007199254740991
+          },
+          "hasElevator": {
+            "type": "boolean"
+          },
+          "seismicRetrofit": {
+            "type": "boolean"
+          },
+          "location": {
+            "type": "object",
+            "properties": {
+              "lat": {
+                "type": "number",
+                "minimum": -90,
+                "maximum": 90
+              },
+              "lon": {
+                "type": "number",
+                "minimum": -180,
+                "maximum": 180
+              }
+            },
+            "required": [
+              "lat",
+              "lon"
+            ],
+            "additionalProperties": false
+          }
+        },
+        "required": [
+          "id",
+          "districtId",
+          "addressLine",
+          "street",
+          "houseNumber",
+          "buildingType",
+          "constructionYear",
+          "totalFloors",
+          "hasElevator",
+          "seismicRetrofit",
+          "location"
+        ],
+        "additionalProperties": false
+      },
+      "CreateBuildingBodyDto": {
+        "type": "object",
+        "properties": {
+          "street": {
+            "type": "object",
+            "properties": {
+              "hy": {
+                "type": "string",
+                "minLength": 1,
+                "maxLength": 120
+              },
+              "ru": {
+                "type": "string",
+                "minLength": 1,
+                "maxLength": 120
+              },
+              "en": {
+                "type": "string",
+                "minLength": 1,
+                "maxLength": 120
+              }
+            },
+            "required": [
+              "hy",
+              "ru",
+              "en"
+            ]
+          },
+          "houseNumber": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 20
+          },
+          "buildingType": {
+            "type": "string",
+            "enum": [
+              "STONE",
+              "PANEL",
+              "MONOLITH",
+              "KHRUSHCHYOVKA",
+              "STALINKA",
+              "NEW_BUILD"
+            ]
+          },
+          "constructionYear": {
+            "type": "integer",
+            "minimum": 1850,
+            "maximum": 2029
+          },
+          "totalFloors": {
+            "type": "integer",
+            "minimum": 1,
+            "maximum": 60
+          },
+          "hasElevator": {
+            "type": "boolean"
+          },
+          "seismicRetrofit": {
+            "default": false,
+            "type": "boolean"
+          },
+          "location": {
+            "type": "object",
+            "properties": {
+              "lat": {
+                "type": "number",
+                "minimum": -90,
+                "maximum": 90
+              },
+              "lon": {
+                "type": "number",
+                "minimum": -180,
+                "maximum": 180
+              }
+            },
+            "required": [
+              "lat",
+              "lon"
+            ]
+          }
+        },
+        "required": [
+          "street",
+          "houseNumber",
+          "buildingType",
+          "constructionYear",
+          "totalFloors",
+          "hasElevator",
+          "location"
+        ]
+      }
+    }
+  }
+}

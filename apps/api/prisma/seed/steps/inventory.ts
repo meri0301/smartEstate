@@ -25,7 +25,7 @@ import { randomPointIn, type Position } from '../lib/geo.js';
 import { estimatePricePerSqmAmd, roundPriceAmd, roundToStep } from '../lib/pricing.js';
 import type { Rng } from '../lib/random.js';
 import { buildListingTexts } from '../lib/text.js';
-import { uuidV7 } from '../lib/uuid.js';
+import { uuidV7 } from '../../../src/common/ids/uuid-v7.js';
 import type { SeededDistrict } from './districts.js';
 
 const LISTINGS_PER_BUILDING = 1.8;

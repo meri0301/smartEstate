@@ -131,6 +131,10 @@ jobs:
         run: |
           pnpm erd
           git diff --exit-code -- docs/diagrams/erd.md
+      - name: OpenAPI document is up to date
+        run: |
+          pnpm --filter @smartestate/api openapi:export
+          git diff --exit-code -- docs/api/openapi.json
 
       - name: Build ML image and run its tests
         run: |

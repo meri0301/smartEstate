@@ -20,7 +20,7 @@ export default defineConfig(
   },
   {
     // Seed, ERD and data scripts are CLIs: stdout is their user interface.
-    files: ['prisma/**/*.ts'],
+    files: ['prisma/**/*.ts', 'src/openapi/export.ts', 'test/integration/setup/**/*.ts'],
     rules: {
       'no-console': 'off',
     },

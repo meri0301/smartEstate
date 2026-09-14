@@ -1,22 +1,11 @@
-import 'reflect-metadata';
-import { NestFactory } from '@nestjs/core';
-import { FastifyAdapter, type NestFastifyApplication } from '@nestjs/platform-fastify';
-import { AppModule } from './app.module.js';
-
-const DEFAULT_PORT = 3000;
+import { createApp } from './app.factory.js';
+import { APP_CONFIG, type AppConfig } from './config/app-config.js';
+import { loadRootEnv } from './config/load-env.js';
 
 /** Binding to all interfaces is required for the process to be reachable inside Docker. */
 const LISTEN_HOST = '0.0.0.0';
 
-function resolvePort(rawValue: string | undefined): number {
-  const parsed = Number.parseInt(rawValue ?? '', 10);
-  return Number.isInteger(parsed) && parsed > 0 && parsed < 65_536 ? parsed : DEFAULT_PORT;
-}
-
-async function bootstrap(): Promise<void> {
-  const app = await NestFactory.create<NestFastifyApplication>(AppModule, new FastifyAdapter());
-  app.enableShutdownHooks();
-  await app.listen(resolvePort(process.env.API_PORT), LISTEN_HOST);
-}
-
-await bootstrap();
+loadRootEnv();
+const app = await createApp();
+const config = app.get<AppConfig>(APP_CONFIG);
+await app.listen(config.port, LISTEN_HOST);
