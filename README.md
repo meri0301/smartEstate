@@ -194,6 +194,25 @@ needs Docker). `pnpm test` runs both.
   feature's `index.ts`. See [ADR-0006](docs/adr/0006-frontend-data-access.md).
 - Development is same-origin: Vite proxies `/api`, `/health` and `/docs` to the API.
 
+### Screens
+
+| Route                             | What it is                                                       |
+| --------------------------------- | ---------------------------------------------------------------- |
+| `/:locale`                        | Landing page; a link into the search                             |
+| `/:locale/listings`               | Search: filter panel, sort, result grid, map view                |
+| `/:locale/listings/:idOrPublicId` | One listing: photographs, specification, price history, location |
+
+- **Filters live in the query string**, not in component state, so a filtered search is
+  shareable and the back button is correct. `features/listings/model/filters.ts` is the only
+  place that reads or writes them, and anything malformed in the URL is dropped rather than
+  sent to the API.
+- **The map is MapLibre GL over OpenStreetMap raster tiles**: no access token, nothing
+  proprietary, and it works from `docker compose up` on any machine. Attribution is displayed,
+  as the tile service's usage policy requires. Set `VITE_MAP_TILE_URL` to use another provider.
+  In dark mode the tiles are inverted in CSS, since the source has no dark variant.
+- **Map logic that is worth testing lives outside the renderer** (`features/map/model`), because
+  jsdom has no WebGL; the page tests replace the map component itself.
+
 ## Design system
 
 Tokens live in [`packages/ui-tokens`](packages/ui-tokens); primitives live in

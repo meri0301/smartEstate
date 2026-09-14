@@ -10,6 +10,93 @@
   "noResultsHint": "Try widening the price range or adding a district.",
   "machineTranslated": "Translated automatically",
   "machineTranslatedHint": "This text was translated from {sourceLanguage} and has not been reviewed.",
+  "common": {
+    "yes": "Yes",
+    "no": "No"
+  },
+  "search": {
+    "title": "Apartments for sale",
+    "filters": "Filters",
+    "filtersLabel": "Search filters",
+    "clear": "{count, plural, one {Clear # filter} other {Clear # filters}}",
+    "sort": "Sort by",
+    "view": "Result view",
+    "viewList": "List",
+    "viewMap": "Map",
+    "searchThisArea": "Search this area",
+    "error": "The search could not be completed"
+  },
+  "filters": {
+    "price": "Price, AMD",
+    "priceMin": "From",
+    "priceMax": "To",
+    "rooms": "Rooms",
+    "roomsMin": "From",
+    "roomsMax": "To",
+    "areaMin": "Area from, m²",
+    "yearMin": "Built from",
+    "districts": "District",
+    "buildingType": "Building",
+    "condition": "Condition",
+    "features": "Features",
+    "hasElevator": "Lift",
+    "hasParking": "Parking",
+    "docsVerified": "Verified documents",
+    "excludeGroundFloor": "Not the ground floor",
+    "excludeTopFloor": "Not the top floor"
+  },
+  "sort": {
+    "published_desc": "Newest first",
+    "price_asc": "Price, lowest first",
+    "price_desc": "Price, highest first",
+    "price_per_sqm_asc": "Price per m², lowest first",
+    "price_per_sqm_desc": "Price per m², highest first",
+    "area_asc": "Area, smallest first",
+    "area_desc": "Area, largest first"
+  },
+  "map": {
+    "label": "{count, plural, =0 {Map with no listings} one {Map with # listing} other {Map with # listings}}",
+    "singleLabel": "Map showing {address}"
+  },
+  "detail": {
+    "breadcrumb": "Where you are",
+    "backToSearch": "Back to search",
+    "overview": "The apartment",
+    "building": "The building",
+    "description": "Description",
+    "location": "Location",
+    "gallery": "Photographs",
+    "photoOf": "{title}, photograph {index} of {total}",
+    "priceHistory": "Price history",
+    "priceHistoryCaption": "Asking price over time, with the change against the previous figure",
+    "priceHistoryDate": "Date",
+    "priceHistoryPrice": "Price",
+    "priceHistoryChange": "Change",
+    "lastUpdated": "Last updated {date}",
+    "notFound": "This listing is not available",
+    "notFoundHint": "It may have been withdrawn, or the address may be wrong."
+  },
+  "attributes": {
+    "rooms": "Rooms",
+    "area": "Total area",
+    "livingArea": "Living area",
+    "kitchenArea": "Kitchen",
+    "floor": "Floor",
+    "bathrooms": "Bathrooms",
+    "ceilingHeight": "Ceiling height",
+    "balconies": "Balconies",
+    "condition": "Condition",
+    "heating": "Heating",
+    "parking": "Parking",
+    "storage": "Storage",
+    "negotiable": "Price negotiable",
+    "documents": "Documents",
+    "buildingType": "Type",
+    "constructionYear": "Built",
+    "totalFloors": "Floors",
+    "elevator": "Lift",
+    "seismicRetrofit": "Seismic retrofit"
+  },
   "verdict": {
     "underpriced": "Priced below the estimate",
     "fair": "Priced about right",
@@ -30,5 +117,22 @@
     "KHRUSHCHYOVKA": "Khrushchyovka",
     "STALINKA": "Stalin-era",
     "NEW_BUILD": "New build"
+  },
+  "heating": {
+    "CENTRAL_GAS": "Central gas",
+    "INDIVIDUAL_GAS_BOILER": "Gas boiler",
+    "ELECTRIC": "Electric",
+    "NONE": "None"
+  },
+  "ownershipDocs": {
+    "VERIFIED": "Verified",
+    "UNVERIFIED": "Not verified"
+  },
+  "status": {
+    "DRAFT": "Draft",
+    "PENDING_REVIEW": "Awaiting review",
+    "PUBLISHED": "Published",
+    "REJECTED": "Sent back",
+    "ARCHIVED": "Archived"
   }
 }

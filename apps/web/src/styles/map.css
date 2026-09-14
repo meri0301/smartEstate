@@ -1,0 +1,80 @@
+/*
+ * Map chrome.
+ *
+ * MapLibre renders into its own canvas and ships its own controls, so the two
+ * need bringing into the design rather than restyling from the utility classes.
+ */
+
+/*
+ * The tiles are a light raster image with no dark variant. Inverting and
+ * rotating the hue back produces a dark basemap whose roads and water keep
+ * roughly their real colours, which is what every dark map style does to a
+ * raster source. The markers sit outside the canvas, so they are unaffected.
+ */
+[data-theme='dark'] .se-map .maplibregl-canvas,
+[data-theme='dark'] .se-map .maplibregl-ctrl-attrib {
+  filter: invert(1) hue-rotate(180deg) brightness(0.95) contrast(0.9);
+}
+
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme='light']) .se-map .maplibregl-canvas,
+  :root:not([data-theme='light']) .se-map .maplibregl-ctrl-attrib {
+    filter: invert(1) hue-rotate(180deg) brightness(0.95) contrast(0.9);
+  }
+}
+
+.se-map .maplibregl-ctrl-group {
+  border-radius: var(--se-radius-sm);
+  box-shadow: none;
+  border: 1px solid var(--se-color-border);
+}
+
+.se-map .maplibregl-ctrl-attrib {
+  font-family: var(--se-font-body);
+  font-size: 0.6875rem;
+}
+
+/* A pin, drawn from tokens so it follows the theme like the rest of the interface. */
+.se-map-pin {
+  display: grid;
+  place-items: center;
+  min-width: 2.25rem;
+  height: 1.75rem;
+  padding-inline: 0.5rem;
+  border-radius: 999px;
+  border: 1px solid var(--se-color-border);
+  background: var(--se-color-surface);
+  color: var(--se-color-text);
+  font-family: var(--se-font-body);
+  font-size: 0.75rem;
+  font-weight: 600;
+  white-space: nowrap;
+  cursor: pointer;
+  transition: background-color var(--se-duration-fast) var(--se-ease-standard);
+}
+
+.se-map-pin:hover,
+.se-map-pin[data-active='true'] {
+  background: var(--se-color-accent);
+  color: var(--se-color-on-accent);
+  border-color: var(--se-color-accent);
+}
+
+.se-map-pin:focus-visible {
+  outline: 2px solid var(--se-color-focus);
+  outline-offset: 2px;
+}
+
+.se-map-popup .maplibregl-popup-content {
+  border-radius: var(--se-radius-sm);
+  border: 1px solid var(--se-color-border);
+  background: var(--se-color-surface);
+  color: var(--se-color-text);
+  font-family: var(--se-font-body);
+  padding: 0.75rem;
+}
+
+.se-map-popup .maplibregl-popup-tip {
+  border-top-color: var(--se-color-surface);
+  border-bottom-color: var(--se-color-surface);
+}

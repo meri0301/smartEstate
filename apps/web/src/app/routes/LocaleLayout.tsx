@@ -51,9 +51,14 @@ function Shell(): JSX.Element {
 
       <header className="border-b border-border">
         <div className="mx-auto flex max-w-content flex-wrap items-center justify-between gap-4 px-6 py-4">
-          <Link to="" className="font-display text-lg uppercase text-text">
-            {t('brand')}
-          </Link>
+          <div className="flex flex-wrap items-baseline gap-6">
+            <Link to="" className="font-display text-lg uppercase text-text">
+              {t('brand')}
+            </Link>
+            <Link to="listings" className="font-body text-sm text-text-secondary hover:text-text">
+              {t('nav.search')}
+            </Link>
+          </div>
           <div className="flex flex-wrap items-center gap-4">
             <ThemeToggle />
             <LanguageSwitcher />

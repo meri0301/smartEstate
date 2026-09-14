@@ -3,8 +3,10 @@ import { createBrowserRouter, Navigate, useLocation, type RouteObject } from 're
 import { useSessionStore } from '../shared/api/session-store.js';
 import { detectLocale, withLocalePath } from '../shared/i18n/detect.js';
 import { HomePage } from './routes/HomePage.js';
+import { ListingDetailPage } from './routes/ListingDetailPage.js';
 import { LocaleLayout } from './routes/LocaleLayout.js';
 import { NotFoundPage } from './routes/NotFoundPage.js';
+import { SearchPage } from './routes/SearchPage.js';
 
 /**
  * Sends a path with no locale segment to the same path with one.
@@ -32,6 +34,8 @@ export const routes: RouteObject[] = [
     element: <LocaleLayout />,
     children: [
       { index: true, element: <HomePage /> },
+      { path: 'listings', element: <SearchPage /> },
+      { path: 'listings/:idOrPublicId', element: <ListingDetailPage /> },
       { path: '*', element: <NotFoundPage /> },
     ],
   },

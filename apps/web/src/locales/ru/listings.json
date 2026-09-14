@@ -10,6 +10,93 @@
   "noResultsHint": "Попробуйте расширить диапазон цен или добавить район.",
   "machineTranslated": "Переведено автоматически",
   "machineTranslatedHint": "Этот текст переведён с {sourceLanguage} и не был проверен.",
+  "common": {
+    "yes": "Да",
+    "no": "Нет"
+  },
+  "search": {
+    "title": "Квартиры на продажу",
+    "filters": "Фильтры",
+    "filtersLabel": "Фильтры поиска",
+    "clear": "{count, plural, one {Очистить # фильтр} few {Очистить # фильтра} many {Очистить # фильтров} other {Очистить # фильтра}}",
+    "sort": "Сортировать по",
+    "view": "Вид результатов",
+    "viewList": "Список",
+    "viewMap": "Карта",
+    "searchThisArea": "Искать в этой области",
+    "error": "Не удалось выполнить поиск"
+  },
+  "filters": {
+    "price": "Цена, драм",
+    "priceMin": "От",
+    "priceMax": "До",
+    "rooms": "Комнаты",
+    "roomsMin": "От",
+    "roomsMax": "До",
+    "areaMin": "Площадь от, м²",
+    "yearMin": "Построен с",
+    "districts": "Район",
+    "buildingType": "Дом",
+    "condition": "Состояние",
+    "features": "Особенности",
+    "hasElevator": "Лифт",
+    "hasParking": "Парковка",
+    "docsVerified": "Проверенные документы",
+    "excludeGroundFloor": "Не первый этаж",
+    "excludeTopFloor": "Не последний этаж"
+  },
+  "sort": {
+    "published_desc": "Сначала новые",
+    "price_asc": "Цена: сначала дешевле",
+    "price_desc": "Цена: сначала дороже",
+    "price_per_sqm_asc": "Цена за м²: сначала ниже",
+    "price_per_sqm_desc": "Цена за м²: сначала выше",
+    "area_asc": "Площадь: сначала меньше",
+    "area_desc": "Площадь: сначала больше"
+  },
+  "map": {
+    "label": "{count, plural, =0 {Карта без объявлений} one {Карта с # объявлением} few {Карта с # объявлениями} many {Карта с # объявлениями} other {Карта с # объявлениями}}",
+    "singleLabel": "Карта: {address}"
+  },
+  "detail": {
+    "breadcrumb": "Где вы находитесь",
+    "backToSearch": "Назад к поиску",
+    "overview": "Квартира",
+    "building": "Дом",
+    "description": "Описание",
+    "location": "Расположение",
+    "gallery": "Фотографии",
+    "photoOf": "{title}, фотография {index} из {total}",
+    "priceHistory": "История цены",
+    "priceHistoryCaption": "Запрашиваемая цена во времени с изменением к предыдущему значению",
+    "priceHistoryDate": "Дата",
+    "priceHistoryPrice": "Цена",
+    "priceHistoryChange": "Изменение",
+    "lastUpdated": "Обновлено {date}",
+    "notFound": "Это объявление недоступно",
+    "notFoundHint": "Возможно, оно снято с публикации или адрес указан неверно."
+  },
+  "attributes": {
+    "rooms": "Комнаты",
+    "area": "Общая площадь",
+    "livingArea": "Жилая площадь",
+    "kitchenArea": "Кухня",
+    "floor": "Этаж",
+    "bathrooms": "Санузлы",
+    "ceilingHeight": "Высота потолков",
+    "balconies": "Балконы",
+    "condition": "Состояние",
+    "heating": "Отопление",
+    "parking": "Парковка",
+    "storage": "Кладовая",
+    "negotiable": "Цена договорная",
+    "documents": "Документы",
+    "buildingType": "Тип",
+    "constructionYear": "Построен",
+    "totalFloors": "Этажей",
+    "elevator": "Лифт",
+    "seismicRetrofit": "Сейсмоусиление"
+  },
   "verdict": {
     "underpriced": "Цена ниже оценки",
     "fair": "Цена соответствует оценке",
@@ -30,5 +117,22 @@
     "KHRUSHCHYOVKA": "Хрущёвка",
     "STALINKA": "Сталинка",
     "NEW_BUILD": "Новостройка"
+  },
+  "heating": {
+    "CENTRAL_GAS": "Центральный газ",
+    "INDIVIDUAL_GAS_BOILER": "Газовый котёл",
+    "ELECTRIC": "Электрическое",
+    "NONE": "Нет"
+  },
+  "ownershipDocs": {
+    "VERIFIED": "Проверены",
+    "UNVERIFIED": "Не проверены"
+  },
+  "status": {
+    "DRAFT": "Черновик",
+    "PENDING_REVIEW": "Ожидает проверки",
+    "PUBLISHED": "Опубликовано",
+    "REJECTED": "Возвращено",
+    "ARCHIVED": "В архиве"
   }
 }

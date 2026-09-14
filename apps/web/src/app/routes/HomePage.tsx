@@ -1,58 +1,36 @@
 import type { JSX } from 'react';
 import { useTranslation } from 'react-i18next';
-import { useCurrentLocale } from '../../shared/i18n/I18nProvider.js';
-import {
-  formatAmd,
-  formatDate,
-  formatPricePerSqm,
-  formatRelativeTime,
-} from '../../shared/i18n/formatters.js';
-import { Badge, Card, CardBody, CardHeader, Heading, Text } from '../../shared/ui/index.js';
+import { Link } from 'react-router';
+import { Heading, Text } from '../../shared/ui/index.js';
 
 /**
- * Placeholder landing view.
+ * The landing view.
  *
- * It exists so that locale routing, the translated shell and the locale-aware
- * formatters can be exercised end to end before the real screens arrive in the
- * next phase. The numbers are illustrative, not data.
+ * Deliberately thin: the product's answer to "should I buy this?" lives on a
+ * listing, so the only job here is to get the reader into the search. The
+ * advisory panels arrive with the valuation and recommendation work.
+ *
+ * The call to action is a link wearing the primary button's clothes, rather
+ * than a button that navigates, because it goes somewhere: it should open in a
+ * new tab on a middle click and offer the browser's own link menu.
  */
-/** Illustrative only; real listings arrive from the API in the next phase. */
-const PUBLISHED_AT = new Date(Date.now() - 3 * 24 * 60 * 60 * 1000);
-
 export function HomePage(): JSX.Element {
   const { t } = useTranslation(['common', 'listings']);
-  const locale = useCurrentLocale();
 
   return (
-    <div className="flex flex-col gap-8">
-      <div className="flex flex-col gap-3">
-        <Heading as="h1" size="lg">
-          {t('common:brand')}
-        </Heading>
-        <Text size="lg">{t('common:tagline')}</Text>
-      </div>
-
-      <Card tone="muted" className="max-w-lg">
-        <CardHeader>
-          <div className="flex flex-wrap items-center justify-between gap-3">
-            <Heading as="h2" size="sm">
-              {t('listings:resultCount', { count: 3 })}
-            </Heading>
-            <Badge tone="success">{t('listings:verdict.underpriced')}</Badge>
-          </div>
-        </CardHeader>
-        <CardBody>
-          <Text>{t('listings:roomCount', { count: 3 })}</Text>
-          <Text>{formatAmd(45_000_000, locale)}</Text>
-          <Text>{formatPricePerSqm(625_000, locale)}</Text>
-          <Text tone="muted" size="sm">
-            {t('listings:publishedRelative', { when: formatRelativeTime(PUBLISHED_AT, locale) })}
-          </Text>
-          <Text tone="muted" size="sm">
-            {formatDate(PUBLISHED_AT, locale, 'long')}
-          </Text>
-        </CardBody>
-      </Card>
+    <div className="flex flex-col items-start gap-6 py-8">
+      <Heading as="h1" size="xl">
+        {t('common:brand')}
+      </Heading>
+      <Text size="lg" className="max-w-prose">
+        {t('common:tagline')}
+      </Text>
+      <Link
+        to="listings"
+        className="inline-flex h-control items-center justify-center rounded-full bg-accent px-6 font-body font-semibold text-on-accent transition-colors duration-[var(--se-duration-fast)] ease-standard hover:bg-accent-hover active:bg-accent-active"
+      >
+        {t('listings:search.title')}
+      </Link>
     </div>
   );
 }

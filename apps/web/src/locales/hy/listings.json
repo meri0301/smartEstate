@@ -10,6 +10,93 @@
   "noResultsHint": "Փորձեք ընդլայնել գնային միջակայքը կամ ավելացնել շրջան։",
   "machineTranslated": "Թարգմանվել է ավտոմատ",
   "machineTranslatedHint": "Այս տեքստը թարգմանվել է {sourceLanguage}-ից և չի ստուգվել։",
+  "common": {
+    "yes": "Այո",
+    "no": "Ոչ"
+  },
+  "search": {
+    "title": "Վաճառվող բնակարաններ",
+    "filters": "Զտիչներ",
+    "filtersLabel": "Որոնման զտիչներ",
+    "clear": "{count, plural, one {Մաքրել # զտիչ} other {Մաքրել # զտիչ}}",
+    "sort": "Դասավորել ըստ",
+    "view": "Արդյունքների տեսք",
+    "viewList": "Ցանկ",
+    "viewMap": "Քարտեզ",
+    "searchThisArea": "Որոնել այս տարածքում",
+    "error": "Որոնումը չհաջողվեց"
+  },
+  "filters": {
+    "price": "Գին, դրամ",
+    "priceMin": "Սկսած",
+    "priceMax": "Մինչև",
+    "rooms": "Սենյակներ",
+    "roomsMin": "Սկսած",
+    "roomsMax": "Մինչև",
+    "areaMin": "Մակերես սկսած, քմ",
+    "yearMin": "Կառուցված սկսած",
+    "districts": "Շրջան",
+    "buildingType": "Շենք",
+    "condition": "Վիճակ",
+    "features": "Հատկություններ",
+    "hasElevator": "Վերելակ",
+    "hasParking": "Ավտոկայանատեղի",
+    "docsVerified": "Ստուգված փաստաթղթեր",
+    "excludeGroundFloor": "Ոչ առաջին հարկ",
+    "excludeTopFloor": "Ոչ վերջին հարկ"
+  },
+  "sort": {
+    "published_desc": "Սկզբում նորերը",
+    "price_asc": "Գին՝ սկզբում էժանները",
+    "price_desc": "Գին՝ սկզբում թանկերը",
+    "price_per_sqm_asc": "Գին մեկ քմ՝ սկզբում ցածրերը",
+    "price_per_sqm_desc": "Գին մեկ քմ՝ սկզբում բարձրերը",
+    "area_asc": "Մակերես՝ սկզբում փոքրերը",
+    "area_desc": "Մակերես՝ սկզբում մեծերը"
+  },
+  "map": {
+    "label": "{count, plural, =0 {Քարտեզ առանց հայտարարությունների} one {Քարտեզ # հայտարարությամբ} other {Քարտեզ # հայտարարությամբ}}",
+    "singleLabel": "Քարտեզ՝ {address}"
+  },
+  "detail": {
+    "breadcrumb": "Ուր եք գտնվում",
+    "backToSearch": "Վերադառնալ որոնմանը",
+    "overview": "Բնակարանը",
+    "building": "Շենքը",
+    "description": "Նկարագրություն",
+    "location": "Գտնվելու վայրը",
+    "gallery": "Լուսանկարներ",
+    "photoOf": "{title}, լուսանկար {index} {total}-ից",
+    "priceHistory": "Գնի պատմություն",
+    "priceHistoryCaption": "Հայտարարված գինը ժամանակի ընթացքում՝ նախորդ արժեքի նկատմամբ փոփոխությամբ",
+    "priceHistoryDate": "Ամսաթիվ",
+    "priceHistoryPrice": "Գին",
+    "priceHistoryChange": "Փոփոխություն",
+    "lastUpdated": "Վերջին թարմացումը՝ {date}",
+    "notFound": "Այս հայտարարությունը հասանելի չէ",
+    "notFoundHint": "Այն կարող է հանված լինել, կամ հասցեն սխալ է։"
+  },
+  "attributes": {
+    "rooms": "Սենյակներ",
+    "area": "Ընդհանուր մակերես",
+    "livingArea": "Բնակելի մակերես",
+    "kitchenArea": "Խոհանոց",
+    "floor": "Հարկ",
+    "bathrooms": "Սանհանգույցներ",
+    "ceilingHeight": "Առաստաղի բարձրություն",
+    "balconies": "Պատշգամբներ",
+    "condition": "Վիճակ",
+    "heating": "Ջեռուցում",
+    "parking": "Ավտոկայանատեղի",
+    "storage": "Պահեստ",
+    "negotiable": "Գինը քննարկելի է",
+    "documents": "Փաստաթղթեր",
+    "buildingType": "Տեսակ",
+    "constructionYear": "Կառուցված",
+    "totalFloors": "Հարկեր",
+    "elevator": "Վերելակ",
+    "seismicRetrofit": "Սեյսմակայունացում"
+  },
   "verdict": {
     "underpriced": "Գինը գնահատականից ցածր է",
     "fair": "Գինը համապատասխանում է գնահատականին",
@@ -30,5 +117,22 @@
     "KHRUSHCHYOVKA": "Խրուշչովկա",
     "STALINKA": "Ստալինկա",
     "NEW_BUILD": "Նորակառույց"
+  },
+  "heating": {
+    "CENTRAL_GAS": "Կենտրոնական գազ",
+    "INDIVIDUAL_GAS_BOILER": "Գազի կաթսա",
+    "ELECTRIC": "Էլեկտրական",
+    "NONE": "Չկա"
+  },
+  "ownershipDocs": {
+    "VERIFIED": "Ստուգված",
+    "UNVERIFIED": "Չստուգված"
+  },
+  "status": {
+    "DRAFT": "Սևագիր",
+    "PENDING_REVIEW": "Սպասում է ստուգման",
+    "PUBLISHED": "Հրապարակված",
+    "REJECTED": "Վերադարձված",
+    "ARCHIVED": "Արխիվացված"
   }
 }
