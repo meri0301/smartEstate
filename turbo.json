@@ -21,12 +21,29 @@
     "dev": {
       "cache": false,
       "persistent": true,
-      "dependsOn": ["db:generate"]
+      "dependsOn": ["^build", "db:generate"]
     },
     "db:generate": {
       "inputs": ["prisma/schema.prisma", "prisma.config.ts"],
       "outputs": ["src/generated/**"],
       "env": ["DATABASE_URL"]
+    },
+    "openapi:export": {
+      "dependsOn": ["build"],
+      "cache": false,
+      "outputs": [],
+      "env": [
+        "DATABASE_URL",
+        "NODE_ENV",
+        "API_PORT",
+        "JWT_*",
+        "REFRESH_TOKEN_*",
+        "COOKIE_SECURE",
+        "CORS_ORIGINS",
+        "LOG_LEVEL",
+        "RATE_LIMIT_*",
+        "SWAGGER_ENABLED"
+      ]
     }
   }
 }

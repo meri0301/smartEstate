@@ -24,6 +24,7 @@
     "db:reset": "pnpm --filter @smartestate/api db:reset",
     "db:studio": "pnpm --filter @smartestate/api db:studio",
     "erd": "pnpm --filter @smartestate/api erd",
+    "openapi:export": "turbo run openapi:export",
     "format": "prettier --write .",
     "format:check": "prettier --check .",
     "docker:up": "docker compose up -d --build --wait",

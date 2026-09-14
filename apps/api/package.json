@@ -25,7 +25,7 @@
     "db:status": "prisma migrate status",
     "erd": "tsx prisma/erd/generate-erd.ts",
     "osm:fetch": "node prisma/seed/scripts/fetch-osm.ts",
-    "openapi:export": "nest build && node dist/openapi/export.js",
+    "openapi:export": "node dist/openapi/export.js",
     "test:integration": "vitest run --project integration"
   },
   "dependencies": {

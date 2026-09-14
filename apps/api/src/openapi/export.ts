@@ -1,7 +1,7 @@
 /**
  * Writes the OpenAPI document to docs/api/openapi.json.
  *
- *   pnpm --filter @smartestate/api openapi:export
+ *   pnpm openapi:export
  *
  * Boots the application (which connects to the database) but never listens.
  * Runs from the compiled output: NestJS dependency injection needs the decorator
