@@ -82,6 +82,9 @@ jobs:
     runs-on: ubuntu-latest
     env:
       DATABASE_URL: postgresql://smartestate:smartestate@localhost:5432/smartestate?schema=public
+      # The OpenAPI export boots the application, whose configuration is validated at start-up.
+      JWT_ACCESS_SECRET: ci-only-secret-not-used-for-real-sessions-0123456789
+      LOG_LEVEL: silent
     steps:
       - uses: actions/checkout@v4
       - name: Validate compose file
