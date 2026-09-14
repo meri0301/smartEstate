@@ -1,0 +1,337 @@
+/*
+ * GENERATED FILE — do not edit.
+ * Run `pnpm --filter @smartestate/ui-tokens tokens:css` after changing src/tokens.ts.
+ * CI regenerates this file and fails if the committed copy is stale.
+ *
+ * Three layers live here:
+ *   1. `--se-*` custom properties, the themeable source of every value.
+ *   2. Theme overrides for dark, selected explicitly with [data-theme] and
+ *      implicitly with prefers-color-scheme when no choice has been made.
+ *   3. An `@theme inline` block that points Tailwind's utilities at the
+ *      custom properties, so utilities re-resolve when the theme changes
+ *      instead of baking in a literal colour.
+ */
+
+:root {
+  color-scheme: light;
+
+  /* Colour */
+  --se-color-bg: #FAFAFA;
+  --se-color-surface: #FFFFFF;
+  --se-color-surface-muted: #E9EEED;
+  --se-color-border: #D9DDDC;
+  --se-color-border-strong: #9A9A9A;
+  --se-color-border-interactive: #5F6462;
+  --se-color-text: #131313;
+  --se-color-text-secondary: #292D32;
+  --se-color-text-muted: #404040;
+  --se-color-text-placeholder: #5F6462;
+  --se-color-accent: #CEF279;
+  --se-color-accent-hover: #BCE45C;
+  --se-color-accent-active: #A8D63F;
+  --se-color-accent-subtle: #EEF9D5;
+  --se-color-on-accent: #131313;
+  --se-color-inverse: #131313;
+  --se-color-on-inverse: #FAFAFA;
+  --se-color-success: #1F7A4D;
+  --se-color-success-subtle: #E3F3E9;
+  --se-color-warning: #8A5A00;
+  --se-color-warning-subtle: #FDF2D9;
+  --se-color-rating: #F2B62A;
+  --se-color-rating-track: #EAE0B4;
+  --se-color-danger: #B3261E;
+  --se-color-danger-subtle: #F8E5E3;
+  --se-color-info: #2F5FD0;
+  --se-color-info-subtle: #E6ECFA;
+  --se-color-focus: #131313;
+  --se-color-brand-mark: #231F20;
+  --se-color-overlay: #131313;
+
+  /* Font families */
+  --se-font-display: 'Krona One', 'Noto Sans Armenian', 'Montserrat', system-ui, sans-serif;
+  --se-font-body: 'Montserrat', 'Noto Sans Armenian', system-ui, sans-serif;
+  --se-font-mono: ui-monospace, 'Cascadia Mono', 'Segoe UI Mono', 'Roboto Mono', monospace;
+
+  /* Font sizes */
+  --se-text-xs: 0.75rem;
+  --se-text-sm: 0.875rem;
+  --se-text-base: 1rem;
+  --se-text-lg: 1.25rem;
+  --se-text-xl: 1.5rem;
+  --se-text-2xl: 2rem;
+  --se-text-3xl: 2.5rem;
+
+  /* Line heights */
+  --se-leading-none: 1;
+  --se-leading-snug: 1.2;
+  --se-leading-normal: 1.4;
+  --se-leading-relaxed: 1.6;
+
+  /* Font weights */
+  --se-weight-normal: 400;
+  --se-weight-medium: 500;
+  --se-weight-semibold: 600;
+  --se-weight-bold: 700;
+
+  /* Letter spacing */
+  --se-tracking-normal: 0;
+  --se-tracking-wide: 0.04em;
+
+  /* Spacing */
+  --se-space-0: 0rem;
+  --se-space-1: 0.25rem;
+  --se-space-2: 0.5rem;
+  --se-space-3: 0.75rem;
+  --se-space-4: 1rem;
+  --se-space-5: 1.25rem;
+  --se-space-6: 1.5rem;
+  --se-space-7: 1.75rem;
+  --se-space-8: 2rem;
+  --se-space-10: 2.5rem;
+  --se-space-12: 3rem;
+  --se-space-16: 4rem;
+  --se-space-20: 5rem;
+  --se-space-24: 6rem;
+  --se-space-40: 10rem;
+  --se-space-px: 1px;
+
+  /* Radii */
+  --se-radius-xs: 3px;
+  --se-radius-sm: 10px;
+  --se-radius-md: 24px;
+  --se-radius-lg: 32px;
+  --se-radius-full: 9999px;
+
+  /* Border widths */
+  --se-border-thin: 1px;
+  --se-border-medium: 1.5px;
+  --se-border-thick: 2px;
+
+  /* Breakpoints */
+  --se-screen-sm: 40rem;
+  --se-screen-md: 48rem;
+  --se-screen-lg: 64rem;
+  --se-screen-xl: 80rem;
+  --se-screen-2xl: 90rem;
+
+  /* Layout */
+  --se-layout-content: 70rem;
+  --se-layout-gutter: 10rem;
+  --se-layout-page: 90rem;
+  --se-layout-control: 2.75rem;
+  --se-layout-control-sm: 2.25rem;
+  --se-layout-control-lg: 3.25rem;
+
+  /* Elevation */
+  --se-shadow-none: none;
+  --se-shadow-overlay: 0 16px 48px -12px rgb(19 19 19 / 0.24);
+
+  /* Stacking order */
+  --se-z-base: 0;
+  --se-z-dropdown: 1000;
+  --se-z-sticky: 1100;
+  --se-z-overlay: 1200;
+  --se-z-modal: 1300;
+  --se-z-popover: 1400;
+  --se-z-toast: 1500;
+
+  /* Durations */
+  --se-duration-fast: 120ms;
+  --se-duration-base: 200ms;
+  --se-duration-slow: 320ms;
+
+  /* Easing */
+  --se-ease-standard: cubic-bezier(0.2, 0, 0, 1);
+  --se-ease-exit: cubic-bezier(0.4, 0, 1, 1);
+}
+
+:root[data-theme='dark'] {
+  color-scheme: dark;
+
+  --se-color-bg: #0E100F;
+  --se-color-surface: #171A19;
+  --se-color-surface-muted: #1E2221;
+  --se-color-border: #2C3130;
+  --se-color-border-strong: #4B5250;
+  --se-color-border-interactive: #8A918E;
+  --se-color-text: #F4F6F4;
+  --se-color-text-secondary: #C9CFCC;
+  --se-color-text-muted: #9AA19E;
+  --se-color-text-placeholder: #8A918E;
+  --se-color-accent: #CEF279;
+  --se-color-accent-hover: #DDF79B;
+  --se-color-accent-active: #BCE45C;
+  --se-color-accent-subtle: #25301A;
+  --se-color-on-accent: #131313;
+  --se-color-inverse: #F4F6F4;
+  --se-color-on-inverse: #131313;
+  --se-color-success: #5FD39A;
+  --se-color-success-subtle: #13301F;
+  --se-color-warning: #F5C452;
+  --se-color-warning-subtle: #3A2E0C;
+  --se-color-rating: #F5C452;
+  --se-color-rating-track: #4A4020;
+  --se-color-danger: #FF8A80;
+  --se-color-danger-subtle: #3A1512;
+  --se-color-info: #9BB8FF;
+  --se-color-info-subtle: #131F3A;
+  --se-color-focus: #CEF279;
+  --se-color-brand-mark: #F4F6F4;
+  --se-color-overlay: #000000;
+}
+
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme='light']) {
+    color-scheme: dark;
+
+    --se-color-bg: #0E100F;
+    --se-color-surface: #171A19;
+    --se-color-surface-muted: #1E2221;
+    --se-color-border: #2C3130;
+    --se-color-border-strong: #4B5250;
+    --se-color-border-interactive: #8A918E;
+    --se-color-text: #F4F6F4;
+    --se-color-text-secondary: #C9CFCC;
+    --se-color-text-muted: #9AA19E;
+    --se-color-text-placeholder: #8A918E;
+    --se-color-accent: #CEF279;
+    --se-color-accent-hover: #DDF79B;
+    --se-color-accent-active: #BCE45C;
+    --se-color-accent-subtle: #25301A;
+    --se-color-on-accent: #131313;
+    --se-color-inverse: #F4F6F4;
+    --se-color-on-inverse: #131313;
+    --se-color-success: #5FD39A;
+    --se-color-success-subtle: #13301F;
+    --se-color-warning: #F5C452;
+    --se-color-warning-subtle: #3A2E0C;
+    --se-color-rating: #F5C452;
+    --se-color-rating-track: #4A4020;
+    --se-color-danger: #FF8A80;
+    --se-color-danger-subtle: #3A1512;
+    --se-color-info: #9BB8FF;
+    --se-color-info-subtle: #131F3A;
+    --se-color-focus: #CEF279;
+    --se-color-brand-mark: #F4F6F4;
+    --se-color-overlay: #000000;
+  }
+}
+
+:root[data-theme='light'] {
+  color-scheme: light;
+}
+
+@theme inline {
+  /* Colour */
+  --color-bg: var(--se-color-bg);
+  --color-surface: var(--se-color-surface);
+  --color-surface-muted: var(--se-color-surface-muted);
+  --color-border: var(--se-color-border);
+  --color-border-strong: var(--se-color-border-strong);
+  --color-border-interactive: var(--se-color-border-interactive);
+  --color-text: var(--se-color-text);
+  --color-text-secondary: var(--se-color-text-secondary);
+  --color-text-muted: var(--se-color-text-muted);
+  --color-text-placeholder: var(--se-color-text-placeholder);
+  --color-accent: var(--se-color-accent);
+  --color-accent-hover: var(--se-color-accent-hover);
+  --color-accent-active: var(--se-color-accent-active);
+  --color-accent-subtle: var(--se-color-accent-subtle);
+  --color-on-accent: var(--se-color-on-accent);
+  --color-inverse: var(--se-color-inverse);
+  --color-on-inverse: var(--se-color-on-inverse);
+  --color-success: var(--se-color-success);
+  --color-success-subtle: var(--se-color-success-subtle);
+  --color-warning: var(--se-color-warning);
+  --color-warning-subtle: var(--se-color-warning-subtle);
+  --color-rating: var(--se-color-rating);
+  --color-rating-track: var(--se-color-rating-track);
+  --color-danger: var(--se-color-danger);
+  --color-danger-subtle: var(--se-color-danger-subtle);
+  --color-info: var(--se-color-info);
+  --color-info-subtle: var(--se-color-info-subtle);
+  --color-focus: var(--se-color-focus);
+  --color-brand-mark: var(--se-color-brand-mark);
+  --color-overlay: var(--se-color-overlay);
+
+  /* Font families */
+  --font-display: var(--se-font-display);
+  --font-body: var(--se-font-body);
+  --font-mono: var(--se-font-mono);
+
+  /* Font sizes */
+  --text-xs: var(--se-text-xs);
+  --text-sm: var(--se-text-sm);
+  --text-base: var(--se-text-base);
+  --text-lg: var(--se-text-lg);
+  --text-xl: var(--se-text-xl);
+  --text-2xl: var(--se-text-2xl);
+  --text-3xl: var(--se-text-3xl);
+
+  /* Line heights */
+  --leading-none: var(--se-leading-none);
+  --leading-snug: var(--se-leading-snug);
+  --leading-normal: var(--se-leading-normal);
+  --leading-relaxed: var(--se-leading-relaxed);
+
+  /* Font weights */
+  --font-weight-normal: var(--se-weight-normal);
+  --font-weight-medium: var(--se-weight-medium);
+  --font-weight-semibold: var(--se-weight-semibold);
+  --font-weight-bold: var(--se-weight-bold);
+
+  /* Letter spacing */
+  --tracking-normal: var(--se-tracking-normal);
+  --tracking-wide: var(--se-tracking-wide);
+
+  /* Spacing */
+  --spacing-0: var(--se-space-0);
+  --spacing-1: var(--se-space-1);
+  --spacing-2: var(--se-space-2);
+  --spacing-3: var(--se-space-3);
+  --spacing-4: var(--se-space-4);
+  --spacing-5: var(--se-space-5);
+  --spacing-6: var(--se-space-6);
+  --spacing-7: var(--se-space-7);
+  --spacing-8: var(--se-space-8);
+  --spacing-10: var(--se-space-10);
+  --spacing-12: var(--se-space-12);
+  --spacing-16: var(--se-space-16);
+  --spacing-20: var(--se-space-20);
+  --spacing-24: var(--se-space-24);
+  --spacing-40: var(--se-space-40);
+  --spacing-px: var(--se-space-px);
+
+  /* Radii */
+  --radius-xs: var(--se-radius-xs);
+  --radius-sm: var(--se-radius-sm);
+  --radius-md: var(--se-radius-md);
+  --radius-lg: var(--se-radius-lg);
+  --radius-full: var(--se-radius-full);
+
+  /* Layout */
+  --spacing-content: var(--se-layout-content);
+  --spacing-gutter: var(--se-layout-gutter);
+  --spacing-page: var(--se-layout-page);
+  --spacing-control: var(--se-layout-control);
+  --spacing-control-sm: var(--se-layout-control-sm);
+  --spacing-control-lg: var(--se-layout-control-lg);
+
+  /* Elevation */
+  --shadow-none: var(--se-shadow-none);
+  --shadow-overlay: var(--se-shadow-overlay);
+
+  /* Easing */
+  --ease-standard: var(--se-ease-standard);
+  --ease-exit: var(--se-ease-exit);
+}
+
+/* Emitted literally: a media query cannot resolve a custom property. */
+@theme {
+  /* Breakpoints */
+  --breakpoint-sm: 40rem;
+  --breakpoint-md: 48rem;
+  --breakpoint-lg: 64rem;
+  --breakpoint-xl: 80rem;
+  --breakpoint-2xl: 90rem;
+}

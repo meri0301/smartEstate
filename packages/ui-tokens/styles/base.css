@@ -1,0 +1,66 @@
+/*
+ * Base element styles.
+ *
+ * Deliberately thin: Tailwind's preflight already normalises the document, so
+ * this file only binds the document to the tokens and sets the two things the
+ * design decides globally — the page surface and the heading face.
+ *
+ * Import order in the application is tokens.css, fonts.css, then this file.
+ */
+
+html {
+  -webkit-text-size-adjust: 100%;
+  scroll-behavior: smooth;
+}
+
+body {
+  margin: 0;
+  background-color: var(--se-color-bg);
+  color: var(--se-color-text-secondary);
+  font-family: var(--se-font-body);
+  font-size: var(--se-text-base);
+  line-height: var(--se-leading-normal);
+  letter-spacing: var(--se-tracking-normal);
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+h1,
+h2,
+h3,
+h4,
+h5,
+h6 {
+  margin: 0;
+  color: var(--se-color-text);
+  font-family: var(--se-font-display);
+  font-weight: var(--se-font-display-weight);
+  line-height: var(--se-leading-none);
+}
+
+/*
+ * One focus treatment for the whole application. The ring is ink on light and
+ * lime on dark, both above 3:1 against every surface, and the offset keeps it
+ * clear of the control's own border.
+ */
+:focus-visible {
+  outline: var(--se-border-thick) solid var(--se-color-focus);
+  outline-offset: 2px;
+}
+
+::selection {
+  background-color: var(--se-color-accent);
+  color: var(--se-color-on-accent);
+}
+
+/* Respect the operating system's motion preference. */
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+}

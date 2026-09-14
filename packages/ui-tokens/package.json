@@ -1,0 +1,39 @@
+{
+  "name": "@smartestate/ui-tokens",
+  "version": "0.1.0",
+  "private": true,
+  "description": "Design tokens extracted from the SmartEstate Figma file: the single source of truth for colour, typography, spacing, radii and motion, emitted as CSS custom properties and a Tailwind theme.",
+  "license": "UNLICENSED",
+  "type": "module",
+  "main": "./dist/index.js",
+  "types": "./dist/index.d.ts",
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "import": "./dist/index.js"
+    },
+    "./tokens.css": "./styles/tokens.css",
+    "./fonts.css": "./styles/fonts.css",
+    "./base.css": "./styles/base.css"
+  },
+  "files": [
+    "dist",
+    "styles"
+  ],
+  "scripts": {
+    "build": "tsc -p tsconfig.build.json",
+    "tokens:css": "tsx scripts/build-tokens-css.ts",
+    "typecheck": "tsc --noEmit -p tsconfig.json",
+    "lint": "eslint . --max-warnings=0",
+    "test": "vitest run"
+  },
+  "devDependencies": {
+    "@smartestate/eslint-config": "workspace:*",
+    "@smartestate/tsconfig": "workspace:*",
+    "@types/node": "24.13.4",
+    "eslint": "10.10.0",
+    "tsx": "4.23.13",
+    "typescript": "6.0.3",
+    "vitest": "5.0.0"
+  }
+}

@@ -162,6 +162,35 @@ needs Docker). `pnpm test` runs both.
   feature's `index.ts`. See [ADR-0006](docs/adr/0006-frontend-data-access.md).
 - Development is same-origin: Vite proxies `/api`, `/health` and `/docs` to the API.
 
+## Design system
+
+Tokens live in [`packages/ui-tokens`](packages/ui-tokens); primitives live in
+`apps/web/src/shared/ui` and are imported through that folder's `index.ts`.
+
+- **Tokens are generated.** `src/tokens.ts` is the source of truth and
+  `styles/tokens.css` is produced by `pnpm tokens:css`; CI fails when the committed CSS is
+  stale. Each token records whether it came from Figma or was derived, and why: 39 of the 99
+  are read from the design, 60 are derived because the design is a light-only landing page with
+  no dark theme, no shadows and no status colours.
+- **Theming is a variable swap.** `[data-theme="dark"]` overrides only the colour group, and
+  `prefers-color-scheme` applies the same overrides when no explicit choice was made.
+  Tailwind utilities point at the variables through `@theme inline`, so they follow the theme.
+- **Three scripts, three faces.** Krona One has no Cyrillic and no Armenian, and Montserrat has
+  no Armenian, so `styles/fonts.css` selects a face per locale with `:lang()`: English keeps
+  the design faces, Russian uses Montserrat Bold for display, Armenian uses Noto Sans Armenian.
+- **Contrast is tested, not assumed.** Three values in the design fail WCAG AA and are corrected;
+  the token tests assert every foreground and background pair in both themes.
+- **No literal colours in components**, enforced by a test that scans the primitives for hex
+  codes, colour functions and non-token custom properties.
+
+```bash
+pnpm storybook
+```
+
+Storybook carries theme and locale in the toolbar, and each primitive has an `AllLanguages`
+story rendering Armenian, Russian and English side by side. See
+[ADR-0007](docs/adr/0007-design-system-tokens-and-multi-script-typography.md).
+
 ## Conventions
 
 - **Commits** follow [Conventional Commits](https://www.conventionalcommits.org). Allowed

@@ -44,6 +44,14 @@
         "RATE_LIMIT_*",
         "SWAGGER_ENABLED"
       ]
+    },
+    "build-storybook": {
+      "dependsOn": ["^build"],
+      "outputs": ["storybook-static/**"]
+    },
+    "tokens:css": {
+      "inputs": ["src/tokens.ts", "src/render-css.ts"],
+      "outputs": ["styles/tokens.css"]
     }
   }
 }

@@ -24,6 +24,8 @@
     "db:reset": "pnpm --filter @smartestate/api db:reset",
     "db:studio": "pnpm --filter @smartestate/api db:studio",
     "erd": "pnpm --filter @smartestate/api erd",
+    "tokens:css": "turbo run tokens:css",
+    "storybook": "pnpm --filter @smartestate/web storybook",
     "openapi:export": "turbo run openapi:export",
     "format": "prettier --write .",
     "format:check": "prettier --check .",

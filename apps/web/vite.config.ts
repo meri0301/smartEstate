@@ -1,10 +1,11 @@
+import tailwindcss from '@tailwindcss/vite';
 import react from '@vitejs/plugin-react';
 import { defineConfig } from 'vitest/config';
 
 const API_ORIGIN = 'http://localhost:3000';
 
 export default defineConfig({
-  plugins: [react()],
+  plugins: [react(), tailwindcss()],
   server: {
     // `host: true` binds 0.0.0.0 so the dev server is reachable from Docker.
     host: true,

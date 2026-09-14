@@ -38,10 +38,16 @@ jobs:
         run: |
           pnpm --filter @smartestate/web api:generate
           git diff --exit-code -- apps/web/src/shared/api/schema.d.ts
+      - name: Design tokens are up to date
+        run: |
+          pnpm tokens:css
+          git diff --exit-code -- packages/ui-tokens/styles/tokens.css
       - run: pnpm lint
       - run: pnpm typecheck
       - run: pnpm test
       - run: pnpm build
+      - name: Storybook builds, so every primitive story still compiles
+        run: pnpm turbo run build-storybook
 
   commitlint:
     name: Conventional Commits

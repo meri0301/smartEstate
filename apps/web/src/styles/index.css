@@ -1,0 +1,25 @@
+/*
+ * Single stylesheet entry for the application and for Storybook.
+ *
+ * Order matters:
+ *   1. Tailwind, which brings preflight and the utility engine.
+ *   2. The self-hosted faces. Each @fontsource stylesheet declares one
+ *      @font-face per subset with a unicode-range, so a browser downloads the
+ *      Armenian file only when it actually paints Armenian text.
+ *   3. The generated tokens, whose `@theme inline` block re-points Tailwind's
+ *      utilities at the custom properties so they follow the active theme.
+ *   4. The per-locale font selection, then the base element styles.
+ */
+@import 'tailwindcss';
+
+@import '@fontsource/krona-one/400.css';
+@import '@fontsource/montserrat/400.css';
+@import '@fontsource/montserrat/500.css';
+@import '@fontsource/montserrat/600.css';
+@import '@fontsource/montserrat/700.css';
+@import '@fontsource/noto-sans-armenian/400.css';
+@import '@fontsource/noto-sans-armenian/700.css';
+
+@import '@smartestate/ui-tokens/tokens.css';
+@import '@smartestate/ui-tokens/fonts.css';
+@import '@smartestate/ui-tokens/base.css';
