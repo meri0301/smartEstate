@@ -52,6 +52,11 @@
     "tokens:css": {
       "inputs": ["src/tokens.ts", "src/render-css.ts"],
       "outputs": ["styles/tokens.css"]
+    },
+    "i18n:check": {
+      "dependsOn": ["^build"],
+      "inputs": ["src/locales/**", "src/shared/i18n/**", "scripts/check-i18n.ts"],
+      "outputs": []
     }
   }
 }
