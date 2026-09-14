@@ -9,12 +9,10 @@ export {
 } from './detect.js';
 export {
   formatAmd,
-  formatArea,
   formatDate,
   formatList,
   formatNumber,
   formatPercent,
-  formatPricePerSqm,
   formatRelativeTime,
   type CurrencyOptions,
   type DateStyle,

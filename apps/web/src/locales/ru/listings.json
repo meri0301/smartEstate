@@ -4,6 +4,7 @@
   "photoCount": "{count, plural, =0 {Фотографий нет} one {# фотография} few {# фотографии} many {# фотографий} other {# фотографии}}",
   "floorOf": "{floor} этаж из {total}",
   "area": "{area} м²",
+  "meters": "{value} м",
   "pricePerSqm": "{price} за м²",
   "publishedRelative": "Опубликовано {when}",
   "noResults": "По этим фильтрам объявлений не найдено",

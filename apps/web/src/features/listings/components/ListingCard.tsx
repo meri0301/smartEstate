@@ -3,12 +3,7 @@ import type { JSX } from 'react';
 import { useTranslation } from 'react-i18next';
 import { Link } from 'react-router';
 import { useCurrentLocale } from '../../../shared/i18n/I18nProvider.js';
-import {
-  formatAmd,
-  formatArea,
-  formatPricePerSqm,
-  formatRelativeTime,
-} from '../../../shared/i18n/formatters.js';
+import { formatAmd, formatNumber, formatRelativeTime } from '../../../shared/i18n/formatters.js';
 import { Badge, Card, Heading, Text } from '../../../shared/ui/index.js';
 
 export interface ListingCardProps {
@@ -61,7 +56,7 @@ export function ListingCard({ listing, to, onHover }: ListingCardProps): JSX.Ele
               {formatAmd(listing.priceAmd, locale, { compact: true })}
             </Text>
             <Text as="span" size="sm" tone="muted">
-              {formatPricePerSqm(listing.pricePerSqmAmd, locale)}
+              {t('pricePerSqm', { price: formatAmd(listing.pricePerSqmAmd, locale) })}
             </Text>
           </div>
 
@@ -72,7 +67,9 @@ export function ListingCard({ listing, to, onHover }: ListingCardProps): JSX.Ele
           <Text size="sm" tone="muted">
             {[
               t('roomCount', { count: listing.rooms }),
-              formatArea(listing.totalArea, locale),
+              t('area', {
+                area: formatNumber(listing.totalArea, locale, { maximumFractionDigits: 1 }),
+              }),
               t('floorOf', { floor: listing.floor, total: listing.totalFloors }),
             ].join(' · ')}
           </Text>

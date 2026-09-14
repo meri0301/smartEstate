@@ -51,14 +51,6 @@ export function formatAmd(value: number, locale: Locale, options: CurrencyOption
 }
 
 /** Price per square metre, the comparison metric this market runs on. */
-export function formatPricePerSqm(value: number, locale: Locale): string {
-  return `${formatAmd(value, locale)}/m²`;
-}
-
-export function formatArea(value: number, locale: Locale): string {
-  return `${formatNumber(value, locale, { maximumFractionDigits: 1 })} m²`;
-}
-
 export function formatPercent(value: number, locale: Locale, fractionDigits = 0): string {
   return numberFormat(locale, {
     style: 'percent',

@@ -15,6 +15,12 @@ export interface ListingResultsProps {
   onRetry: () => void;
   /** Builds the detail path for one listing; the locale segment lives with the caller. */
   hrefOf: (listing: ListingSummary) => string;
+  /**
+   * 'grid' fills the width of the page; 'column' is the narrow list beside the
+   * map. The choice cannot be a viewport breakpoint, because the same viewport
+   * carries both layouts.
+   */
+  layout?: 'grid' | 'column';
   onHover?: ((id: string | undefined) => void) | undefined;
 }
 
@@ -34,11 +40,16 @@ export function ListingResults({
   onRetry,
   hrefOf,
   onHover,
+  layout = 'grid',
 }: ListingResultsProps): JSX.Element {
   const { t } = useTranslation(['listings', 'common']);
+  const gridClassName =
+    layout === 'column'
+      ? 'grid grid-cols-1 gap-4'
+      : 'grid grid-cols-1 gap-6 sm:grid-cols-2 xl:grid-cols-3';
 
   if (isLoading) {
-    return <ResultSkeletons />;
+    return <ResultSkeletons className={gridClassName} />;
   }
 
   if (error !== null) {
@@ -68,7 +79,7 @@ export function ListingResults({
 
   return (
     <div className="flex flex-col gap-8">
-      <ul className="grid grid-cols-1 gap-6 sm:grid-cols-2 xl:grid-cols-3">
+      <ul className={gridClassName}>
         {listings.map((listing) => (
           <ListingCard key={listing.id} listing={listing} to={hrefOf(listing)} onHover={onHover} />
         ))}
@@ -91,14 +102,10 @@ export function ListingResults({
 }
 
 /** Placeholders in the shape of the cards they replace, so the grid does not jump. */
-function ResultSkeletons(): JSX.Element {
+function ResultSkeletons({ className }: { className: string }): JSX.Element {
   const { t } = useTranslation('common');
   return (
-    <div
-      className="grid grid-cols-1 gap-6 sm:grid-cols-2 xl:grid-cols-3"
-      aria-busy
-      aria-label={t('loading')}
-    >
+    <div className={className} aria-busy aria-label={t('loading')}>
       {Array.from({ length: 6 }, (_, index) => (
         <Card key={index} padding="none" className="overflow-hidden">
           <Skeleton className="aspect-[4/3] w-full rounded-none" />

@@ -85,8 +85,9 @@ export function SearchPage(): JSX.Element {
 
   const areaDiffers = visibleArea !== undefined && visibleArea !== filters.bbox;
 
-  const results = (
+  const resultsWith = (layout: 'grid' | 'column'): JSX.Element => (
     <ListingResults
+      layout={layout}
       listings={listings}
       isLoading={search.isPending}
       error={search.error}
@@ -172,7 +173,7 @@ export function SearchPage(): JSX.Element {
           </div>
 
           {view === 'list' ? (
-            results
+            resultsWith('grid')
           ) : (
             <div className="grid gap-6 xl:grid-cols-[3fr_2fr]">
               <div className="relative">
@@ -198,7 +199,7 @@ export function SearchPage(): JSX.Element {
                   </div>
                 )}
               </div>
-              <div className="max-h-[40rem] overflow-y-auto pe-2">{results}</div>
+              <div className="max-h-[40rem] overflow-y-auto pe-2">{resultsWith('column')}</div>
             </div>
           )}
         </section>

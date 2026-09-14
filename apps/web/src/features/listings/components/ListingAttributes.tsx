@@ -2,7 +2,7 @@ import type { ListingDetail } from '@smartestate/contracts';
 import type { JSX, ReactNode } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useCurrentLocale } from '../../../shared/i18n/I18nProvider.js';
-import { formatArea, formatNumber } from '../../../shared/i18n/formatters.js';
+import { formatNumber } from '../../../shared/i18n/formatters.js';
 import { Heading } from '../../../shared/ui/index.js';
 
 export interface ListingAttributesProps {
@@ -20,16 +20,18 @@ export function ListingAttributes({ listing }: ListingAttributesProps): JSX.Elem
   const { t } = useTranslation('listings');
   const locale = useCurrentLocale();
   const yesNo = (value: boolean): string => (value ? t('common.yes') : t('common.no'));
+  const area = (value: number): string =>
+    t('area', { area: formatNumber(value, locale, { maximumFractionDigits: 1 }) });
 
   const rows: { term: string; value: ReactNode }[] = [
     { term: t('attributes.rooms'), value: t('roomCount', { count: listing.rooms }) },
-    { term: t('attributes.area'), value: formatArea(listing.totalArea, locale) },
+    { term: t('attributes.area'), value: area(listing.totalArea) },
     ...(listing.livingArea === null
       ? []
-      : [{ term: t('attributes.livingArea'), value: formatArea(listing.livingArea, locale) }]),
+      : [{ term: t('attributes.livingArea'), value: area(listing.livingArea) }]),
     ...(listing.kitchenArea === null
       ? []
-      : [{ term: t('attributes.kitchenArea'), value: formatArea(listing.kitchenArea, locale) }]),
+      : [{ term: t('attributes.kitchenArea'), value: area(listing.kitchenArea) }]),
     {
       term: t('attributes.floor'),
       value: t('floorOf', { floor: listing.floor, total: listing.building.totalFloors }),
@@ -40,7 +42,9 @@ export function ListingAttributes({ listing }: ListingAttributesProps): JSX.Elem
       : [
           {
             term: t('attributes.ceilingHeight'),
-            value: `${formatNumber(listing.ceilingHeight, locale, { maximumFractionDigits: 2 })} m`,
+            value: t('meters', {
+              value: formatNumber(listing.ceilingHeight, locale, { maximumFractionDigits: 2 }),
+            }),
           },
         ]),
     { term: t('attributes.balconies'), value: formatNumber(listing.balconyCount, locale) },

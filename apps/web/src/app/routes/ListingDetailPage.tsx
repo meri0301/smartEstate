@@ -9,12 +9,7 @@ import {
 } from '../../features/listings/index.js';
 import { ListingMap } from '../../features/map/index.js';
 import { useCurrentLocale } from '../../shared/i18n/I18nProvider.js';
-import {
-  formatAmd,
-  formatDate,
-  formatPricePerSqm,
-  formatRelativeTime,
-} from '../../shared/i18n/formatters.js';
+import { formatAmd, formatDate, formatRelativeTime } from '../../shared/i18n/formatters.js';
 import {
   Badge,
   Button,
@@ -107,7 +102,7 @@ export function ListingDetailPage(): JSX.Element {
             {formatAmd(data.priceAmd, locale)}
           </Text>
           <Text as="span" tone="muted">
-            {formatPricePerSqm(data.pricePerSqmAmd, locale)}
+            {t('listings:pricePerSqm', { price: formatAmd(data.pricePerSqmAmd, locale) })}
           </Text>
         </div>
 

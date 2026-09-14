@@ -1,12 +1,10 @@
 import { describe, expect, it } from 'vitest';
 import {
   formatAmd,
-  formatArea,
   formatDate,
   formatList,
   formatNumber,
   formatPercent,
-  formatPricePerSqm,
   formatRelativeTime,
 } from './formatters.js';
 
@@ -43,11 +41,8 @@ describe('formatAmd', () => {
 });
 
 describe('unit formatting', () => {
-  it('appends the square-metre unit', () => {
-    expect(formatArea(72.5, 'en')).toBe('72.5 m²');
-    expect(squash(formatPricePerSqm(625_000, 'en'))).toBe('֏625,000/m²');
-  });
-
+  // Units themselves are translated strings, not formatter output: see the
+  // "area", "pricePerSqm" and "meters" keys in the listings catalogue.
   it('shows the sign on a deviation percentage', () => {
     expect(formatPercent(-0.12, 'en')).toBe('-12%');
     expect(formatPercent(0.12, 'en')).toBe('+12%');

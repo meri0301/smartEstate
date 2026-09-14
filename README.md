@@ -253,7 +253,14 @@ Armenian is the default, English the fallback. The locale is the first path segm
 - **Messages are ICU**, not i18next plural suffixes, because Russian needs four plural
   categories and Armenian selects the singular for zero. Catalogues are namespaced per feature
   under `apps/web/src/locales/<locale>/` and typed, so a mistyped key fails `pnpm typecheck`.
-- **Formatting is `Intl`**, wrapped in `shared/i18n/formatters.ts`. Dram renders as ֏.
+- **Formatting is `Intl`**, wrapped in `shared/i18n/formatters.ts`. Dram renders as ֏. Units
+  are not formatter output: "m²" is Latin, so the square-metre and metre suffixes are translated
+  strings in the listings catalogue.
+- **Armenian needs the browser's full ICU data.** Current Chrome, Firefox and Safari ship it.
+  A few reduced builds (some Electron shells, Node without full-icu) do not, and there
+  `Intl` silently resolves `hy-AM` to `en-US`: the interface stays Armenian while dates and
+  relative times come out in English conventions. Nothing breaks, and
+  `Intl.DateTimeFormat.supportedLocalesOf(['hy-AM'])` tells you whether a given browser has it.
 - **The catalogue is checked**, for key parity, ICU syntax, and whether each plural block covers
   the categories its language needs. Key parity alone would accept a Russian message copied from
   the English two-form shape.

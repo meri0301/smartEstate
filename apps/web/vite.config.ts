@@ -2,7 +2,12 @@ import tailwindcss from '@tailwindcss/vite';
 import react from '@vitejs/plugin-react';
 import { defineConfig } from 'vitest/config';
 
-const API_ORIGIN = 'http://localhost:3000';
+/**
+ * Where the dev server proxies API calls. Overridable because port 3000 is a
+ * popular default and may already be taken by something else on the machine;
+ * set API_PROXY_TARGET to wherever the API is actually listening.
+ */
+const API_ORIGIN = process.env.API_PROXY_TARGET ?? 'http://localhost:3000';
 
 export default defineConfig({
   plugins: [react(), tailwindcss()],
