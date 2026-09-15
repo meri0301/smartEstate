@@ -388,6 +388,26 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/api/search/hybrid": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * Search by sentence: filters, words and meaning, fused
+         * @description Parses the sentence into filters, ranks the listings that pass them by full-text match and by embedding similarity, and fuses the two rankings with reciprocal rank fusion. Every result reports where each arm placed it. Without an embedding index or a model service the search runs lexically and says so.
+         */
+        post: operations["Search.hybridSearch"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/health": {
         parameters: {
             query?: never;
@@ -1029,6 +1049,98 @@ export interface components {
             /** @enum {string} */
             source: "model" | "cache" | "no-provider" | "quota" | "error" | "invalid" | "disabled";
         };
+        HybridSearchBodyDto: {
+            query: string;
+            /** @default 20 */
+            limit?: number;
+            filters?: {
+                priceMin?: number;
+                priceMax?: number;
+                roomsMin?: number;
+                roomsMax?: number;
+                areaMin?: number;
+                areaMax?: number;
+                districts?: string[];
+                buildingTypes?: ("STONE" | "PANEL" | "MONOLITH" | "KHRUSHCHYOVKA" | "STALINKA" | "NEW_BUILD")[];
+                conditions?: ("NEEDS_REPAIR" | "OLD_RENOVATION" | "GOOD" | "EURO_RENOVATION" | "DESIGNER")[];
+                excludeGroundFloor?: boolean;
+                excludeTopFloor?: boolean;
+                hasElevator?: boolean;
+                hasParking?: boolean;
+            };
+        };
+        HybridSearchResponseDto: {
+            query: string;
+            filters: {
+                priceMin?: number;
+                priceMax?: number;
+                roomsMin?: number;
+                roomsMax?: number;
+                areaMin?: number;
+                areaMax?: number;
+                districts?: string[];
+                buildingTypes?: ("STONE" | "PANEL" | "MONOLITH" | "KHRUSHCHYOVKA" | "STALINKA" | "NEW_BUILD")[];
+                conditions?: ("NEEDS_REPAIR" | "OLD_RENOVATION" | "GOOD" | "EURO_RENOVATION" | "DESIGNER")[];
+                excludeGroundFloor?: boolean;
+                excludeTopFloor?: boolean;
+                hasElevator?: boolean;
+                hasParking?: boolean;
+            };
+            unmapped: string[];
+            /** @enum {string} */
+            parseSource: "model" | "cache" | "no-provider" | "quota" | "error" | "invalid" | "disabled";
+            arms: ("lexical" | "semantic")[];
+            /** @enum {string} */
+            semanticSkipped?: "unavailable" | "not-indexed";
+            rrfK: number;
+            results: {
+                listing: {
+                    /** Format: uuid */
+                    id: string;
+                    publicId: string;
+                    /** @enum {string} */
+                    status: "DRAFT" | "PENDING_REVIEW" | "PUBLISHED" | "REJECTED" | "ARCHIVED";
+                    /** @enum {string} */
+                    locale: "hy" | "ru" | "en";
+                    title: string;
+                    priceAmd: number;
+                    pricePerSqmAmd: number;
+                    /** @enum {string} */
+                    originalCurrency: "AMD" | "USD" | "EUR";
+                    originalPrice: number | null;
+                    priceNegotiable: boolean;
+                    rooms: number;
+                    totalArea: number;
+                    floor: number;
+                    totalFloors: number;
+                    /** @enum {string} */
+                    buildingType: "STONE" | "PANEL" | "MONOLITH" | "KHRUSHCHYOVKA" | "STALINKA" | "NEW_BUILD";
+                    /** @enum {string} */
+                    condition: "NEEDS_REPAIR" | "OLD_RENOVATION" | "GOOD" | "EURO_RENOVATION" | "DESIGNER";
+                    district: {
+                        slug: string;
+                        name: {
+                            hy: string;
+                            ru: string;
+                            en: string;
+                        };
+                    };
+                    location: {
+                        lat: number;
+                        lon: number;
+                    };
+                    /** Format: uri */
+                    thumbnailUrl: string | null;
+                    /** Format: date-time */
+                    publishedAt: string;
+                };
+                rank: number;
+                score: number;
+                ranks: {
+                    [key: string]: number;
+                };
+            }[];
+        };
     };
     responses: never;
     parameters: never;
@@ -1059,6 +1171,8 @@ export type RecommendationRequestDto = components['schemas']['RecommendationRequ
 export type RecommendationResponseDto = components['schemas']['RecommendationResponseDto'];
 export type ParseQueryBodyDto = components['schemas']['ParseQueryBodyDto'];
 export type ParsedQueryDto = components['schemas']['ParsedQueryDto'];
+export type HybridSearchBodyDto = components['schemas']['HybridSearchBodyDto'];
+export type HybridSearchResponseDto = components['schemas']['HybridSearchResponseDto'];
 export type $defs = Record<string, never>;
 export interface operations {
     "Auth.register": {
@@ -1764,6 +1878,38 @@ export interface operations {
                 };
                 content: {
                     "application/json": components["schemas"]["ParsedQueryDto"];
+                };
+            };
+            /** @description Rate limit exceeded */
+            429: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    "Search.hybridSearch": {
+        parameters: {
+            query?: {
+                locale?: "hy" | "ru" | "en";
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["HybridSearchBodyDto"];
+            };
+        };
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HybridSearchResponseDto"];
                 };
             };
             /** @description Rate limit exceeded */

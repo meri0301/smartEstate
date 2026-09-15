@@ -134,7 +134,7 @@ Health probes live outside the prefix: `/health` (liveness) and `/health/ready` 
 | buildings | `GET /buildings/:id`, agent: `POST /buildings` (district derived from coordinates)                                                                                                          |
 | geo       | `GET /districts`, `GET /districts/:slug/boundary` (GeoJSON)                                                                                                                                 |
 
-Valuation, recommendations and natural-language search have sections of their own below.
+Valuation, recommendations, hybrid search and natural-language parsing have sections of their own below.
 
 - **Sessions.** Access token: 15-minute JWT in `Authorization: Bearer`. Refresh token: httpOnly,
   SameSite=Strict cookie scoped to `/api/auth`, rotated on every refresh; replaying a consumed
@@ -300,10 +300,52 @@ not place, and then runs an ordinary search with what is left standing.
 - **Twenty requests a minute per account**, per address when signed out — the same budget every
   AI endpoint draws on, since the free-tier allowance is shared by the whole installation.
 
+## Hybrid search
+
+A sentence is answered three ways at once: the exact part becomes filters, the words are matched by
+full-text search, and the meaning is matched by embedding similarity. The two rankings are fused by
+reciprocal rank fusion. See [ADR-0015](docs/adr/0015-hybrid-search.md).
+
+```
+POST /api/search/hybrid?locale=en   { "query": "...", "limit": 20, "filters": { ... } }
+  -> { query, filters, unmapped, parseSource, arms, semanticSkipped?, rrfK, results }
+```
+
+Each result carries `ranks`, saying where each arm placed it — so a listing found by meaning and
+not by words is visible as one.
+
+- **Both arms search inside the filters**, built by the same function the ordinary listing search
+  uses. A listing over budget is not a worse answer to "under 60 million"; it is not an answer.
+- **Fusion is by rank, not by score.** `ts_rank` and cosine similarity have no common scale — on
+  this encoder almost every pair scores between 0.75 and 0.95 — so the scores are discarded and
+  only the order is kept, at `k = 60`.
+- **Only the prose is embedded.** Rooms, area and district are already exact filters; in the vector
+  as well, a fuzzy match could argue with an exact constraint.
+- **One vector per listing, not one per language.** Measured on the real model, a Russian query
+  matches an Armenian passage at 0.878 against 0.923 for the same language, and both beat an
+  unrelated passage — cross-lingual retrieval works, so a second row would buy nothing.
+- **Armenian has no stemmer in PostgreSQL**, so the lexical arm matches Armenian word forms rather
+  than lemmas. Russian and English are stemmed.
+- **Without vectors the search runs lexically and says so**, in `semanticSkipped`:
+  `not-indexed` before the first backfill, `unavailable` when the encoder is down.
+
+### Building the index
+
+```bash
+pnpm embeddings:backfill
+```
+
+Needs the ML service running. Listings embed themselves when they are published, so this is for the
+first run, a model change and a reseed. It skips anything whose text and model version are
+unchanged, so a second run does no encoding at all.
+
 ## ML service
 
-FastAPI on `http://localhost:8000`, started by `docker compose up`. It values listings and
-explains the valuation; it never reads the database. See
+FastAPI on `http://localhost:8000`, started by `docker compose up`. It values listings, explains
+the valuation, and encodes text for hybrid search; it never reads the database. The encoder is
+`multilingual-e5-small` at a pinned revision, baked into the image so the container starts with no
+network — which is most of why that image is about 2.9 GB and takes half a minute to come up. Set
+`ML_EMBEDDINGS_ENABLED=false` to run valuations without loading it. See
 [`apps/ml/README.md`](apps/ml/README.md) and
 [ADR-0010](docs/adr/0010-price-valuation-model.md).
 

@@ -8,19 +8,28 @@ import {
   ApiTags,
   ApiTooManyRequestsResponse,
 } from '@nestjs/swagger';
-import { LOCALES, type ParsedQuery } from '@smartestate/contracts';
+import { LOCALES, type HybridSearchResponse, type ParsedQuery } from '@smartestate/contracts';
 import type { FastifyRequest } from 'fastify';
 import type { AuthenticatedUser } from '../../common/auth/authenticated-user.js';
 import { CurrentUser, Public } from '../../common/auth/decorators.js';
 import { resolveLocale } from '../../common/locale/locale.js';
 import { AiRateLimit } from '../../common/rate-limit/ai.rate-limit.js';
-import { ParsedQueryDto, ParseQueryBodyDto } from './search.dto.js';
+import { HybridSearchService } from './hybrid-search.service.js';
+import {
+  HybridSearchBodyDto,
+  HybridSearchResponseDto,
+  ParsedQueryDto,
+  ParseQueryBodyDto,
+} from './search.dto.js';
 import { QueryParserService } from './query-parser.service.js';
 
 @ApiTags('search')
 @Controller('search')
 export class SearchController {
-  constructor(private readonly parser: QueryParserService) {}
+  constructor(
+    private readonly parser: QueryParserService,
+    private readonly hybrid: HybridSearchService,
+  ) {}
 
   @Public()
   @Post('parse')
@@ -45,6 +54,33 @@ export class SearchController {
   ): Promise<ParsedQuery> {
     return this.parser.parse(
       body.query,
+      resolveLocale({ query: locale, userLocale: user?.locale, acceptLanguage }),
+    );
+  }
+
+  @Public()
+  @Post('hybrid')
+  // A search is a reading of the catalogue, not a resource being created.
+  @HttpCode(200)
+  // It may embed the query, which spends the shared model allowance.
+  @RouteConfig(AiRateLimit)
+  @ApiOperation({
+    summary: 'Search by sentence: filters, words and meaning, fused',
+    description:
+      'Parses the sentence into filters, ranks the listings that pass them by full-text match and by embedding similarity, and fuses the two rankings with reciprocal rank fusion. Every result reports where each arm placed it. Without an embedding index or a model service the search runs lexically and says so.',
+  })
+  @ApiQuery({ name: 'locale', required: false, enum: LOCALES })
+  @ApiBody({ type: HybridSearchBodyDto })
+  @ApiOkResponse({ type: HybridSearchResponseDto })
+  @ApiTooManyRequestsResponse({ description: 'Rate limit exceeded' })
+  hybridSearch(
+    @Body() body: HybridSearchBodyDto,
+    @CurrentUser() user: AuthenticatedUser | undefined,
+    @Query('locale') locale: string | undefined,
+    @Headers('accept-language') acceptLanguage: string | undefined,
+  ): Promise<HybridSearchResponse> {
+    return this.hybrid.search(
+      body,
       resolveLocale({ query: locale, userLocale: user?.locale, acceptLanguage }),
     );
   }
