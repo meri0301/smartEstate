@@ -179,3 +179,56 @@ export function applyParsedFilters(
     hasParking: parsed.hasParking ?? false,
   };
 }
+
+/**
+ * The filters as the sentence search understands them.
+ *
+ * The inverse of `applyParsedFilters`, and a narrowing: the panel can express
+ * things a sentence cannot — a map rectangle, a construction year, verified
+ * documents — and those stay behind. Sending them would be sending the ranking
+ * constraints it has no field for and would quietly drop anyway.
+ *
+ * Empty arrays and false flags are omitted rather than sent, so "no preference"
+ * reaches the server as an absent field and not as an empty list that reads like
+ * "none of these".
+ */
+export function toParsedFilters(values: ListingFilterValues): ParsedFilters {
+  const filters: ParsedFilters = {};
+  const number = (
+    key: 'priceMin' | 'priceMax' | 'roomsMin' | 'roomsMax' | 'areaMin' | 'areaMax',
+  ): void => {
+    const value = values[key];
+    if (value !== undefined) {
+      filters[key] = value;
+    }
+  };
+  number('priceMin');
+  number('priceMax');
+  number('roomsMin');
+  number('roomsMax');
+  number('areaMin');
+  number('areaMax');
+
+  if (values.districts.length > 0) {
+    filters.districts = values.districts;
+  }
+  if (values.buildingTypes.length > 0) {
+    filters.buildingTypes = values.buildingTypes;
+  }
+  if (values.conditions.length > 0) {
+    filters.conditions = values.conditions;
+  }
+  if (values.hasElevator) {
+    filters.hasElevator = true;
+  }
+  if (values.hasParking) {
+    filters.hasParking = true;
+  }
+  if (values.excludeGroundFloor) {
+    filters.excludeGroundFloor = true;
+  }
+  if (values.excludeTopFloor) {
+    filters.excludeTopFloor = true;
+  }
+  return filters;
+}

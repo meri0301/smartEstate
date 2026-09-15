@@ -74,6 +74,7 @@ const json = (body: unknown): Response =>
 
 /** Every search request the page made, newest last. */
 const searchUrls: URL[] = [];
+const hybridUrls: URL[] = [];
 
 /** What the parse endpoint should answer with, when a test exercises it. */
 const parseStub: { filters: Record<string, unknown>; unmapped: string[]; status: number } = {
@@ -81,6 +82,14 @@ const parseStub: { filters: Record<string, unknown>; unmapped: string[]; status:
   unmapped: [],
   status: 200,
 };
+
+/** What the hybrid endpoint should answer with, when a test exercises it. */
+const hybridStub: {
+  arms: string[];
+  semanticSkipped?: string;
+  unmapped: string[];
+  results: ReturnType<typeof listing>[];
+} = { arms: ['lexical', 'semantic'], unmapped: [], results: [] };
 
 function stubApi(page: ListingsPage): void {
   vi.spyOn(globalThis, 'fetch').mockImplementation((input) => {
@@ -101,6 +110,28 @@ function stubApi(page: ListingsPage): void {
               JSON.stringify({ statusCode: parseStub.status, error: 'x', message: 'no' }),
               { status: parseStub.status, headers: { 'content-type': 'application/json' } },
             ),
+      );
+    }
+    if (url.pathname === '/api/search/hybrid') {
+      hybridUrls.push(url);
+      return Promise.resolve(
+        json({
+          query: 'typed',
+          filters: parseStub.filters,
+          unmapped: hybridStub.unmapped,
+          parseSource: 'no-provider',
+          arms: hybridStub.arms,
+          ...(hybridStub.semanticSkipped === undefined
+            ? {}
+            : { semanticSkipped: hybridStub.semanticSkipped }),
+          rrfK: 60,
+          results: hybridStub.results.map((item, index) => ({
+            listing: item,
+            rank: index + 1,
+            score: 0.03 - index * 0.001,
+            ranks: { lexical: index + 1, semantic: index + 2 },
+          })),
+        }),
       );
     }
     if (url.pathname === '/api/listings') {
@@ -125,6 +156,11 @@ beforeEach(() => {
   searchUrls.length = 0;
   parseStub.filters = {};
   parseStub.unmapped = [];
+  hybridUrls.length = 0;
+  hybridStub.arms = ['lexical', 'semantic'];
+  hybridStub.semanticSkipped = undefined;
+  hybridStub.unmapped = [];
+  hybridStub.results = [];
   parseStub.status = 200;
 });
 
@@ -269,10 +305,11 @@ describe('the search screen', () => {
     expect(await screen.findByRole('button', { name: 'Remove Kentron' })).toBeInTheDocument();
   });
 
-  it('says which phrases it could not turn into a filter', async () => {
+  it('answers the phrases no filter could express, by ranking on them', async () => {
     stubApi({ items: [listing()], nextCursor: null });
     parseStub.filters = { districts: ['kentron'] };
-    parseStub.unmapped = ['quiet', 'school'];
+    hybridStub.unmapped = ['quiet', 'school'];
+    hybridStub.results = [listing({ title: 'Quiet flat by the park' })];
     renderAt('/en/listings');
     await screen.findByRole('link', { name: /Bright three-room flat/ });
 
@@ -282,7 +319,73 @@ describe('the search screen', () => {
     );
     await userEvent.click(screen.getByRole('button', { name: 'Read it' }));
 
-    expect(await screen.findByText('Not turned into a filter: quiet, school')).toBeInTheDocument();
+    expect(
+      await screen.findByText(/Ranked partly by what the descriptions mean, for: quiet, school/),
+    ).toBeInTheDocument();
+    expect(await screen.findByRole('link', { name: /Quiet flat by the park/ })).toBeInTheDocument();
+  });
+
+  it('puts the sentence in the address, so a ranked search is shareable', async () => {
+    stubApi({ items: [listing()], nextCursor: null });
+    hybridStub.results = [listing()];
+    const router = renderAt('/en/listings');
+    await screen.findByRole('link', { name: /Bright three-room flat/ });
+
+    await userEvent.type(
+      screen.getByRole('textbox', { name: /Describe what you are looking for/ }),
+      'quiet flat near a school',
+    );
+    await userEvent.click(screen.getByRole('button', { name: 'Read it' }));
+
+    await waitFor(() => {
+      expect(router.state.location.search).toContain('q=quiet+flat+near+a+school');
+    });
+  });
+
+  it('ranks rather than lists when the address carries a sentence', async () => {
+    stubApi({ items: [listing()], nextCursor: null });
+    hybridStub.results = [listing({ title: 'Ranked first' })];
+    renderAt('/en/listings?q=quiet%20flat');
+
+    expect(await screen.findByRole('link', { name: /Ranked first/ })).toBeInTheDocument();
+    // The ordinary paginated search must not also run: one answer is shown and
+    // paying for the other would be waste the reader never sees.
+    expect(searchUrls).toHaveLength(0);
+    expect(hybridUrls).toHaveLength(1);
+  });
+
+  it('offers no sort beside a ranking, because the ranking is the order', async () => {
+    stubApi({ items: [listing()], nextCursor: null });
+    hybridStub.results = [listing()];
+    renderAt('/en/listings?q=quiet%20flat');
+    await screen.findByRole('link', { name: /Bright three-room flat/ });
+
+    expect(screen.queryByRole('combobox', { name: 'Sort' })).not.toBeInTheDocument();
+  });
+
+  it('says when it could only match words, rather than pretending it matched meaning', async () => {
+    stubApi({ items: [listing()], nextCursor: null });
+    hybridStub.arms = ['lexical'];
+    hybridStub.semanticSkipped = 'not-indexed';
+    hybridStub.results = [listing()];
+    renderAt('/en/listings?q=quiet%20flat');
+
+    expect(await screen.findByText(/have not been indexed for meaning yet/)).toBeInTheDocument();
+  });
+
+  it('returns to the ordinary list when the sentence is cleared', async () => {
+    stubApi({ items: [listing()], nextCursor: null });
+    hybridStub.results = [listing()];
+    const router = renderAt('/en/listings?q=quiet%20flat&districts=arabkir');
+    await screen.findByRole('link', { name: /Bright three-room flat/ });
+
+    await userEvent.click(screen.getByRole('button', { name: 'Clear the sentence' }));
+
+    await waitFor(() => {
+      expect(router.state.location.search).not.toContain('q=');
+    });
+    // The filters survive: clearing the sentence is not clearing the search.
+    expect(router.state.location.search).toContain('districts=arabkir');
   });
 
   it('leaves the filters alone when the sentence cannot be read at all', async () => {

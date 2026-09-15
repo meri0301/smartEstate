@@ -5,8 +5,10 @@ import { Button, Input, Text } from '../../../shared/ui/index.js';
 import { useParseQuery } from '../api/use-parse-query.js';
 
 export interface NaturalLanguageSearchProps {
-  /** Called with the parse; the caller decides what to do with the filters. */
-  onParsed: (parsed: ParsedQuery) => void;
+  /** Called with the sentence and its parse; the caller decides what to do with both. */
+  onParsed: (query: string, parsed: ParsedQuery) => void;
+  /** The sentence currently being searched, so a shared link arrives with the box filled. */
+  initialQuery?: string;
 }
 
 /**
@@ -18,13 +20,17 @@ export interface NaturalLanguageSearchProps {
  * always looking at the filters that are actually applied, not at a promise
  * about what a sentence meant.
  *
- * Phrases the parser could not place are shown rather than swallowed. "Quiet"
- * and "near a school" are reasonable things to ask for and the system cannot act
- * on either yet; saying so is better than returning results that ignore them.
+ * The sentence itself goes back to the page as well as the filters. The filters
+ * are what the reader can see and correct; the sentence is what the ranking arms
+ * answer, and it is how "quiet" and "near a school" stop being phrases nobody
+ * acted on.
  */
-export function NaturalLanguageSearch({ onParsed }: NaturalLanguageSearchProps): JSX.Element {
+export function NaturalLanguageSearch({
+  onParsed,
+  initialQuery = '',
+}: NaturalLanguageSearchProps): JSX.Element {
   const { t } = useTranslation(['listings', 'common']);
-  const [text, setText] = useState('');
+  const [text, setText] = useState(initialQuery);
   const parse = useParseQuery();
 
   const submit = (event: SyntheticEvent): void => {
@@ -33,7 +39,11 @@ export function NaturalLanguageSearch({ onParsed }: NaturalLanguageSearchProps):
     if (query.length === 0) {
       return;
     }
-    parse.mutate(query, { onSuccess: onParsed });
+    parse.mutate(query, {
+      onSuccess: (parsed) => {
+        onParsed(query, parsed);
+      },
+    });
   };
 
   return (
@@ -62,14 +72,6 @@ export function NaturalLanguageSearch({ onParsed }: NaturalLanguageSearchProps):
       {parse.isError && (
         <Text size="sm" tone="danger" role="alert">
           {t('listings:search.askFailed')}
-        </Text>
-      )}
-
-      {parse.data !== undefined && parse.data.unmapped.length > 0 && (
-        <Text size="sm" tone="muted">
-          {t('listings:search.askUnmapped', {
-            phrases: parse.data.unmapped.join(', '),
-          })}
         </Text>
       )}
     </form>

@@ -31,7 +31,11 @@
     "askHint": "Armenian, Russian or English. Whatever is understood appears below as filters you can change.",
     "askSubmit": "Read it",
     "askFailed": "That could not be read just now. The filters below still work.",
-    "askUnmapped": "Not turned into a filter: {phrases}"
+    "rankedFor": "{count, plural, one {# listing} other {# listings}} ranked for “{query}”, best match first.",
+    "rankedByMeaning": "Ranked partly by what the descriptions mean, for: {phrases}.",
+    "semanticNotIndexed": "Ranked by matching words only — the descriptions have not been indexed for meaning yet.",
+    "semanticUnavailable": "Ranked by matching words only — the language service is unavailable.",
+    "clearQuery": "Clear the sentence"
   },
   "filters": {
     "price": "Price, AMD",

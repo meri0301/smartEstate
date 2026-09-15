@@ -329,6 +329,11 @@ not by words is visible as one.
 - **Without vectors the search runs lexically and says so**, in `semanticSkipped`:
   `not-indexed` before the first backfill, `unavailable` when the encoder is down.
 
+- **The sentence lives in the URL**, as `?q=`, so a ranked search is shareable and the back
+  button returns to the list it came from. A link carrying only a sentence has its filters read
+  into the address bar on arrival, so the reader always sees the constraints that were applied.
+  While a sentence is active the sort control is hidden: a ranking is already an order.
+
 ### Building the index
 
 ```bash

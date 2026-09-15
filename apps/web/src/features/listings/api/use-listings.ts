@@ -21,11 +21,17 @@ export type ListingsSearchFilters = Omit<
 /**
  * Cursor-paginated search. Each page's `nextCursor` becomes the next page
  * parameter; `hasNextPage` turns false when the API returns `null`.
+ *
+ * `enabled` is here because the search screen has two ways of answering: a
+ * sentence is answered by a ranking, and everything else by this. Running both
+ * would show one and pay for the other.
  */
 export function useListingsSearch(
   filters: ListingsSearchFilters,
+  options: { enabled?: boolean } = {},
 ): UseInfiniteQueryResult<InfiniteData<ListingsPage, string | undefined>, ApiError> {
   return useInfiniteQuery({
+    enabled: options.enabled ?? true,
     queryKey: queryKeys.listings.search(filters),
     queryFn: ({ pageParam }) =>
       apiRequest(() =>

@@ -11,7 +11,13 @@ export { ListingFilters, type ListingFiltersProps } from './components/ListingFi
 export { ListingGallery, type ListingGalleryProps } from './components/ListingGallery.js';
 export { ListingResults, type ListingResultsProps } from './components/ListingResults.js';
 export { PriceHistory, type PriceHistoryProps } from './components/PriceHistory.js';
-export { applyParsedFilters, toChips, type ChipLabels, type FilterChip } from './model/chips.js';
+export {
+  applyParsedFilters,
+  toChips,
+  toParsedFilters,
+  type ChipLabels,
+  type FilterChip,
+} from './model/chips.js';
 export {
   activeFilterCount,
   DEFAULT_SORT,
