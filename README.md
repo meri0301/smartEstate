@@ -223,6 +223,26 @@ each listing with the arithmetic that put it there. See
 - **Every run is stored** in `recommendation_sessions` with its preferences, strategy, method and
   full ordering, and the response carries the session id. The ranking comparison that is the
   thesis's contribution reads those rows, so they are written from the first request.
+- **Every result explains itself.** `explanation.highlights` names up to four criteria that put the
+  listing where it is — strengths first, then the trade-offs — each carrying the figure behind it as
+  a number the client formats. Trade-offs are named as readily as strengths: a recommender that
+  only gives reasons to say yes is an advertisement.
+- **A model phrases those reasons; it never produces them.** `explanation.text` is a paragraph in
+  the reader's language, present only when a model wrote one and it passed the check below. With
+  `LLM_PROVIDER=rule-based` there is no paragraph and nothing is lost: the highlights are the
+  explanation. `explanationSource` says which of the seven outcomes applied.
+- **Every number in a generated paragraph is checked against the figures it was given.** The model
+  is told a rank, a price, an area, a room count and the criteria — never the title, address or
+  description. Afterwards each number in its answer must trace back to one of those, allowing for
+  locale separators, million shorthand and the precision it was written to. A paragraph that quotes
+  anything else is discarded and the computed reasons stand alone; the check is per listing, so one
+  bad paragraph does not cost the page its prose. See
+  [ADR-0014](docs/adr/0014-explanations-and-numeric-grounding.md).
+- **One model call per page, not one per listing**, because the free tier allows about ten requests
+  a minute and a page of results would spend all of it. `explain: false` skips the call entirely,
+  for benchmarking and A/B runs.
+- **The prompt and raw response are stored on the session** when a model was actually reached, so a
+  paragraph can be reproduced months later.
 
 ## Language model layer
 
@@ -277,8 +297,8 @@ not place, and then runs an ordinary search with what is left standing.
   price, not the room count; price and area claim their bound words before rooms is matched.
 - **What could not be parsed is reported, not swallowed.** "quiet" and "near a school" come back in
   `unmapped`, because a filter the reader cannot see is worse than none.
-- **Twenty requests a minute per account**, per address when signed out, since the free-tier
-  allowance is shared by the whole installation.
+- **Twenty requests a minute per account**, per address when signed out — the same budget every
+  AI endpoint draws on, since the free-tier allowance is shared by the whole installation.
 
 ## ML service
 

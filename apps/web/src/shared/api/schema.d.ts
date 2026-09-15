@@ -359,7 +359,7 @@ export interface paths {
         put?: never;
         /**
          * Rank listings against a buyer’s stated preferences
-         * @description Hard limits filter the catalogue; the remainder are scored on each criterion and combined by the chosen method. Every run is stored so rankings can be compared later.
+         * @description Hard limits filter the catalogue; the remainder are scored on each criterion and combined by the chosen method. Each result carries the criteria that placed it there, and a paragraph phrasing them when a model wrote one that quotes only the figures it was given. Every run is stored so rankings can be compared later.
          */
         post: operations["Recommendations.recommend"];
         delete?: never;
@@ -921,6 +921,8 @@ export interface components {
              * @enum {string}
              */
             method?: "WEIGHTED_SUM" | "TOPSIS";
+            /** @default true */
+            explain?: boolean;
             experimentKey?: string;
         };
         RecommendationResponseDto: {
@@ -932,6 +934,8 @@ export interface components {
             method: "WEIGHTED_SUM" | "TOPSIS";
             candidateCount: number;
             omittedCriteria: ("price" | "value" | "size" | "rooms" | "location" | "condition" | "building")[];
+            /** @enum {string} */
+            explanationSource: "model" | "cache" | "no-provider" | "quota" | "error" | "invalid" | "disabled";
             items: {
                 listing: {
                     /** Format: uuid */
@@ -982,6 +986,21 @@ export interface components {
                     weight: number;
                     contribution: number;
                 }[];
+                explanation: {
+                    highlights: {
+                        /** @enum {string} */
+                        criterion: "price" | "value" | "size" | "rooms" | "location" | "condition" | "building";
+                        /** @enum {string} */
+                        kind: "strength" | "tradeoff";
+                        score: number;
+                        fact?: {
+                            /** @enum {string} */
+                            key: "budgetHeadroomPct" | "priceVsEstimatePct" | "areaSqm" | "rooms" | "distanceM" | "buildingAgeYears";
+                            value: number;
+                        };
+                    }[];
+                    text?: string;
+                };
             }[];
             /** Format: date-time */
             createdAt: string;
@@ -1714,6 +1733,13 @@ export interface operations {
                 content: {
                     "application/json": components["schemas"]["RecommendationResponseDto"];
                 };
+            };
+            /** @description Rate limit exceeded */
+            429: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
             };
         };
     };

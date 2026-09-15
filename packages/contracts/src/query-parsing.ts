@@ -9,6 +9,7 @@
  */
 import { z } from 'zod';
 import { buildingTypeSchema, conditionSchema } from './common/enums.js';
+import { ANSWER_SOURCES, answerSourceSchema, type AnswerSource } from './common/llm.js';
 import { amdAmountSchema } from './common/primitives.js';
 import { districtSlugSchema } from './geo.js';
 
@@ -58,22 +59,14 @@ export type ParsedFilterField = (typeof PARSED_FILTER_FIELDS)[number];
 /**
  * Where the parse came from.
  *
- * `model` and `cache` mean a language model produced it. Everything else names the
- * reason the deterministic parser did, which is more useful to a reader than a
- * single "rules" would be: a quota that is spent and a model that answered
- * nonsense are different problems.
+ * The shared list, not a copy of it: a parse is an answer a model could have
+ * produced, and it reports the same seven outcomes as every other such answer.
+ * Anything other than `model` or `cache` means the deterministic parser
+ * answered, and says why.
  */
-export const PARSE_SOURCES = [
-  'model',
-  'cache',
-  'no-provider',
-  'quota',
-  'error',
-  'invalid',
-  'disabled',
-] as const;
-export const parseSourceSchema = z.enum(PARSE_SOURCES);
-export type ParseSource = z.infer<typeof parseSourceSchema>;
+export const PARSE_SOURCES = ANSWER_SOURCES;
+export const parseSourceSchema = answerSourceSchema;
+export type ParseSource = AnswerSource;
 
 export const parseQueryBodySchema = z.object({
   query: z.string().trim().min(1).max(300),

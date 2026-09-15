@@ -10,12 +10,17 @@
  *
  * Twenty a minute is generous for a person typing sentences and well under the
  * ten-a-minute model quota once caching is taken into account.
+ *
+ * It lives in `common` rather than beside one feature because every AI endpoint
+ * draws on the same allowance: a limit that each feature set for itself would
+ * add up to no limit at all.
  */
 import type { FastifyRequest } from 'fastify';
 
 export const AI_REQUESTS_PER_MINUTE = 20;
 
-export const ParsedQueryBodyLimit = {
+/** Route configuration for an endpoint that may spend the model allowance. */
+export const AiRateLimit = {
   rateLimit: {
     max: AI_REQUESTS_PER_MINUTE,
     timeWindow: '1 minute',

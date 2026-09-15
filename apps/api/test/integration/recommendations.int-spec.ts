@@ -235,6 +235,68 @@ describe('recommendations', () => {
     expect(result.items).toEqual([]);
   });
 
+  it('explains every result from the arithmetic that placed it', async () => {
+    const result = await recommend({ preferences: preferences(), limit: 5 });
+
+    for (const item of result.items) {
+      const criteria = new Set(item.breakdown.map((entry) => entry.criterion));
+      for (const highlight of item.explanation.highlights) {
+        // A reason the ranking did not actually use would be a story about the
+        // listing rather than an account of its position.
+        expect(criteria.has(highlight.criterion)).toBe(true);
+        expect(highlight.score).toBeGreaterThanOrEqual(0);
+        expect(highlight.score).toBeLessThanOrEqual(1);
+      }
+      expect(item.explanation.highlights.length).toBeLessThanOrEqual(4);
+    }
+  });
+
+  it('explains itself with no model configured, and says where that came from', async () => {
+    // The test app runs the rule-based provider, which is also the default for a
+    // fresh checkout. The explanations are still complete; only the prose is not
+    // there, and a client renders the highlights in any of the three languages.
+    const result = await recommend({ preferences: preferences(), limit: 3 });
+
+    expect(result.explanationSource).toBe('no-provider');
+    for (const item of result.items) {
+      expect(item.explanation.text).toBeUndefined();
+      expect(item.explanation.highlights.length).toBeGreaterThan(0);
+    }
+  });
+
+  it('skips the model entirely when the caller does not want prose', async () => {
+    const result = await recommend({ preferences: preferences(), limit: 3, explain: false });
+
+    expect(result.explanationSource).toBe('disabled');
+    expect(result.items[0]?.explanation.highlights.length).toBeGreaterThan(0);
+  });
+
+  it('names the trade-offs, not only the strengths', async () => {
+    // A recommender that lists only reasons to say yes is an advertisement. Over
+    // a page of results at least one listing should be admitting to something.
+    const result = await recommend({ preferences: preferences(), limit: 10 });
+
+    const kinds = result.items.flatMap((item) =>
+      item.explanation.highlights.map((highlight) => highlight.kind),
+    );
+    expect(kinds).toContain('tradeoff');
+    expect(kinds).toContain('strength');
+  });
+
+  it('stores the reasons with the run, and no trace when no model was reached', async () => {
+    const result = await recommend({ preferences: preferences(), limit: 3 });
+
+    const session = await app
+      .prisma()
+      .recommendationSession.findUnique({ where: { id: result.sessionId } });
+
+    const stored = session?.results as { explanation: { highlights: unknown[] } }[];
+    expect(stored[0]?.explanation.highlights).toEqual(result.items[0]?.explanation.highlights);
+    expect(session?.llmTrace).toBeNull();
+    const inputs = session?.preferences as { explanationSource: string };
+    expect(inputs.explanationSource).toBe('no-provider');
+  });
+
   it('rejects preferences it cannot act on', async () => {
     const response = await app.request('POST', '/api/recommendations', {
       body: { preferences: { budgetAmd: -5 } },

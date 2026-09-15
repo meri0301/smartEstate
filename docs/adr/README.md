@@ -19,5 +19,6 @@ direction is a new record that supersedes the old one.
 | [0011](0011-transparent-ranking.md)                              | Ranking: transparent multi-criteria scoring, and what gets recorded            | Accepted |
 | [0012](0012-llm-provider-layer.md)                               | The language model layer: a fallback-first interface                           | Accepted |
 | [0013](0013-natural-language-query-parsing.md)                   | Natural-language query parsing: rules first, the model as a second opinion     | Accepted |
+| [0014](0014-explanations-and-numeric-grounding.md)               | Explanations: computed reasons, and a paragraph checked against its figures    | Accepted |
 
 Template: [0000-template.md](0000-template.md)

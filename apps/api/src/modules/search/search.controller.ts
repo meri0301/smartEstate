@@ -13,7 +13,7 @@ import type { FastifyRequest } from 'fastify';
 import type { AuthenticatedUser } from '../../common/auth/authenticated-user.js';
 import { CurrentUser, Public } from '../../common/auth/decorators.js';
 import { resolveLocale } from '../../common/locale/locale.js';
-import { ParsedQueryBodyLimit } from './search.rate-limit.js';
+import { AiRateLimit } from '../../common/rate-limit/ai.rate-limit.js';
 import { ParsedQueryDto, ParseQueryBodyDto } from './search.dto.js';
 import { QueryParserService } from './query-parser.service.js';
 
@@ -26,7 +26,7 @@ export class SearchController {
   @Post('parse')
   // Nothing is created: the answer is a reading of the request, not a resource.
   @HttpCode(200)
-  @RouteConfig(ParsedQueryBodyLimit)
+  @RouteConfig(AiRateLimit)
   @ApiOperation({
     summary: 'Turn a sentence into search filters',
     description:

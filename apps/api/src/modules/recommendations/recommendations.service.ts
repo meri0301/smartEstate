@@ -12,6 +12,7 @@ import { Injectable, Logger } from '@nestjs/common';
 import {
   RANKING_CRITERIA,
   type Locale,
+  type PreferenceProfile,
   type RankedListing,
   type RecommendationRequest,
   type RecommendationResponse,
@@ -24,6 +25,12 @@ import { toListingSummary } from '../listings/listing.mapper.js';
 import { ListingsRepository } from '../listings/listings.repository.js';
 import { toFeatures } from '../valuation/valuation.mapper.js';
 import { scoreCriteria } from './criteria.js';
+import { explain } from './explanation.js';
+import {
+  ExplanationsService,
+  wasModelContacted,
+  type ExplanationSubject,
+} from './explanations.service.js';
 import { normaliseWeights, rank, usableCriteria } from './mcda.js';
 import { RecommendationsRepository } from './recommendations.repository.js';
 
@@ -43,6 +50,7 @@ export class RecommendationsService {
     private readonly listings: ListingsRepository,
     private readonly sessions: RecommendationsRepository,
     private readonly ml: MlClient,
+    private readonly explanations: ExplanationsService,
   ) {}
 
   async recommend(
@@ -87,7 +95,21 @@ export class RecommendationsService {
     const weights = normaliseWeights(preferences.weights, usable);
 
     const ranked = rank(request.method, scored, weights).slice(0, request.limit);
-    const items = await this.hydrate(ranked, locale);
+    const items = await this.hydrate(ranked, preferences, deviations, locale);
+
+    // The reasons are already complete; this only decides whether a model is
+    // asked to phrase them, and a paragraph it writes is used only if every
+    // number in it is one it was given.
+    const phrased = request.explain
+      ? await this.explanations.phrase(items.map(toSubject), locale)
+      : { texts: new Map<string, string>(), source: 'disabled' as const, trace: undefined };
+
+    for (const item of items) {
+      const text = phrased.texts.get(item.listing.id);
+      if (text !== undefined) {
+        item.explanation.text = text;
+      }
+    }
 
     const sessionId = uuidV7();
     const createdAt = new Date();
@@ -101,13 +123,25 @@ export class RecommendationsService {
         method: request.method,
         candidateCount: candidates.length,
         omittedCriteria,
+        // Recorded with the run rather than only returned, so the evaluation can
+        // say how many of the stored rankings a model ever spoke about.
+        explanationSource: phrased.source,
       },
       results: items.map((item) => ({
         listingId: item.listing.id,
         rank: item.rank,
         score: item.score,
         breakdown: item.breakdown,
+        explanation: item.explanation,
       })),
+      // Stored beside the ranking it explains rather than in a table of its own,
+      // so a paragraph can be reproduced months later from the prompt and model
+      // that produced it. Null when no model was reached, because a prompt that
+      // was never sent is not evidence of anything and every run would carry one.
+      llmTrace:
+        phrased.trace !== undefined && wasModelContacted(phrased.source)
+          ? { ...phrased.trace }
+          : null,
     });
 
     return {
@@ -116,6 +150,7 @@ export class RecommendationsService {
       method: request.method,
       candidateCount: candidates.length,
       omittedCriteria,
+      explanationSource: phrased.source,
       items,
       createdAt: createdAt.toISOString(),
     };
@@ -155,13 +190,22 @@ export class RecommendationsService {
     return deviations;
   }
 
-  /** Turns ranked rows into the summaries the client renders. */
+  /**
+   * Turns ranked rows into the summaries the client renders.
+   *
+   * The explanation is computed here rather than later because this is where the
+   * row, the breakdown and the preferences are all still in scope. It is the
+   * answer to "why this one?" on its own; anything a model adds later is
+   * phrasing on top of it.
+   */
   private async hydrate(
     ranked: readonly {
       candidate: ListingRow;
       score: number;
       breakdown: RankedListing['breakdown'];
     }[],
+    preferences: PreferenceProfile,
+    deviations: ReadonlyMap<string, number>,
     locale: Locale,
   ): Promise<RankedListing[]> {
     const ids = ranked.map((entry) => entry.candidate.id);
@@ -184,8 +228,26 @@ export class RecommendationsService {
         weight: roundTo(item.weight, 4),
         contribution: roundTo(item.contribution, 4),
       })),
+      explanation: explain({
+        row: entry.candidate,
+        breakdown: entry.breakdown,
+        preferences,
+        deviationPct: deviations.get(entry.candidate.id),
+      }),
     }));
   }
+}
+
+/** What the model is told about one result: figures, and nothing else. */
+function toSubject(item: RankedListing): ExplanationSubject {
+  return {
+    listingId: item.listing.id,
+    rank: item.rank,
+    priceAmd: item.listing.priceAmd,
+    areaSqm: item.listing.totalArea,
+    rooms: item.listing.rooms,
+    explanation: item.explanation,
+  };
 }
 
 function roundTo(value: number, decimals: number): number {

@@ -13,6 +13,7 @@ import {
   isoDateTimeSchema,
   uuidSchema,
 } from './common/primitives.js';
+import { answerSourceSchema } from './common/llm.js';
 import { districtSlugSchema } from './geo.js';
 import { listingSummarySchema } from './listings.js';
 
@@ -98,6 +99,68 @@ export const criterionScoreSchema = z.object({
 });
 export type CriterionScore = z.infer<typeof criterionScoreSchema>;
 
+/**
+ * A figure a reason is about.
+ *
+ * Kept as a number with a named key rather than a formatted string, because the
+ * reader's language decides how it is written and the reader's browser is
+ * better at that than this server is. It also keeps the guardrail simple: every
+ * number a user sees came from here, and this came from the database or the
+ * model service.
+ */
+export const EXPLANATION_FACTS = [
+  /** How far under the stated budget the asking price is, as a percentage. */
+  'budgetHeadroomPct',
+  /** Asking price against the model's estimate, as a percentage. Negative is a bargain. */
+  'priceVsEstimatePct',
+  /** Floor area, m². */
+  'areaSqm',
+  /** Room count. */
+  'rooms',
+  /** Metres from the buyer's anchor point. */
+  'distanceM',
+  /** Age of the building, in years. */
+  'buildingAgeYears',
+] as const;
+export const explanationFactSchema = z.enum(EXPLANATION_FACTS);
+export type ExplanationFact = z.infer<typeof explanationFactSchema>;
+
+/**
+ * One reason a listing is where it is.
+ *
+ * Computed, never generated. A strength is a criterion that pushed the listing
+ * up; a trade-off is one it does badly on and the reader should know about
+ * before they get attached to it. Showing only the strengths would make the
+ * recommender an advertisement.
+ */
+export const explanationHighlightSchema = z.object({
+  criterion: rankingCriterionSchema,
+  kind: z.enum(['strength', 'tradeoff']),
+  /** The criterion's score, 0–1. */
+  score: z.number().min(0).max(1),
+  /** The computed figure behind the reason, when the criterion has one. */
+  fact: z.object({ key: explanationFactSchema, value: z.number() }).optional(),
+});
+export type ExplanationHighlight = z.infer<typeof explanationHighlightSchema>;
+
+/**
+ * Why one listing is where it is, in two layers.
+ *
+ * `highlights` is the explanation. It is computed from the breakdown, it is
+ * always present, and a client can render a complete answer to "why this one?"
+ * from it alone in any of the three languages.
+ *
+ * `text` is the same facts phrased as a paragraph by a language model, and is
+ * absent whenever no model wrote one or the one it wrote failed the check that
+ * every number in it was a number it was given. Prose is fluency, not
+ * information: nothing is lost when it is missing.
+ */
+export const rankedExplanationSchema = z.object({
+  highlights: z.array(explanationHighlightSchema).max(4),
+  text: z.string().max(800).optional(),
+});
+export type RankedExplanation = z.infer<typeof rankedExplanationSchema>;
+
 export const rankedListingSchema = z.object({
   listing: listingSummarySchema,
   /** Position in the result, starting at 1. */
@@ -106,6 +169,7 @@ export const rankedListingSchema = z.object({
   score: z.number().min(0).max(1),
   /** Ordered by contribution, so the first entry is the strongest reason. */
   breakdown: z.array(criterionScoreSchema),
+  explanation: rankedExplanationSchema,
 });
 export type RankedListing = z.infer<typeof rankedListingSchema>;
 
@@ -114,6 +178,14 @@ export const recommendationRequestSchema = z.object({
   limit: z.number().int().min(1).max(50).default(10),
   strategy: rankingStrategySchema.default('MCDA'),
   method: mcdaMethodSchema.default('WEIGHTED_SUM'),
+  /**
+   * Whether to ask a language model to phrase the explanations.
+   *
+   * The computed highlights are returned either way; this only decides whether
+   * prose is attempted on top of them. A caller that is batching, benchmarking
+   * or running an experiment turns it off so the run costs no quota.
+   */
+  explain: z.boolean().default(true),
   /**
    * Groups a run with others in the same experiment, so two strategies can be
    * compared later on the same preferences.
@@ -136,6 +208,12 @@ export const recommendationResponseSchema = z.object({
    * better than quietly ranking on something other than what was asked for.
    */
   omittedCriteria: z.array(rankingCriterionSchema),
+  /**
+   * How the prose was produced, for the whole run: one model call phrases every
+   * listing on the page, because a free tier that allows ten requests a minute
+   * cannot afford one call per result.
+   */
+  explanationSource: answerSourceSchema,
   items: z.array(rankedListingSchema),
   createdAt: isoDateTimeSchema,
 });

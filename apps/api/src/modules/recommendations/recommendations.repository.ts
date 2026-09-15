@@ -18,8 +18,16 @@ export interface NewRecommendationSession {
   experimentKey: string | null;
   /** The inputs, verbatim, plus what the run decided about them. */
   preferences: Prisma.InputJsonValue;
-  /** The ordering, with each listing's score and breakdown. */
+  /** The ordering, with each listing's score, breakdown and computed reasons. */
   results: Prisma.InputJsonValue;
+  /**
+   * The prompt, model and raw response behind the phrased explanations.
+   *
+   * Null when no model was asked, which is the default. Stored here rather than
+   * in a table of its own because a trace without the ranking it explains is not
+   * reproducible, and the two are written in the same transaction.
+   */
+  llmTrace: Prisma.InputJsonValue | null;
 }
 
 @Injectable()
@@ -35,6 +43,7 @@ export class RecommendationsRepository {
         experimentKey: session.experimentKey,
         preferences: session.preferences,
         results: session.results,
+        llmTrace: session.llmTrace ?? Prisma.DbNull,
       },
     });
   }

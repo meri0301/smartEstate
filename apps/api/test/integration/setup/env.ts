@@ -18,3 +18,8 @@ process.env.SWAGGER_ENABLED = 'true';
 // Credential routes carry a 10/min limit that the auth suite would trip; the
 // platform suite re-enables limiting explicitly to test it.
 process.env.RATE_LIMIT_ENABLED = 'false';
+// No cache. A Redis left running from the development compose stack would
+// otherwise let a second identical request answer from a previous test's stored
+// value, which is the one thing an integration test must never do quietly. The
+// caching itself is tested where it lives, against a fake.
+delete process.env.REDIS_URL;

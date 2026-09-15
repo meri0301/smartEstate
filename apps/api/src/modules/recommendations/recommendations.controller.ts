@@ -1,9 +1,18 @@
 import { Body, Controller, Headers, HttpCode, Post, Query } from '@nestjs/common';
-import { ApiBody, ApiOkResponse, ApiOperation, ApiQuery, ApiTags } from '@nestjs/swagger';
+import { RouteConfig } from '@nestjs/platform-fastify';
+import {
+  ApiBody,
+  ApiOkResponse,
+  ApiOperation,
+  ApiQuery,
+  ApiTags,
+  ApiTooManyRequestsResponse,
+} from '@nestjs/swagger';
 import { LOCALES, type RecommendationResponse } from '@smartestate/contracts';
 import type { AuthenticatedUser } from '../../common/auth/authenticated-user.js';
 import { CurrentUser, Public } from '../../common/auth/decorators.js';
 import { resolveLocale } from '../../common/locale/locale.js';
+import { AiRateLimit } from '../../common/rate-limit/ai.rate-limit.js';
 import { RecommendationRequestDto, RecommendationResponseDto } from './recommendations.dto.js';
 import { RecommendationsService } from './recommendations.service.js';
 
@@ -17,10 +26,13 @@ export class RecommendationsController {
   // A ranking is a computation over the catalogue, not a new resource, so the
   // body-carrying verb does not imply 201.
   @HttpCode(200)
+  // A run may ask a model to phrase its explanations, so it draws on the same
+  // shared allowance as every other AI endpoint.
+  @RouteConfig(AiRateLimit)
   @ApiOperation({
     summary: 'Rank listings against a buyer’s stated preferences',
     description:
-      'Hard limits filter the catalogue; the remainder are scored on each criterion and combined by the chosen method. Every run is stored so rankings can be compared later.',
+      'Hard limits filter the catalogue; the remainder are scored on each criterion and combined by the chosen method. Each result carries the criteria that placed it there, and a paragraph phrasing them when a model wrote one that quotes only the figures it was given. Every run is stored so rankings can be compared later.',
   })
   @ApiQuery({
     name: 'locale',
@@ -30,6 +42,7 @@ export class RecommendationsController {
   })
   @ApiBody({ type: RecommendationRequestDto })
   @ApiOkResponse({ type: RecommendationResponseDto })
+  @ApiTooManyRequestsResponse({ description: 'Rate limit exceeded' })
   recommend(
     @Body() body: RecommendationRequestDto,
     @CurrentUser() user: AuthenticatedUser | undefined,

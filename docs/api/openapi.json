@@ -1305,7 +1305,7 @@
     },
     "/api/recommendations": {
       "post": {
-        "description": "Hard limits filter the catalogue; the remainder are scored on each criterion and combined by the chosen method. Every run is stored so rankings can be compared later.",
+        "description": "Hard limits filter the catalogue; the remainder are scored on each criterion and combined by the chosen method. Each result carries the criteria that placed it there, and a paragraph phrasing them when a model wrote one that quotes only the figures it was given. Every run is stored so rankings can be compared later.",
         "operationId": "Recommendations.recommend",
         "parameters": [
           {
@@ -1343,6 +1343,9 @@
                 }
               }
             }
+          },
+          "429": {
+            "description": "Rate limit exceeded"
           }
         },
         "summary": "Rank listings against a buyer’s stated preferences",
@@ -3556,6 +3559,10 @@
               "TOPSIS"
             ]
           },
+          "explain": {
+            "default": true,
+            "type": "boolean"
+          },
           "experimentKey": {
             "type": "string",
             "minLength": 1,
@@ -3607,6 +3614,18 @@
                 "building"
               ]
             }
+          },
+          "explanationSource": {
+            "type": "string",
+            "enum": [
+              "model",
+              "cache",
+              "no-provider",
+              "quota",
+              "error",
+              "invalid",
+              "disabled"
+            ]
           },
           "items": {
             "type": "array",
@@ -3848,13 +3867,90 @@
                     ],
                     "additionalProperties": false
                   }
+                },
+                "explanation": {
+                  "type": "object",
+                  "properties": {
+                    "highlights": {
+                      "maxItems": 4,
+                      "type": "array",
+                      "items": {
+                        "type": "object",
+                        "properties": {
+                          "criterion": {
+                            "type": "string",
+                            "enum": [
+                              "price",
+                              "value",
+                              "size",
+                              "rooms",
+                              "location",
+                              "condition",
+                              "building"
+                            ]
+                          },
+                          "kind": {
+                            "type": "string",
+                            "enum": [
+                              "strength",
+                              "tradeoff"
+                            ]
+                          },
+                          "score": {
+                            "type": "number",
+                            "minimum": 0,
+                            "maximum": 1
+                          },
+                          "fact": {
+                            "type": "object",
+                            "properties": {
+                              "key": {
+                                "type": "string",
+                                "enum": [
+                                  "budgetHeadroomPct",
+                                  "priceVsEstimatePct",
+                                  "areaSqm",
+                                  "rooms",
+                                  "distanceM",
+                                  "buildingAgeYears"
+                                ]
+                              },
+                              "value": {
+                                "type": "number"
+                              }
+                            },
+                            "required": [
+                              "key",
+                              "value"
+                            ],
+                            "additionalProperties": false
+                          }
+                        },
+                        "required": [
+                          "criterion",
+                          "kind",
+                          "score"
+                        ],
+                        "additionalProperties": false
+                      }
+                    },
+                    "text": {
+                      "type": "string",
+                      "maxLength": 800
+                    }
+                  },
+                  "required": [
+                    "highlights"
+                  ],
+                  "additionalProperties": false
                 }
               },
               "required": [
                 "listing",
                 "rank",
                 "score",
-                "breakdown"
+                "breakdown",
+                "explanation"
               ],
               "additionalProperties": false
             }
@@ -3871,6 +3967,7 @@
           "method",
           "candidateCount",
           "omittedCriteria",
+          "explanationSource",
           "items",
           "createdAt"
         ],
