@@ -348,6 +348,26 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/api/recommendations": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * Rank listings against a buyer’s stated preferences
+         * @description Hard limits filter the catalogue; the remainder are scored on each criterion and combined by the chosen method. Every run is stored so rankings can be compared later.
+         */
+        post: operations["Recommendations.recommend"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/health": {
         parameters: {
             query?: never;
@@ -828,6 +848,124 @@ export interface components {
             calculatedAt: string;
             isStale: boolean;
         };
+        RecommendationRequestDto: {
+            preferences: {
+                budgetAmd: number;
+                /** @default 1 */
+                roomsMin?: number;
+                roomsMax?: number;
+                areaMin?: number;
+                /** @default [] */
+                districts?: string[];
+                anchor?: {
+                    lat: number;
+                    lon: number;
+                };
+                /**
+                 * @default {
+                 *       "price": 1,
+                 *       "value": 1,
+                 *       "size": 0.6,
+                 *       "rooms": 0.8,
+                 *       "location": 0.8,
+                 *       "condition": 0.6,
+                 *       "building": 0.4
+                 *     }
+                 */
+                weights?: {
+                    /** @default 1 */
+                    price?: number;
+                    /** @default 1 */
+                    value?: number;
+                    /** @default 0.6 */
+                    size?: number;
+                    /** @default 0.8 */
+                    rooms?: number;
+                    /** @default 0.8 */
+                    location?: number;
+                    /** @default 0.6 */
+                    condition?: number;
+                    /** @default 0.4 */
+                    building?: number;
+                };
+            };
+            /** @default 10 */
+            limit?: number;
+            /**
+             * @default MCDA
+             * @enum {string}
+             */
+            strategy?: "MCDA" | "LEARNED_BASELINE";
+            /**
+             * @default WEIGHTED_SUM
+             * @enum {string}
+             */
+            method?: "WEIGHTED_SUM" | "TOPSIS";
+            experimentKey?: string;
+        };
+        RecommendationResponseDto: {
+            /** Format: uuid */
+            sessionId: string;
+            /** @enum {string} */
+            strategy: "MCDA" | "LEARNED_BASELINE";
+            /** @enum {string} */
+            method: "WEIGHTED_SUM" | "TOPSIS";
+            candidateCount: number;
+            omittedCriteria: ("price" | "value" | "size" | "rooms" | "location" | "condition" | "building")[];
+            items: {
+                listing: {
+                    /** Format: uuid */
+                    id: string;
+                    publicId: string;
+                    /** @enum {string} */
+                    status: "DRAFT" | "PENDING_REVIEW" | "PUBLISHED" | "REJECTED" | "ARCHIVED";
+                    /** @enum {string} */
+                    locale: "hy" | "ru" | "en";
+                    title: string;
+                    priceAmd: number;
+                    pricePerSqmAmd: number;
+                    /** @enum {string} */
+                    originalCurrency: "AMD" | "USD" | "EUR";
+                    originalPrice: number | null;
+                    priceNegotiable: boolean;
+                    rooms: number;
+                    totalArea: number;
+                    floor: number;
+                    totalFloors: number;
+                    /** @enum {string} */
+                    buildingType: "STONE" | "PANEL" | "MONOLITH" | "KHRUSHCHYOVKA" | "STALINKA" | "NEW_BUILD";
+                    /** @enum {string} */
+                    condition: "NEEDS_REPAIR" | "OLD_RENOVATION" | "GOOD" | "EURO_RENOVATION" | "DESIGNER";
+                    district: {
+                        slug: string;
+                        name: {
+                            hy: string;
+                            ru: string;
+                            en: string;
+                        };
+                    };
+                    location: {
+                        lat: number;
+                        lon: number;
+                    };
+                    /** Format: uri */
+                    thumbnailUrl: string | null;
+                    /** Format: date-time */
+                    publishedAt: string;
+                };
+                rank: number;
+                score: number;
+                breakdown: {
+                    /** @enum {string} */
+                    criterion: "price" | "value" | "size" | "rooms" | "location" | "condition" | "building";
+                    score: number;
+                    weight: number;
+                    contribution: number;
+                }[];
+            }[];
+            /** Format: date-time */
+            createdAt: string;
+        };
     };
     responses: never;
     parameters: never;
@@ -854,6 +992,8 @@ export type ListingTransitionBodyDto = components['schemas']['ListingTransitionB
 export type BuildingDto = components['schemas']['BuildingDto'];
 export type CreateBuildingBodyDto = components['schemas']['CreateBuildingBodyDto'];
 export type ValuationDto = components['schemas']['ValuationDto'];
+export type RecommendationRequestDto = components['schemas']['RecommendationRequestDto'];
+export type RecommendationResponseDto = components['schemas']['RecommendationResponseDto'];
 export type $defs = Record<string, never>;
 export interface operations {
     "Auth.register": {
@@ -1502,6 +1642,32 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content?: never;
+            };
+        };
+    };
+    "Recommendations.recommend": {
+        parameters: {
+            query?: {
+                /** @description Response locale for listing texts */
+                locale?: "hy" | "ru" | "en";
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["RecommendationRequestDto"];
+            };
+        };
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["RecommendationResponseDto"];
+                };
             };
         };
     };

@@ -203,6 +203,27 @@ shows no panel.
 - **Every number comes from the model or the database.** Nothing on that panel is generated text,
   and the disclaimer says plainly that this estimates an asking price, not a sale price.
 
+## Recommendations
+
+`POST /api/recommendations` ranks the catalogue against a buyer's stated preferences and returns
+each listing with the arithmetic that put it there. See
+[ADR-0011](docs/adr/0011-transparent-ranking.md).
+
+- **Seven named criteria**: price against budget, value against the model's estimate, size, rooms,
+  location, condition, and the building. Each scores to a number between 0 and 1 by a curve
+  written out in `criteria.ts`, so a claim like "0.8 on price because it is 20% under budget" can
+  be checked by hand.
+- **Limits filter, preferences rank.** Budget, rooms, minimum area and districts are SQL filters.
+  Everything else is a matter of degree.
+- **Two aggregation methods**, weighted sum and TOPSIS, over the same criteria. They disagree in a
+  way the thesis reports rather than resolves.
+- **A criterion that cannot be measured is dropped, not defaulted.** With no model service there is
+  no `value` score, so it leaves the run, the other weights are renormalised, and the response
+  says which criteria were omitted.
+- **Every run is stored** in `recommendation_sessions` with its preferences, strategy, method and
+  full ordering, and the response carries the session id. The ranking comparison that is the
+  thesis's contribution reads those rows, so they are written from the first request.
+
 ## ML service
 
 FastAPI on `http://localhost:8000`, started by `docker compose up`. It values listings and

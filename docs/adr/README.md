@@ -16,5 +16,6 @@ direction is a new record that supersedes the old one.
 | [0008](0008-internationalisation.md)                             | Internationalisation: locale in the URL, ICU messages, and a checked catalogue | Accepted |
 | [0009](0009-listing-lifecycle-rbac-abac.md)                      | Listing lifecycle: a state machine, and ABAC layered on RBAC                   | Accepted |
 | [0010](0010-price-valuation-model.md)                            | Price valuation: target, validation, explanations and interval                 | Accepted |
+| [0011](0011-transparent-ranking.md)                              | Ranking: transparent multi-criteria scoring, and what gets recorded            | Accepted |
 
 Template: [0000-template.md](0000-template.md)

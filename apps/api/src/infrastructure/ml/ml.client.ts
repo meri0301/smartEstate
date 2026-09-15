@@ -66,6 +66,15 @@ const explainResponseSchema = z.object({
 });
 export type MlExplanation = z.infer<typeof explainResponseSchema>;
 
+const predictResponseSchema = z.object({
+  modelVersion: z.string().min(1),
+  estimates: z.array(estimateSchema),
+});
+export type MlPrediction = z.infer<typeof predictResponseSchema>;
+
+/** The service refuses a larger batch, and so does this client, with a clearer message. */
+export const ML_MAX_BATCH = 100;
+
 const modelInfoSchema = z.object({
   modelVersion: z.string().min(1),
   trainedAt: z.string(),
@@ -122,6 +131,37 @@ export class MlClient {
         .map((issue) => `${issue.path.join('.')}: ${issue.message}`)
         .join('; ');
       throw new MlUnavailableError(`it answered with an unexpected shape (${detail})`);
+    }
+    return parsed.data;
+  }
+
+  /**
+   * Value a batch of listings without asking why.
+   *
+   * Ranking needs an estimate for every candidate and a reason for none of them,
+   * so this is the cheap call: one round trip for a whole page of results rather
+   * than one per listing.
+   */
+  async predict(listings: readonly MlListingFeatures[]): Promise<MlPrediction> {
+    if (listings.length === 0) {
+      return { modelVersion: await this.modelVersion(), estimates: [] };
+    }
+    if (listings.length > ML_MAX_BATCH) {
+      throw new MlUnavailableError(
+        `a batch of ${String(listings.length)} exceeds the limit of ${String(ML_MAX_BATCH)}`,
+      );
+    }
+    const body = await this.request('POST', '/predict', { listings });
+    const parsed = predictResponseSchema.safeParse(body);
+    if (!parsed.success) {
+      throw new MlUnavailableError('it answered /predict with an unexpected shape');
+    }
+    if (parsed.data.estimates.length !== listings.length) {
+      // The estimates are matched to listings by position, so a short answer
+      // would silently attach one listing's price to another.
+      throw new MlUnavailableError(
+        `it returned ${String(parsed.data.estimates.length)} estimates for ${String(listings.length)} listings`,
+      );
     }
     return parsed.data;
   }

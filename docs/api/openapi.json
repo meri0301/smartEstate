@@ -1303,6 +1303,54 @@
         ]
       }
     },
+    "/api/recommendations": {
+      "post": {
+        "description": "Hard limits filter the catalogue; the remainder are scored on each criterion and combined by the chosen method. Every run is stored so rankings can be compared later.",
+        "operationId": "Recommendations.recommend",
+        "parameters": [
+          {
+            "name": "locale",
+            "required": false,
+            "in": "query",
+            "description": "Response locale for listing texts",
+            "schema": {
+              "enum": [
+                "hy",
+                "ru",
+                "en"
+              ],
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/RecommendationRequestDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/RecommendationResponseDto"
+                }
+              }
+            }
+          }
+        },
+        "summary": "Rank listings against a buyer’s stated preferences",
+        "tags": [
+          "recommendations"
+        ]
+      }
+    },
     "/health": {
       "get": {
         "operationId": "Health.check",
@@ -3317,6 +3365,464 @@
           "factors",
           "calculatedAt",
           "isStale"
+        ],
+        "additionalProperties": false
+      },
+      "RecommendationRequestDto": {
+        "type": "object",
+        "properties": {
+          "preferences": {
+            "type": "object",
+            "properties": {
+              "budgetAmd": {
+                "type": "integer",
+                "minimum": 0,
+                "maximum": 9007199254740991
+              },
+              "roomsMin": {
+                "default": 1,
+                "type": "integer",
+                "minimum": 1,
+                "maximum": 10
+              },
+              "roomsMax": {
+                "type": "integer",
+                "minimum": 1,
+                "maximum": 10
+              },
+              "areaMin": {
+                "type": "number",
+                "minimum": 10,
+                "maximum": 500
+              },
+              "districts": {
+                "default": [],
+                "maxItems": 20,
+                "type": "array",
+                "items": {
+                  "type": "string",
+                  "pattern": "^[a-z][a-z0-9-]{1,40}$"
+                }
+              },
+              "anchor": {
+                "type": "object",
+                "properties": {
+                  "lat": {
+                    "type": "number",
+                    "minimum": -90,
+                    "maximum": 90
+                  },
+                  "lon": {
+                    "type": "number",
+                    "minimum": -180,
+                    "maximum": 180
+                  }
+                },
+                "required": [
+                  "lat",
+                  "lon"
+                ]
+              },
+              "weights": {
+                "default": {
+                  "price": 1,
+                  "value": 1,
+                  "size": 0.6,
+                  "rooms": 0.8,
+                  "location": 0.8,
+                  "condition": 0.6,
+                  "building": 0.4
+                },
+                "type": "object",
+                "properties": {
+                  "price": {
+                    "default": 1,
+                    "type": "number",
+                    "minimum": 0,
+                    "maximum": 1
+                  },
+                  "value": {
+                    "default": 1,
+                    "type": "number",
+                    "minimum": 0,
+                    "maximum": 1
+                  },
+                  "size": {
+                    "default": 0.6,
+                    "type": "number",
+                    "minimum": 0,
+                    "maximum": 1
+                  },
+                  "rooms": {
+                    "default": 0.8,
+                    "type": "number",
+                    "minimum": 0,
+                    "maximum": 1
+                  },
+                  "location": {
+                    "default": 0.8,
+                    "type": "number",
+                    "minimum": 0,
+                    "maximum": 1
+                  },
+                  "condition": {
+                    "default": 0.6,
+                    "type": "number",
+                    "minimum": 0,
+                    "maximum": 1
+                  },
+                  "building": {
+                    "default": 0.4,
+                    "type": "number",
+                    "minimum": 0,
+                    "maximum": 1
+                  }
+                }
+              }
+            },
+            "required": [
+              "budgetAmd"
+            ]
+          },
+          "limit": {
+            "default": 10,
+            "type": "integer",
+            "minimum": 1,
+            "maximum": 50
+          },
+          "strategy": {
+            "default": "MCDA",
+            "type": "string",
+            "enum": [
+              "MCDA",
+              "LEARNED_BASELINE"
+            ]
+          },
+          "method": {
+            "default": "WEIGHTED_SUM",
+            "type": "string",
+            "enum": [
+              "WEIGHTED_SUM",
+              "TOPSIS"
+            ]
+          },
+          "experimentKey": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 64
+          }
+        },
+        "required": [
+          "preferences"
+        ]
+      },
+      "RecommendationResponseDto": {
+        "type": "object",
+        "properties": {
+          "sessionId": {
+            "type": "string",
+            "format": "uuid",
+            "pattern": "^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}|00000000-0000-0000-0000-000000000000|ffffffff-ffff-ffff-ffff-ffffffffffff)$"
+          },
+          "strategy": {
+            "type": "string",
+            "enum": [
+              "MCDA",
+              "LEARNED_BASELINE"
+            ]
+          },
+          "method": {
+            "type": "string",
+            "enum": [
+              "WEIGHTED_SUM",
+              "TOPSIS"
+            ]
+          },
+          "candidateCount": {
+            "type": "integer",
+            "minimum": 0,
+            "maximum": 9007199254740991
+          },
+          "omittedCriteria": {
+            "type": "array",
+            "items": {
+              "type": "string",
+              "enum": [
+                "price",
+                "value",
+                "size",
+                "rooms",
+                "location",
+                "condition",
+                "building"
+              ]
+            }
+          },
+          "items": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "listing": {
+                  "type": "object",
+                  "properties": {
+                    "id": {
+                      "type": "string",
+                      "format": "uuid",
+                      "pattern": "^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}|00000000-0000-0000-0000-000000000000|ffffffff-ffff-ffff-ffff-ffffffffffff)$"
+                    },
+                    "publicId": {
+                      "type": "string",
+                      "pattern": "^L-[A-HJ-NP-Z2-9]{6}$"
+                    },
+                    "status": {
+                      "type": "string",
+                      "enum": [
+                        "DRAFT",
+                        "PENDING_REVIEW",
+                        "PUBLISHED",
+                        "REJECTED",
+                        "ARCHIVED"
+                      ]
+                    },
+                    "locale": {
+                      "type": "string",
+                      "enum": [
+                        "hy",
+                        "ru",
+                        "en"
+                      ]
+                    },
+                    "title": {
+                      "type": "string"
+                    },
+                    "priceAmd": {
+                      "type": "integer",
+                      "minimum": 0,
+                      "maximum": 9007199254740991
+                    },
+                    "pricePerSqmAmd": {
+                      "type": "integer",
+                      "minimum": 0,
+                      "maximum": 9007199254740991
+                    },
+                    "originalCurrency": {
+                      "type": "string",
+                      "enum": [
+                        "AMD",
+                        "USD",
+                        "EUR"
+                      ]
+                    },
+                    "originalPrice": {
+                      "nullable": true,
+                      "type": "number"
+                    },
+                    "priceNegotiable": {
+                      "type": "boolean"
+                    },
+                    "rooms": {
+                      "type": "integer",
+                      "minimum": -9007199254740991,
+                      "maximum": 9007199254740991
+                    },
+                    "totalArea": {
+                      "type": "number"
+                    },
+                    "floor": {
+                      "type": "integer",
+                      "minimum": -9007199254740991,
+                      "maximum": 9007199254740991
+                    },
+                    "totalFloors": {
+                      "type": "integer",
+                      "minimum": -9007199254740991,
+                      "maximum": 9007199254740991
+                    },
+                    "buildingType": {
+                      "type": "string",
+                      "enum": [
+                        "STONE",
+                        "PANEL",
+                        "MONOLITH",
+                        "KHRUSHCHYOVKA",
+                        "STALINKA",
+                        "NEW_BUILD"
+                      ]
+                    },
+                    "condition": {
+                      "type": "string",
+                      "enum": [
+                        "NEEDS_REPAIR",
+                        "OLD_RENOVATION",
+                        "GOOD",
+                        "EURO_RENOVATION",
+                        "DESIGNER"
+                      ]
+                    },
+                    "district": {
+                      "type": "object",
+                      "properties": {
+                        "slug": {
+                          "type": "string",
+                          "pattern": "^[a-z][a-z0-9-]{1,40}$"
+                        },
+                        "name": {
+                          "type": "object",
+                          "properties": {
+                            "hy": {
+                              "type": "string"
+                            },
+                            "ru": {
+                              "type": "string"
+                            },
+                            "en": {
+                              "type": "string"
+                            }
+                          },
+                          "required": [
+                            "hy",
+                            "ru",
+                            "en"
+                          ],
+                          "additionalProperties": false
+                        }
+                      },
+                      "required": [
+                        "slug",
+                        "name"
+                      ],
+                      "additionalProperties": false
+                    },
+                    "location": {
+                      "type": "object",
+                      "properties": {
+                        "lat": {
+                          "type": "number",
+                          "minimum": -90,
+                          "maximum": 90
+                        },
+                        "lon": {
+                          "type": "number",
+                          "minimum": -180,
+                          "maximum": 180
+                        }
+                      },
+                      "required": [
+                        "lat",
+                        "lon"
+                      ],
+                      "additionalProperties": false
+                    },
+                    "thumbnailUrl": {
+                      "nullable": true,
+                      "type": "string",
+                      "format": "uri"
+                    },
+                    "publishedAt": {
+                      "type": "string",
+                      "format": "date-time",
+                      "pattern": "^(?:(?:\\d\\d[2468][048]|\\d\\d[13579][26]|\\d\\d0[48]|[02468][048]00|[13579][26]00)-02-29|\\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\\d|30)|(?:02)-(?:0[1-9]|1\\d|2[0-8])))T(?:(?:[01]\\d|2[0-3]):[0-5]\\d:[0-5]\\d(?:\\.\\d+)?(?:Z|([+-](?:[01]\\d|2[0-3]):[0-5]\\d)))$"
+                    }
+                  },
+                  "required": [
+                    "id",
+                    "publicId",
+                    "status",
+                    "locale",
+                    "title",
+                    "priceAmd",
+                    "pricePerSqmAmd",
+                    "originalCurrency",
+                    "originalPrice",
+                    "priceNegotiable",
+                    "rooms",
+                    "totalArea",
+                    "floor",
+                    "totalFloors",
+                    "buildingType",
+                    "condition",
+                    "district",
+                    "location",
+                    "thumbnailUrl",
+                    "publishedAt"
+                  ],
+                  "additionalProperties": false
+                },
+                "rank": {
+                  "type": "integer",
+                  "minimum": 1,
+                  "maximum": 9007199254740991
+                },
+                "score": {
+                  "type": "number",
+                  "minimum": 0,
+                  "maximum": 1
+                },
+                "breakdown": {
+                  "type": "array",
+                  "items": {
+                    "type": "object",
+                    "properties": {
+                      "criterion": {
+                        "type": "string",
+                        "enum": [
+                          "price",
+                          "value",
+                          "size",
+                          "rooms",
+                          "location",
+                          "condition",
+                          "building"
+                        ]
+                      },
+                      "score": {
+                        "type": "number",
+                        "minimum": 0,
+                        "maximum": 1
+                      },
+                      "weight": {
+                        "type": "number",
+                        "minimum": 0,
+                        "maximum": 1
+                      },
+                      "contribution": {
+                        "type": "number"
+                      }
+                    },
+                    "required": [
+                      "criterion",
+                      "score",
+                      "weight",
+                      "contribution"
+                    ],
+                    "additionalProperties": false
+                  }
+                }
+              },
+              "required": [
+                "listing",
+                "rank",
+                "score",
+                "breakdown"
+              ],
+              "additionalProperties": false
+            }
+          },
+          "createdAt": {
+            "type": "string",
+            "format": "date-time",
+            "pattern": "^(?:(?:\\d\\d[2468][048]|\\d\\d[13579][26]|\\d\\d0[48]|[02468][048]00|[13579][26]00)-02-29|\\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\\d|30)|(?:02)-(?:0[1-9]|1\\d|2[0-8])))T(?:(?:[01]\\d|2[0-3]):[0-5]\\d:[0-5]\\d(?:\\.\\d+)?(?:Z|([+-](?:[01]\\d|2[0-3]):[0-5]\\d)))$"
+          }
+        },
+        "required": [
+          "sessionId",
+          "strategy",
+          "method",
+          "candidateCount",
+          "omittedCriteria",
+          "items",
+          "createdAt"
         ],
         "additionalProperties": false
       }
