@@ -39,7 +39,7 @@ export function ListingFilters({ values, districts, onChange }: ListingFiltersPr
   };
 
   const setNumber =
-    (key: 'priceMin' | 'priceMax' | 'roomsMin' | 'roomsMax' | 'areaMin' | 'yearMin') =>
+    (key: 'priceMin' | 'priceMax' | 'roomsMin' | 'roomsMax' | 'areaMin' | 'areaMax' | 'yearMin') =>
     (raw: string): void => {
       const parsed = Number(raw);
       set(key, raw.trim() === '' || !Number.isFinite(parsed) || parsed <= 0 ? undefined : parsed);
@@ -131,6 +131,17 @@ export function ListingFilters({ values, districts, onChange }: ListingFiltersPr
             setNumber('areaMin')(event.target.value);
           }}
         />
+        <Input
+          label={t('filters.areaMax')}
+          inputMode="decimal"
+          value={values.areaMax?.toString() ?? ''}
+          onChange={(event) => {
+            setNumber('areaMax')(event.target.value);
+          }}
+        />
+      </div>
+
+      <div className="grid grid-cols-2 gap-3">
         <Input
           label={t('filters.yearMin')}
           inputMode="numeric"

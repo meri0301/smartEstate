@@ -18,5 +18,6 @@ direction is a new record that supersedes the old one.
 | [0010](0010-price-valuation-model.md)                            | Price valuation: target, validation, explanations and interval                 | Accepted |
 | [0011](0011-transparent-ranking.md)                              | Ranking: transparent multi-criteria scoring, and what gets recorded            | Accepted |
 | [0012](0012-llm-provider-layer.md)                               | The language model layer: a fallback-first interface                           | Accepted |
+| [0013](0013-natural-language-query-parsing.md)                   | Natural-language query parsing: rules first, the model as a second opinion     | Accepted |
 
 Template: [0000-template.md](0000-template.md)

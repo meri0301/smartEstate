@@ -25,7 +25,13 @@
     "viewList": "List",
     "viewMap": "Map",
     "searchThisArea": "Search this area",
-    "error": "The search could not be completed"
+    "error": "The search could not be completed",
+    "askLabel": "Describe what you are looking for",
+    "askPlaceholder": "2-room in Arabkir under 60 million, not ground floor",
+    "askHint": "Armenian, Russian or English. Whatever is understood appears below as filters you can change.",
+    "askSubmit": "Read it",
+    "askFailed": "That could not be read just now. The filters below still work.",
+    "askUnmapped": "Not turned into a filter: {phrases}"
   },
   "filters": {
     "price": "Price, AMD",
@@ -44,7 +50,19 @@
     "hasParking": "Parking",
     "docsVerified": "Verified documents",
     "excludeGroundFloor": "Not the ground floor",
-    "excludeTopFloor": "Not the top floor"
+    "excludeTopFloor": "Not the top floor",
+    "areaMax": "Area to, m²"
+  },
+  "chips": {
+    "title": "Filtering by",
+    "remove": "Remove {filter}",
+    "priceFrom": "From {price}",
+    "priceTo": "Up to {price}",
+    "roomsFrom": "{count, plural, one {From # room} other {From # rooms}}",
+    "roomsTo": "{count, plural, one {Up to # room} other {Up to # rooms}}",
+    "areaFrom": "From {area}",
+    "areaTo": "Up to {area}",
+    "builtFrom": "Built from {year}"
   },
   "sort": {
     "published_desc": "Newest first",

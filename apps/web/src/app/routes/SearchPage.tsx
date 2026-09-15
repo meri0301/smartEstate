@@ -4,6 +4,8 @@ import { useTranslation } from 'react-i18next';
 import { useNavigate, useSearchParams } from 'react-router';
 import { useDistricts } from '../../features/geo/index.js';
 import {
+  applyParsedFilters,
+  FilterChips,
   flattenListings,
   ListingFilters,
   ListingResults,
@@ -14,6 +16,7 @@ import {
   type ListingFilterValues,
 } from '../../features/listings/index.js';
 import { ListingMap, type MapMarker } from '../../features/map/index.js';
+import { NaturalLanguageSearch } from '../../features/search/index.js';
 import { useCurrentLocale } from '../../shared/i18n/I18nProvider.js';
 import { formatAmd } from '../../shared/i18n/formatters.js';
 import { Button, Card, Heading, Select, Text } from '../../shared/ui/index.js';
@@ -116,6 +119,22 @@ export function SearchPage(): JSX.Element {
             : t('listings:resultCount', { count: listings.length })}
         </Text>
       </div>
+
+      <NaturalLanguageSearch
+        onParsed={(parsed) => {
+          // The parse is applied as ordinary filters, which then appear as chips
+          // the reader can remove. Nothing is searched that they cannot see.
+          apply(applyParsedFilters(parsed.filters, filters));
+        }}
+      />
+
+      <FilterChips
+        values={filters}
+        districts={districts.data ?? []}
+        onChange={(next) => {
+          apply(next);
+        }}
+      />
 
       <div className="grid gap-8 lg:grid-cols-[18rem_1fr]">
         <aside className="lg:sticky lg:top-6 lg:self-start">

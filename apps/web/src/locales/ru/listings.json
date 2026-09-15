@@ -25,7 +25,13 @@
     "viewList": "Список",
     "viewMap": "Карта",
     "searchThisArea": "Искать в этой области",
-    "error": "Не удалось выполнить поиск"
+    "error": "Не удалось выполнить поиск",
+    "askLabel": "Опишите, что вы ищете",
+    "askPlaceholder": "двухкомнатная в Арабкир до 60 млн, не первый этаж",
+    "askHint": "На армянском, русском или английском. Всё понятое появится ниже как фильтры, которые можно изменить.",
+    "askSubmit": "Разобрать",
+    "askFailed": "Сейчас не удалось разобрать. Фильтры ниже по-прежнему работают.",
+    "askUnmapped": "Не стало фильтром: {phrases}"
   },
   "filters": {
     "price": "Цена, драм",
@@ -44,7 +50,19 @@
     "hasParking": "Парковка",
     "docsVerified": "Проверенные документы",
     "excludeGroundFloor": "Не первый этаж",
-    "excludeTopFloor": "Не последний этаж"
+    "excludeTopFloor": "Не последний этаж",
+    "areaMax": "Площадь до, м²"
+  },
+  "chips": {
+    "title": "Фильтры",
+    "remove": "Убрать {filter}",
+    "priceFrom": "От {price}",
+    "priceTo": "До {price}",
+    "roomsFrom": "{count, plural, one {От # комнаты} few {От # комнат} many {От # комнат} other {От # комнат}}",
+    "roomsTo": "{count, plural, one {До # комнаты} few {До # комнат} many {До # комнат} other {До # комнат}}",
+    "areaFrom": "От {area}",
+    "areaTo": "До {area}",
+    "builtFrom": "Построен с {year}"
   },
   "sort": {
     "published_desc": "Сначала новые",

@@ -87,6 +87,7 @@ describe('toSearchParams', () => {
       roomsMin: 2,
       roomsMax: 4,
       areaMin: 65,
+      areaMax: 120,
       yearMin: 1990,
       districts: ['kentron', 'arabkir'],
       buildingTypes: ['STONE', 'MONOLITH'],

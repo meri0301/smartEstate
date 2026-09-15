@@ -75,11 +75,33 @@ const json = (body: unknown): Response =>
 /** Every search request the page made, newest last. */
 const searchUrls: URL[] = [];
 
+/** What the parse endpoint should answer with, when a test exercises it. */
+const parseStub: { filters: Record<string, unknown>; unmapped: string[]; status: number } = {
+  filters: {},
+  unmapped: [],
+  status: 200,
+};
+
 function stubApi(page: ListingsPage): void {
   vi.spyOn(globalThis, 'fetch').mockImplementation((input) => {
     const url = new URL((input as Request).url);
     if (url.pathname === '/api/districts') {
       return Promise.resolve(json(districts));
+    }
+    if (url.pathname === '/api/search/parse') {
+      return Promise.resolve(
+        parseStub.status === 200
+          ? json({
+              query: 'typed',
+              filters: parseStub.filters,
+              unmapped: parseStub.unmapped,
+              source: 'no-provider',
+            })
+          : new Response(
+              JSON.stringify({ statusCode: parseStub.status, error: 'x', message: 'no' }),
+              { status: parseStub.status, headers: { 'content-type': 'application/json' } },
+            ),
+      );
     }
     if (url.pathname === '/api/listings') {
       searchUrls.push(url);
@@ -101,6 +123,9 @@ function renderAt(path: string) {
 
 beforeEach(() => {
   searchUrls.length = 0;
+  parseStub.filters = {};
+  parseStub.unmapped = [];
+  parseStub.status = 200;
 });
 
 afterEach(() => {
@@ -200,6 +225,81 @@ describe('the search screen', () => {
     renderAt('/en/listings');
     await screen.findByRole('link', { name: /Bright three-room flat/ });
     expect(screen.getByRole('button', { name: 'Show more' })).toBeInTheDocument();
+  });
+
+  it('shows a chip for every filter in force, however it got there', async () => {
+    stubApi({ items: [listing()], nextCursor: null });
+    renderAt('/en/listings?districts=arabkir&priceMax=60000000');
+    await screen.findByRole('link', { name: /Bright three-room flat/ });
+
+    expect(screen.getByText('Filtering by')).toBeInTheDocument();
+    expect(screen.getByRole('button', { name: 'Remove Arabkir' })).toBeInTheDocument();
+    expect(screen.getByRole('button', { name: /Remove Up to/ })).toBeInTheDocument();
+  });
+
+  it('removes a filter when its chip is dismissed', async () => {
+    stubApi({ items: [listing()], nextCursor: null });
+    const router = renderAt('/en/listings?districts=arabkir&priceMax=60000000');
+    await screen.findByRole('link', { name: /Bright three-room flat/ });
+
+    await userEvent.click(screen.getByRole('button', { name: 'Remove Arabkir' }));
+
+    await waitFor(() => {
+      expect(router.state.location.search).not.toContain('districts');
+    });
+    expect(router.state.location.search).toContain('priceMax=60000000');
+  });
+
+  it('turns a typed sentence into filters the reader can see and change', async () => {
+    stubApi({ items: [listing()], nextCursor: null });
+    parseStub.filters = { roomsMin: 2, roomsMax: 2, districts: ['kentron'] };
+    const router = renderAt('/en/listings');
+    await screen.findByRole('link', { name: /Bright three-room flat/ });
+
+    await userEvent.type(
+      screen.getByRole('textbox', { name: /Describe what you are looking for/ }),
+      '2 rooms in Kentron',
+    );
+    await userEvent.click(screen.getByRole('button', { name: 'Read it' }));
+
+    await waitFor(() => {
+      expect(router.state.location.search).toContain('districts=kentron');
+    });
+    expect(router.state.location.search).toContain('roomsMin=2');
+    expect(await screen.findByRole('button', { name: 'Remove Kentron' })).toBeInTheDocument();
+  });
+
+  it('says which phrases it could not turn into a filter', async () => {
+    stubApi({ items: [listing()], nextCursor: null });
+    parseStub.filters = { districts: ['kentron'] };
+    parseStub.unmapped = ['quiet', 'school'];
+    renderAt('/en/listings');
+    await screen.findByRole('link', { name: /Bright three-room flat/ });
+
+    await userEvent.type(
+      screen.getByRole('textbox', { name: /Describe what you are looking for/ }),
+      'quiet flat near a school in Kentron',
+    );
+    await userEvent.click(screen.getByRole('button', { name: 'Read it' }));
+
+    expect(await screen.findByText('Not turned into a filter: quiet, school')).toBeInTheDocument();
+  });
+
+  it('leaves the filters alone when the sentence cannot be read at all', async () => {
+    stubApi({ items: [listing()], nextCursor: null });
+    parseStub.status = 503;
+    const router = renderAt('/en/listings?districts=arabkir');
+    await screen.findByRole('link', { name: /Bright three-room flat/ });
+
+    await userEvent.type(
+      screen.getByRole('textbox', { name: /Describe what you are looking for/ }),
+      'anything',
+    );
+    await userEvent.click(screen.getByRole('button', { name: 'Read it' }));
+
+    expect(await screen.findByRole('alert')).toHaveTextContent(/could not be read/);
+    // The filters that were already applied keep working.
+    expect(router.state.location.search).toContain('districts=arabkir');
   });
 
   it('reports a failed search and offers to try again', async () => {

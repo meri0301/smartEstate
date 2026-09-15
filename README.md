@@ -134,7 +134,7 @@ Health probes live outside the prefix: `/health` (liveness) and `/health/ready` 
 | buildings | `GET /buildings/:id`, agent: `POST /buildings` (district derived from coordinates)                                                                                                          |
 | geo       | `GET /districts`, `GET /districts/:slug/boundary` (GeoJSON)                                                                                                                                 |
 
-Valuation is documented in its own section below.
+Valuation, recommendations and natural-language search have sections of their own below.
 
 - **Sessions.** Access token: 15-minute JWT in `Authorization: Bearer`. Refresh token: httpOnly,
   SameSite=Strict cookie scoped to `/api/auth`, rotated on every refresh; replaying a consumed
@@ -253,6 +253,33 @@ at all, and choosing a model changes the wording of some sentences, never a numb
 - **Redis is optional.** Without it the layer works uncached, and quota counters that cannot be
   kept let the call through rather than refusing work because a cache is down.
 
+## Natural-language search
+
+The search page takes a sentence in Armenian, Russian or English — "two-room in Arabkir under 60
+million, not ground floor" — and turns it into filters the reader can see and correct. See
+[ADR-0013](docs/adr/0013-natural-language-query-parsing.md).
+
+```
+POST /api/search/parse?locale=en   { "query": "..." }
+  -> { query, filters, unmapped, source }
+```
+
+It returns no listings. The client shows the filters as removable chips, lists the phrases it could
+not place, and then runs an ordinary search with what is left standing.
+
+- **The deterministic parser runs on every request**, and is the fallback the language model layer
+  requires. With `LLM_PROVIDER=rule-based` it is the whole feature: a fresh checkout with no key
+  parses all three languages. A model, when configured, is asked the same question and wins on
+  disagreement — but only with an answer that validates against the same schema.
+- **Inflected district names are matched by a bounded suffix rule**, so `Արաբկիրում` and
+  `Арабкире` both find Arabkir without a morphological analyser for two languages.
+- **A bound word belongs to one quantity.** "до 50 млн" three words after "двухкомнатная" sets the
+  price, not the room count; price and area claim their bound words before rooms is matched.
+- **What could not be parsed is reported, not swallowed.** "quiet" and "near a school" come back in
+  `unmapped`, because a filter the reader cannot see is worse than none.
+- **Twenty requests a minute per account**, per address when signed out, since the free-tier
+  allowance is shared by the whole installation.
+
 ## ML service
 
 FastAPI on `http://localhost:8000`, started by `docker compose up`. It values listings and
@@ -307,7 +334,7 @@ Tests and lint run in Docker, so no local Python is needed: `pnpm ml:test`, `pnp
 | Route                             | What it is                                                       |
 | --------------------------------- | ---------------------------------------------------------------- |
 | `/:locale`                        | Landing page; a link into the search                             |
-| `/:locale/listings`               | Search: filter panel, sort, result grid, map view                |
+| `/:locale/listings`               | Search: sentence box, filter panel, sort, result grid, map view  |
 | `/:locale/listings/:idOrPublicId` | One listing: photographs, specification, price history, location |
 
 - **Filters live in the query string**, not in component state, so a filtered search is

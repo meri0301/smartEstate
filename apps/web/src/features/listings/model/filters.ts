@@ -31,6 +31,7 @@ export interface ListingFilterValues {
   roomsMin: number | undefined;
   roomsMax: number | undefined;
   areaMin: number | undefined;
+  areaMax: number | undefined;
   yearMin: number | undefined;
   districts: string[];
   buildingTypes: BuildingType[];
@@ -51,6 +52,7 @@ export const EMPTY_FILTERS: ListingFilterValues = {
   roomsMin: undefined,
   roomsMax: undefined,
   areaMin: undefined,
+  areaMax: undefined,
   yearMin: undefined,
   districts: [],
   buildingTypes: [],
@@ -134,6 +136,7 @@ export function parseFilters(params: URLSearchParams): ListingFilterValues {
     roomsMin: positiveInt(params.get('roomsMin')),
     roomsMax: positiveInt(params.get('roomsMax')),
     areaMin: positiveNumber(params.get('areaMin')),
+    areaMax: positiveNumber(params.get('areaMax')),
     yearMin: positiveInt(params.get('yearMin')),
     districts: list(params.get('districts'), isSlug),
     buildingTypes: list(params.get('buildingTypes'), isBuildingType),
@@ -177,6 +180,7 @@ export function toSearchParams(values: ListingFilterValues): URLSearchParams {
   setNumber('roomsMin', values.roomsMin);
   setNumber('roomsMax', values.roomsMax);
   setNumber('areaMin', values.areaMin);
+  setNumber('areaMax', values.areaMax);
   setNumber('yearMin', values.yearMin);
   setList('districts', values.districts);
   setList('buildingTypes', values.buildingTypes);

@@ -25,7 +25,13 @@
     "viewList": "Ցանկ",
     "viewMap": "Քարտեզ",
     "searchThisArea": "Որոնել այս տարածքում",
-    "error": "Որոնումը չհաջողվեց"
+    "error": "Որոնումը չհաջողվեց",
+    "askLabel": "Նկարագրեք, թե ինչ եք փնտրում",
+    "askPlaceholder": "2 սենյականոց Արաբկիրում մինչև 60 մլն, ոչ առաջին հարկ",
+    "askHint": "Հայերեն, ռուսերեն կամ անգլերեն։ Հասկացվածը ներքևում կհայտնվի որպես զտիչներ, որոնք կարող եք փոխել։",
+    "askSubmit": "Կարդալ",
+    "askFailed": "Այս պահին չհաջողվեց կարդալ։ Ներքևի զտիչները շարունակում են աշխատել։",
+    "askUnmapped": "Չվերածվեց զտիչի՝ {phrases}"
   },
   "filters": {
     "price": "Գին, դրամ",
@@ -44,7 +50,19 @@
     "hasParking": "Ավտոկայանատեղի",
     "docsVerified": "Ստուգված փաստաթղթեր",
     "excludeGroundFloor": "Ոչ առաջին հարկ",
-    "excludeTopFloor": "Ոչ վերջին հարկ"
+    "excludeTopFloor": "Ոչ վերջին հարկ",
+    "areaMax": "Մակերես մինչև, քմ"
+  },
+  "chips": {
+    "title": "Զտվում է ըստ",
+    "remove": "Հեռացնել {filter}",
+    "priceFrom": "{price}-ից",
+    "priceTo": "Մինչև {price}",
+    "roomsFrom": "{count, plural, one {# սենյակից} other {# սենյակից}}",
+    "roomsTo": "{count, plural, one {Մինչև # սենյակ} other {Մինչև # սենյակ}}",
+    "areaFrom": "{area}-ից",
+    "areaTo": "Մինչև {area}",
+    "builtFrom": "Կառուցված {year}-ից"
   },
   "sort": {
     "published_desc": "Սկզբում նորերը",

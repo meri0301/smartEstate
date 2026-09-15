@@ -1351,6 +1351,56 @@
         ]
       }
     },
+    "/api/search/parse": {
+      "post": {
+        "description": "Returns the filters that were understood and the phrases that were not. The result is never applied automatically: the caller shows it and lets the reader correct it.",
+        "operationId": "Search.parse",
+        "parameters": [
+          {
+            "name": "locale",
+            "required": false,
+            "in": "query",
+            "schema": {
+              "enum": [
+                "hy",
+                "ru",
+                "en"
+              ],
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ParseQueryBodyDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ParsedQueryDto"
+                }
+              }
+            }
+          },
+          "429": {
+            "description": "Rate limit exceeded"
+          }
+        },
+        "summary": "Turn a sentence into search filters",
+        "tags": [
+          "search"
+        ]
+      }
+    },
     "/health": {
       "get": {
         "operationId": "Health.check",
@@ -3823,6 +3873,138 @@
           "omittedCriteria",
           "items",
           "createdAt"
+        ],
+        "additionalProperties": false
+      },
+      "ParseQueryBodyDto": {
+        "type": "object",
+        "properties": {
+          "query": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 300
+          }
+        },
+        "required": [
+          "query"
+        ]
+      },
+      "ParsedQueryDto": {
+        "type": "object",
+        "properties": {
+          "query": {
+            "type": "string"
+          },
+          "filters": {
+            "type": "object",
+            "properties": {
+              "priceMin": {
+                "type": "integer",
+                "minimum": 0,
+                "maximum": 9007199254740991
+              },
+              "priceMax": {
+                "type": "integer",
+                "minimum": 0,
+                "maximum": 9007199254740991
+              },
+              "roomsMin": {
+                "type": "integer",
+                "minimum": 1,
+                "maximum": 10
+              },
+              "roomsMax": {
+                "type": "integer",
+                "minimum": 1,
+                "maximum": 10
+              },
+              "areaMin": {
+                "type": "number",
+                "minimum": 10,
+                "maximum": 500
+              },
+              "areaMax": {
+                "type": "number",
+                "minimum": 10,
+                "maximum": 500
+              },
+              "districts": {
+                "maxItems": 12,
+                "type": "array",
+                "items": {
+                  "type": "string",
+                  "pattern": "^[a-z][a-z0-9-]{1,40}$"
+                }
+              },
+              "buildingTypes": {
+                "maxItems": 6,
+                "type": "array",
+                "items": {
+                  "type": "string",
+                  "enum": [
+                    "STONE",
+                    "PANEL",
+                    "MONOLITH",
+                    "KHRUSHCHYOVKA",
+                    "STALINKA",
+                    "NEW_BUILD"
+                  ]
+                }
+              },
+              "conditions": {
+                "maxItems": 5,
+                "type": "array",
+                "items": {
+                  "type": "string",
+                  "enum": [
+                    "NEEDS_REPAIR",
+                    "OLD_RENOVATION",
+                    "GOOD",
+                    "EURO_RENOVATION",
+                    "DESIGNER"
+                  ]
+                }
+              },
+              "excludeGroundFloor": {
+                "type": "boolean"
+              },
+              "excludeTopFloor": {
+                "type": "boolean"
+              },
+              "hasElevator": {
+                "type": "boolean"
+              },
+              "hasParking": {
+                "type": "boolean"
+              }
+            },
+            "additionalProperties": false
+          },
+          "unmapped": {
+            "maxItems": 10,
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "source": {
+            "type": "string",
+            "enum": [
+              "model",
+              "cache",
+              "no-provider",
+              "quota",
+              "error",
+              "invalid",
+              "disabled"
+            ]
+          }
+        },
+        "required": [
+          "query",
+          "filters",
+          "unmapped",
+          "source"
         ],
         "additionalProperties": false
       }

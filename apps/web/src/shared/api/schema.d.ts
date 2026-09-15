@@ -368,6 +368,26 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/api/search/parse": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * Turn a sentence into search filters
+         * @description Returns the filters that were understood and the phrases that were not. The result is never applied automatically: the caller shows it and lets the reader correct it.
+         */
+        post: operations["Search.parse"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/health": {
         parameters: {
             query?: never;
@@ -966,6 +986,30 @@ export interface components {
             /** Format: date-time */
             createdAt: string;
         };
+        ParseQueryBodyDto: {
+            query: string;
+        };
+        ParsedQueryDto: {
+            query: string;
+            filters: {
+                priceMin?: number;
+                priceMax?: number;
+                roomsMin?: number;
+                roomsMax?: number;
+                areaMin?: number;
+                areaMax?: number;
+                districts?: string[];
+                buildingTypes?: ("STONE" | "PANEL" | "MONOLITH" | "KHRUSHCHYOVKA" | "STALINKA" | "NEW_BUILD")[];
+                conditions?: ("NEEDS_REPAIR" | "OLD_RENOVATION" | "GOOD" | "EURO_RENOVATION" | "DESIGNER")[];
+                excludeGroundFloor?: boolean;
+                excludeTopFloor?: boolean;
+                hasElevator?: boolean;
+                hasParking?: boolean;
+            };
+            unmapped: string[];
+            /** @enum {string} */
+            source: "model" | "cache" | "no-provider" | "quota" | "error" | "invalid" | "disabled";
+        };
     };
     responses: never;
     parameters: never;
@@ -994,6 +1038,8 @@ export type CreateBuildingBodyDto = components['schemas']['CreateBuildingBodyDto
 export type ValuationDto = components['schemas']['ValuationDto'];
 export type RecommendationRequestDto = components['schemas']['RecommendationRequestDto'];
 export type RecommendationResponseDto = components['schemas']['RecommendationResponseDto'];
+export type ParseQueryBodyDto = components['schemas']['ParseQueryBodyDto'];
+export type ParsedQueryDto = components['schemas']['ParsedQueryDto'];
 export type $defs = Record<string, never>;
 export interface operations {
     "Auth.register": {
@@ -1668,6 +1714,38 @@ export interface operations {
                 content: {
                     "application/json": components["schemas"]["RecommendationResponseDto"];
                 };
+            };
+        };
+    };
+    "Search.parse": {
+        parameters: {
+            query?: {
+                locale?: "hy" | "ru" | "en";
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["ParseQueryBodyDto"];
+            };
+        };
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ParsedQueryDto"];
+                };
+            };
+            /** @description Rate limit exceeded */
+            429: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
             };
         };
     };

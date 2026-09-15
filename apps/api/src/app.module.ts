@@ -18,6 +18,7 @@ import { GeoModule } from './modules/geo/geo.module.js';
 import { HealthModule } from './modules/health/health.module.js';
 import { ListingsModule } from './modules/listings/listings.module.js';
 import { RecommendationsModule } from './modules/recommendations/recommendations.module.js';
+import { SearchModule } from './modules/search/search.module.js';
 import { UsersModule } from './modules/users/users.module.js';
 import { ValuationModule } from './modules/valuation/valuation.module.js';
 
@@ -67,6 +68,7 @@ function loggerParams(config: AppConfig): Params {
     ListingsModule,
     ValuationModule,
     RecommendationsModule,
+    SearchModule,
     HealthModule,
   ],
   providers: [
