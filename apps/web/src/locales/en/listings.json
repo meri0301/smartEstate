@@ -97,7 +97,9 @@
     "priceHistoryChange": "Change",
     "lastUpdated": "Last updated {date}",
     "notFound": "This listing is not available",
-    "notFoundHint": "It may have been withdrawn, or the address may be wrong."
+    "notFoundHint": "It may have been withdrawn, or the address may be wrong.",
+    "advisorPrompt": "Could you do better for the money?",
+    "advisorLink": "Compare with the alternatives"
   },
   "attributes": {
     "rooms": "Rooms",

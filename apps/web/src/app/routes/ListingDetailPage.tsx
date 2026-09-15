@@ -131,6 +131,16 @@ export function ListingDetailPage(): JSX.Element {
         <ValuationPanel valuation={valuation.data} askingPriceAmd={data.priceAmd} />
       )}
 
+      <Card tone="outline" className="flex flex-wrap items-center justify-between gap-3">
+        <Text size="sm">{t('listings:detail.advisorPrompt')}</Text>
+        <a
+          href={`/${locale}/listings/${data.publicId}/alternatives`}
+          className="font-body text-sm font-medium text-text underline underline-offset-4"
+        >
+          {t('listings:detail.advisorLink')}
+        </a>
+      </Card>
+
       {machineTranslated !== undefined && (
         <Card tone="muted" className="flex flex-col gap-1">
           <Text className="font-medium">{t('listings:machineTranslated')}</Text>

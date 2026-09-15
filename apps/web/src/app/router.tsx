@@ -2,6 +2,7 @@ import type { JSX } from 'react';
 import { createBrowserRouter, Navigate, useLocation, type RouteObject } from 'react-router';
 import { useSessionStore } from '../shared/api/session-store.js';
 import { detectLocale, withLocalePath } from '../shared/i18n/detect.js';
+import { AlternativesPage } from './routes/AlternativesPage.js';
 import { HomePage } from './routes/HomePage.js';
 import { ListingDetailPage } from './routes/ListingDetailPage.js';
 import { LocaleLayout } from './routes/LocaleLayout.js';
@@ -36,6 +37,7 @@ export const routes: RouteObject[] = [
       { index: true, element: <HomePage /> },
       { path: 'listings', element: <SearchPage /> },
       { path: 'listings/:idOrPublicId', element: <ListingDetailPage /> },
+      { path: 'listings/:idOrPublicId/alternatives', element: <AlternativesPage /> },
       { path: '*', element: <NotFoundPage /> },
     ],
   },

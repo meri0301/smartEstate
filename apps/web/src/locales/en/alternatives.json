@@ -1,0 +1,46 @@
+{
+  "title": "Is there anything better?",
+  "subtitle": "Compared against “{title}” at {price}, among {count, plural, one {# listing} other {# listings}} you could switch to: the same district, at least as many rooms, and no more than a tenth dearer.",
+  "backToListing": "← Back to {title}",
+  "failed": "The comparison could not be loaded.",
+  "omitted": "Not compared, because it could not be measured: {criteria}.",
+  "tableTitle": "Side by side",
+  "tableHint": "Add up to {max, number} listings to the table with the buttons below. The best value in each row is highlighted.",
+  "optionsTitle": "{count, plural, =0 {No better options} one {# better option} other {# better options}}",
+  "betterOn": "Better on {count, plural, one {# thing} other {# things}}:",
+  "worseOn": "Worse on {count, plural, one {# thing} other {# things}}:",
+  "givesUpNothing": "It gives up nothing measured here.",
+  "addToTable": "Add to the table",
+  "removeFromTable": "Remove from the table",
+  "viewListing": "View the listing",
+  "verdict": {
+    "none": "Nothing among the comparable listings is better than this one.",
+    "dominated": "{count, plural, one {# listing is} other {# listings are}} better than this one in every respect compared.",
+    "tradeOffs": "Nothing is better in every respect, but {count, plural, one {# listing offers} other {# listings offer}} something this one does not."
+  },
+  "relation": {
+    "DOMINATES": "Better in every respect",
+    "TRADE_OFF": "A trade-off",
+    "EQUIVALENT": "Much the same"
+  },
+  "criterion": {
+    "price": "Price",
+    "area": "Floor area",
+    "condition": "State of repair",
+    "building": "The building",
+    "floor": "The floor",
+    "location": "Distance",
+    "value": "Against the estimate"
+  },
+  "table": {
+    "caption": "The listing being viewed compared with the alternatives, criterion by criterion",
+    "criterion": "Criterion",
+    "viewing": "You are viewing",
+    "option": "Option",
+    "best": "(best)"
+  },
+  "units": {
+    "years": "{count, plural, one {# year} other {# years}}",
+    "percent": "{value}%"
+  }
+}

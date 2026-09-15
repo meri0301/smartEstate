@@ -428,11 +428,12 @@ Tests and lint run in Docker, so no local Python is needed: `pnpm ml:test`, `pnp
 
 ### Screens
 
-| Route                             | What it is                                                       |
-| --------------------------------- | ---------------------------------------------------------------- |
-| `/:locale`                        | Landing page; a link into the search                             |
-| `/:locale/listings`               | Search: sentence box, filter panel, sort, result grid, map view  |
-| `/:locale/listings/:idOrPublicId` | One listing: photographs, specification, price history, location |
+| Route                                          | What it is                                                                |
+| ---------------------------------------------- | ------------------------------------------------------------------------- |
+| `/:locale`                                     | Landing page; a link into the search                                      |
+| `/:locale/listings`                            | Search: sentence box, filter panel, sort, result grid, map view           |
+| `/:locale/listings/:idOrPublicId`              | One listing: photographs, specification, price history, location          |
+| `/:locale/listings/:idOrPublicId/alternatives` | The advisor: what is better than this listing, and what each option costs |
 
 - **Filters live in the query string**, not in component state, so a filtered search is
   shareable and the back button is correct. `features/listings/model/filters.ts` is the only

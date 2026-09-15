@@ -1,13 +1,16 @@
+import enAlternatives from '../../locales/en/alternatives.json';
 import enAuth from '../../locales/en/auth.json';
 import enCommon from '../../locales/en/common.json';
 import enErrors from '../../locales/en/errors.json';
 import enListings from '../../locales/en/listings.json';
 import enValuation from '../../locales/en/valuation.json';
+import hyAlternatives from '../../locales/hy/alternatives.json';
 import hyAuth from '../../locales/hy/auth.json';
 import hyCommon from '../../locales/hy/common.json';
 import hyErrors from '../../locales/hy/errors.json';
 import hyListings from '../../locales/hy/listings.json';
 import hyValuation from '../../locales/hy/valuation.json';
+import ruAlternatives from '../../locales/ru/alternatives.json';
 import ruAuth from '../../locales/ru/auth.json';
 import ruCommon from '../../locales/ru/common.json';
 import ruErrors from '../../locales/ru/errors.json';
@@ -23,7 +26,14 @@ import ruValuation from '../../locales/ru/valuation.json';
  * translation keys. Once the catalogue grows past a screenful of features this
  * becomes a per-namespace dynamic import.
  */
-export const NAMESPACES = ['common', 'listings', 'valuation', 'auth', 'errors'] as const;
+export const NAMESPACES = [
+  'common',
+  'listings',
+  'valuation',
+  'alternatives',
+  'auth',
+  'errors',
+] as const;
 export type Namespace = (typeof NAMESPACES)[number];
 
 export const DEFAULT_NAMESPACE = 'common' satisfies Namespace;
@@ -33,6 +43,7 @@ export const resources = {
     common: enCommon,
     listings: enListings,
     valuation: enValuation,
+    alternatives: enAlternatives,
     auth: enAuth,
     errors: enErrors,
   },
@@ -40,6 +51,7 @@ export const resources = {
     common: hyCommon,
     listings: hyListings,
     valuation: hyValuation,
+    alternatives: hyAlternatives,
     auth: hyAuth,
     errors: hyErrors,
   },
@@ -47,6 +59,7 @@ export const resources = {
     common: ruCommon,
     listings: ruListings,
     valuation: ruValuation,
+    alternatives: ruAlternatives,
     auth: ruAuth,
     errors: ruErrors,
   },
