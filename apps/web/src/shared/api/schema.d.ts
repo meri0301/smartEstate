@@ -160,6 +160,63 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/api/experiments": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Every experiment, with its arms and allocation */
+        get: operations["Experiments.list"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/experiments/{key}/results": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * Per-arm outcomes for one experiment
+         * @description Click-through rate over every session, and precision@k and NDCG@k over sessions with feedback, with standard errors and the sample size beside each. Arms are compared with 95% Welch intervals only once every arm has reached the published minimum number of sessions; below it no comparison is offered rather than one with a caveat.
+         */
+        get: operations["Experiments.results"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/interactions": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * Record what a reader did with a listing
+         * @description Implicit feedback: a view, a favourite, a comparison, a dismissal. With a sessionId it becomes an outcome for the ranking that showed the listing, and so for the experiment arm the session ran under. A sessionId that did not show the listing is dropped rather than stored.
+         */
+        post: operations["Interactions.record"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/api/auth/register": {
         parameters: {
             query?: never;
@@ -866,6 +923,99 @@ export interface components {
                 lon: number;
             };
         };
+        ExperimentDto: {
+            key: string;
+            name: string;
+            description: string;
+            arms: {
+                name: string;
+                /** @enum {string} */
+                strategy: "MCDA" | "LEARNED_BASELINE";
+                /** @enum {string} */
+                method: "WEIGHTED_SUM" | "TOPSIS";
+                weight: number;
+            }[];
+            isActive: boolean;
+            /** Format: date-time */
+            createdAt: string;
+        };
+        ExperimentResultsDto: {
+            experiment: {
+                key: string;
+                name: string;
+                description: string;
+                arms: {
+                    name: string;
+                    /** @enum {string} */
+                    strategy: "MCDA" | "LEARNED_BASELINE";
+                    /** @enum {string} */
+                    method: "WEIGHTED_SUM" | "TOPSIS";
+                    weight: number;
+                }[];
+                isActive: boolean;
+                /** Format: date-time */
+                createdAt: string;
+            };
+            k: number;
+            relevanceGains: {
+                [key: string]: number;
+            };
+            minimumSessionsPerArm: number;
+            arms: {
+                arm: {
+                    name: string;
+                    /** @enum {string} */
+                    strategy: "MCDA" | "LEARNED_BASELINE";
+                    /** @enum {string} */
+                    method: "WEIGHTED_SUM" | "TOPSIS";
+                    weight: number;
+                };
+                sessions: number;
+                sessionsWithFeedback: number;
+                clickThroughRate: {
+                    mean: number;
+                    standardError?: number;
+                    n: number;
+                };
+                precisionAtK: {
+                    mean: number;
+                    standardError?: number;
+                    n: number;
+                };
+                ndcgAtK: {
+                    mean: number;
+                    standardError?: number;
+                    n: number;
+                };
+            }[];
+            comparisons: {
+                /** @enum {string} */
+                metric: "clickThroughRate" | "precisionAtK" | "ndcgAtK";
+                arms: (string)[];
+                difference: number;
+                confidenceLow: number;
+                confidenceHigh: number;
+                distinguishable: boolean;
+            }[];
+            sufficient: boolean;
+            /** Format: date-time */
+            computedAt: string;
+        };
+        RecordInteractionBodyDto: {
+            /** Format: uuid */
+            listingId: string;
+            /** @enum {string} */
+            type: "VIEW" | "DWELL" | "FAVORITE" | "UNFAVORITE" | "COMPARE" | "DISMISS" | "CONTACT";
+            /** Format: uuid */
+            sessionId?: string;
+            value?: number;
+        };
+        InteractionRecordedDto: {
+            /** Format: uuid */
+            id: string;
+            /** Format: date-time */
+            recordedAt: string;
+        };
         RegisterBodyDto: {
             email: string;
             password: string;
@@ -1137,6 +1287,7 @@ export interface components {
             strategy: "MCDA" | "LEARNED_BASELINE";
             /** @enum {string} */
             method: "WEIGHTED_SUM" | "TOPSIS";
+            arm?: string;
             candidateCount: number;
             omittedCriteria: ("price" | "value" | "size" | "rooms" | "location" | "condition" | "building")[];
             /** @enum {string} */
@@ -1341,6 +1492,10 @@ export type UpdateListingBodyDto = components['schemas']['UpdateListingBodyDto']
 export type ListingTransitionBodyDto = components['schemas']['ListingTransitionBodyDto'];
 export type BuildingDto = components['schemas']['BuildingDto'];
 export type CreateBuildingBodyDto = components['schemas']['CreateBuildingBodyDto'];
+export type ExperimentDto = components['schemas']['ExperimentDto'];
+export type ExperimentResultsDto = components['schemas']['ExperimentResultsDto'];
+export type RecordInteractionBodyDto = components['schemas']['RecordInteractionBodyDto'];
+export type InteractionRecordedDto = components['schemas']['InteractionRecordedDto'];
 export type RegisterBodyDto = components['schemas']['RegisterBodyDto'];
 export type AuthResponseDto = components['schemas']['AuthResponseDto'];
 export type LoginBodyDto = components['schemas']['LoginBodyDto'];
@@ -1701,6 +1856,88 @@ export interface operations {
             };
             /** @description Coordinates fall outside every supported district */
             422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    "Experiments.list": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ExperimentDto"][];
+                };
+            };
+        };
+    };
+    "Experiments.results": {
+        parameters: {
+            query?: {
+                k?: number;
+            };
+            header?: never;
+            path: {
+                key: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ExperimentResultsDto"];
+                };
+            };
+            /** @description Unknown experiment */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    "Interactions.record": {
+        parameters: {
+            query?: never;
+            header?: {
+                /** @description A stable id for an anonymous browser, so its feedback is one subject and not many */
+                "x-anonymous-id"?: string;
+            };
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["RecordInteractionBodyDto"];
+            };
+        };
+        responses: {
+            201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["InteractionRecordedDto"];
+                };
+            };
+            /** @description Unknown listing */
+            404: {
                 headers: {
                     [name: string]: unknown;
                 };

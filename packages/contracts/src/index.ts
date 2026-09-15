@@ -8,6 +8,7 @@
 export * from './alternatives.js';
 export * from './auth.js';
 export * from './common/index.js';
+export * from './experiments.js';
 export * from './geo.js';
 export * from './hybrid-search.js';
 export * from './listings.js';

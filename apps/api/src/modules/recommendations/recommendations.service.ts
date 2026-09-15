@@ -23,6 +23,8 @@ import { MlClient, MlUnavailableError } from '../../infrastructure/ml/ml.client.
 import type { ListingRow } from '../listings/listing-row.js';
 import { toListingSummary } from '../listings/listing.mapper.js';
 import { ListingsRepository } from '../listings/listings.repository.js';
+import { subjectOf } from '../experiments/assignment.js';
+import { ExperimentsService } from '../experiments/experiments.service.js';
 import { toFeatures } from '../valuation/valuation.mapper.js';
 import { scoreCriteria } from './criteria.js';
 import { explain } from './explanation.js';
@@ -51,13 +53,28 @@ export class RecommendationsService {
     private readonly sessions: RecommendationsRepository,
     private readonly ml: MlClient,
     private readonly explanations: ExplanationsService,
+    private readonly experiments: ExperimentsService,
   ) {}
 
   async recommend(
-    request: RecommendationRequest,
+    incoming: RecommendationRequest,
     viewer: AuthenticatedUser | undefined,
     locale: Locale,
+    anonymousId?: string,
   ): Promise<RecommendationResponse> {
+    // Under an experiment the arm decides the strategy and the method, and the
+    // request's own choice is set aside: the point of the experiment is that
+    // the client does not pick. Without an identifiable subject there is nothing
+    // to be sticky to, so the run proceeds as asked and records no arm — a
+    // session that says "arm A" has to have been assigned to it.
+    const subject = subjectOf(viewer?.id, anonymousId);
+    const arm =
+      incoming.experimentKey !== undefined && subject !== undefined
+        ? await this.experiments.armFor(incoming.experimentKey, subject)
+        : undefined;
+    const request: RecommendationRequest =
+      arm === undefined ? incoming : { ...incoming, strategy: arm.strategy, method: arm.method };
+
     const { preferences } = request;
     // The search fetches one more row than asked for, to detect a next page.
     // Ranking has no pages, and that extra row would push the batch one over the
@@ -116,8 +133,10 @@ export class RecommendationsService {
     await this.sessions.insert({
       id: sessionId,
       userId: viewer?.id ?? null,
+      anonymousId: viewer === undefined ? (anonymousId ?? null) : null,
       strategy: request.strategy,
       experimentKey: request.experimentKey ?? null,
+      arm: arm?.name ?? null,
       preferences: {
         ...request.preferences,
         method: request.method,
@@ -148,6 +167,7 @@ export class RecommendationsService {
       sessionId,
       strategy: request.strategy,
       method: request.method,
+      ...(arm === undefined ? {} : { arm: arm.name }),
       candidateCount: candidates.length,
       omittedCriteria,
       explanationSource: phrased.source,

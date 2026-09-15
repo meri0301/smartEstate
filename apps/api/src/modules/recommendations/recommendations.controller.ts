@@ -13,6 +13,7 @@ import type { AuthenticatedUser } from '../../common/auth/authenticated-user.js'
 import { CurrentUser, Public } from '../../common/auth/decorators.js';
 import { resolveLocale } from '../../common/locale/locale.js';
 import { AiRateLimit } from '../../common/rate-limit/ai.rate-limit.js';
+import { ANONYMOUS_ID_HEADER } from '../interactions/interactions.controller.js';
 import { RecommendationRequestDto, RecommendationResponseDto } from './recommendations.dto.js';
 import { RecommendationsService } from './recommendations.service.js';
 
@@ -48,11 +49,13 @@ export class RecommendationsController {
     @CurrentUser() user: AuthenticatedUser | undefined,
     @Query('locale') locale: string | undefined,
     @Headers('accept-language') acceptLanguage: string | undefined,
+    @Headers(ANONYMOUS_ID_HEADER) anonymousId: string | undefined,
   ): Promise<RecommendationResponse> {
     return this.recommendations.recommend(
       body,
       user,
       resolveLocale({ query: locale, userLocale: user?.locale, acceptLanguage }),
+      anonymousId?.trim() === '' ? undefined : anonymousId?.slice(0, 64),
     );
   }
 }

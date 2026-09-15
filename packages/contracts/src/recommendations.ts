@@ -200,6 +200,14 @@ export const recommendationResponseSchema = z.object({
   sessionId: uuidSchema,
   strategy: rankingStrategySchema,
   method: mcdaMethodSchema,
+  /**
+   * The experiment arm this run was served under, when it ran under one.
+   *
+   * Present so a client can see what it was given, and absent — not a default
+   * — when no experiment was named or the subject could not be identified:
+   * an arm that was not assigned must not look like one that was.
+   */
+  arm: z.string().optional(),
   /** How many listings passed the hard filters before ranking. */
   candidateCount: z.number().int().min(0),
   /**

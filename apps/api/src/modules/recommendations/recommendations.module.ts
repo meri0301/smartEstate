@@ -1,4 +1,5 @@
 import { Module } from '@nestjs/common';
+import { ExperimentsModule } from '../experiments/experiments.module.js';
 import { ListingsModule } from '../listings/listings.module.js';
 import { ExplanationsService } from './explanations.service.js';
 import { RecommendationsController } from './recommendations.controller.js';
@@ -11,7 +12,7 @@ import { RecommendationsService } from './recommendations.service.js';
  * import here beyond the service that owns the prompt.
  */
 @Module({
-  imports: [ListingsModule],
+  imports: [ListingsModule, ExperimentsModule],
   controllers: [RecommendationsController],
   providers: [RecommendationsService, RecommendationsRepository, ExplanationsService],
   exports: [RecommendationsService],

@@ -134,7 +134,7 @@ Health probes live outside the prefix: `/health` (liveness) and `/health/ready` 
 | buildings | `GET /buildings/:id`, agent: `POST /buildings` (district derived from coordinates)                                                                                                          |
 | geo       | `GET /districts`, `GET /districts/:slug/boundary` (GeoJSON)                                                                                                                                 |
 
-Valuation, recommendations, better options, the mortgage refund, hybrid search and natural-language parsing have sections of their own below.
+Valuation, recommendations, better options, the mortgage refund, experiments, hybrid search and natural-language parsing have sections of their own below.
 
 - **Sessions.** Access token: 15-minute JWT in `Authorization: Bearer`. Refresh token: httpOnly,
   SameSite=Strict cookie scoped to `/api/auth`, rotated on every refresh; replaying a consumed
@@ -307,6 +307,41 @@ POST /api/mortgage/refund   { propertyValueAmd, loanAmountAmd, annualRatePct, te
 
 A Yerevan mortgage signed today refunds nothing — the scheme ended there on 2025-01-01 — which is
 why the seed includes listings in Gyumri, Vanadzor and Dilijan.
+
+## Experiments
+
+The comparison the thesis is built around: which ranking strategy do buyers actually act on? See
+[ADR-0018](docs/adr/0018-ab-testing-harness.md).
+
+```
+GET  /api/experiments                       -> [{ key, name, arms, isActive, ... }]
+GET  /api/experiments/:key/results?k=10     -> { arms, comparisons, sufficient, relevanceGains, ... }
+POST /api/interactions                      { listingId, type, sessionId? }
+```
+
+- **An experiment is a row and its arms are data.** `experiments.arms` names the strategy and
+  method of each arm and its share of traffic. The seeded experiment, `ranking-method`, runs
+  weighted sum against TOPSIS at 50/50. A learned ranker, when there is one, is a third arm and no
+  change to the harness.
+- **Assignment is a sticky hash** of the experiment key and the subject — a signed-in user, or an
+  anonymous browser identified by an `x-anonymous-id` header the client mints and keeps. Without
+  a subject the recommender runs as asked and records no arm; a random assignment would be an
+  experiment on nobody.
+- **A request under an experiment does not get to choose.** `POST /recommendations` with an
+  `experimentKey` has its strategy and method set by the arm, and the response and the stored
+  session both say which arm served it.
+- **Outcomes are attributed only to the session that showed the listing.** An interaction with a
+  `sessionId` keeps it only if that session's results included that listing; otherwise it is
+  stored as a fact about the listing with no session. A client cannot credit clicks to a ranking
+  that never produced them.
+- **Relevance is implicit and graded** — contact or favourite 3, compare 2, view or dwell 1,
+  dismiss 0 — and the gains are published in every results payload.
+- **Three metrics, each with its standard error and n:** click-through rate over every session;
+  precision@k and NDCG@k over sessions with feedback.
+- **No comparison below thirty sessions per arm.** Above it, 95% Welch intervals on the difference
+  of means. The threshold is in the payload so the page says "not yet" rather than implying a winner.
+- **Nothing fabricates traffic.** The results page shows "not enough data" until real sessions
+  accumulate.
 
 ## Language model layer
 

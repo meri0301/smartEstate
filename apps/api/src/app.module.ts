@@ -13,6 +13,8 @@ import { MlModule } from './infrastructure/ml/ml.module.js';
 import { PrismaModule } from './infrastructure/prisma/prisma.module.js';
 import { RedisModule } from './infrastructure/redis/redis.module.js';
 import { AlternativesModule } from './modules/alternatives/alternatives.module.js';
+import { ExperimentsModule } from './modules/experiments/experiments.module.js';
+import { InteractionsModule } from './modules/interactions/interactions.module.js';
 import { AdminModule } from './modules/admin/admin.module.js';
 import { AuthModule } from './modules/auth/auth.module.js';
 import { GeoModule } from './modules/geo/geo.module.js';
@@ -65,6 +67,8 @@ function loggerParams(config: AppConfig): Params {
     LlmModule,
     AdminModule,
     AlternativesModule,
+    ExperimentsModule,
+    InteractionsModule,
     AuthModule,
     UsersModule,
     GeoModule,

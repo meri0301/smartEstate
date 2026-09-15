@@ -14,8 +14,12 @@ import { PrismaService } from '../../infrastructure/prisma/prisma.service.js';
 export interface NewRecommendationSession {
   id: string;
   userId: string | null;
+  /** The browser's own id when nobody is signed in, so feedback has a subject. */
+  anonymousId: string | null;
   strategy: RankingStrategy;
   experimentKey: string | null;
+  /** Written at serving time, never derived: see the experiments migration. */
+  arm: string | null;
   /** The inputs, verbatim, plus what the run decided about them. */
   preferences: Prisma.InputJsonValue;
   /** The ordering, with each listing's score, breakdown and computed reasons. */
@@ -39,8 +43,10 @@ export class RecommendationsRepository {
       data: {
         id: session.id,
         userId: session.userId,
+        anonymousId: session.anonymousId,
         strategy: session.strategy,
         experimentKey: session.experimentKey,
+        arm: session.arm,
         preferences: session.preferences,
         results: session.results,
         llmTrace: session.llmTrace ?? Prisma.DbNull,

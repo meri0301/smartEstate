@@ -69,3 +69,16 @@ export type DistrictKind = z.infer<typeof districtKindSchema>;
 export const MEDIA_KINDS = ['PHOTO', 'FLOOR_PLAN', 'VIDEO'] as const;
 export const mediaKindSchema = z.enum(MEDIA_KINDS);
 export type MediaKind = z.infer<typeof mediaKindSchema>;
+
+/** What a reader did with a listing. Implicit feedback, graded when it is read back. */
+export const INTERACTION_TYPES = [
+  'VIEW',
+  'DWELL',
+  'FAVORITE',
+  'UNFAVORITE',
+  'COMPARE',
+  'DISMISS',
+  'CONTACT',
+] as const;
+export const interactionTypeSchema = z.enum(INTERACTION_TYPES);
+export type InteractionType = z.infer<typeof interactionTypeSchema>;

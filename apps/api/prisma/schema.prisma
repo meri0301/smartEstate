@@ -565,6 +565,10 @@ model RecommendationSession {
   anonymousId   String?         @map("anonymous_id")
   strategy      RankingStrategy
   experimentKey String?         @map("experiment_key")
+  /// The experiment arm this session was served under, written at serving time.
+  /// Not derived from strategy and method: a derivation is a second definition
+  /// of the arms that would drift from the first the day one was redefined.
+  arm           String?
   /// Preference vector / filters used as input.
   preferences   Json
   /// Ordered results: [{"listingId":"…","score":0.82,"breakdown":{…}}, …]
@@ -577,7 +581,25 @@ model RecommendationSession {
 
   @@index([userId, createdAt(sort: Desc)])
   @@index([experimentKey, strategy])
+  @@index([experimentKey, arm])
   @@map("recommendation_sessions")
+}
+
+/// An A/B experiment over ranking strategies, as data.
+///
+/// The arms are a JSON array validated on read: [{ name, strategy, method,
+/// weight }]. Stored rather than configured so that which arms ran, at what
+/// allocation, is readable from the database that holds the results.
+model Experiment {
+  id          String   @id @default(uuid(7)) @db.Uuid
+  key         String   @unique
+  name        String
+  description String
+  arms        Json
+  isActive    Boolean  @default(true) @map("is_active")
+  createdAt   DateTime @default(now()) @map("created_at") @db.Timestamptz(3)
+
+  @@map("experiments")
 }
 
 /// Implicit feedback stream (views, dwell time, favourites, dismissals).
@@ -597,6 +619,7 @@ model UserInteraction {
 
   @@index([userId, createdAt(sort: Desc)])
   @@index([listingId, type])
+  @@index([sessionId])
   @@map("user_interactions")
 }
 
