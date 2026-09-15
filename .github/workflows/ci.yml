@@ -131,10 +131,21 @@ jobs:
       - name: Assert seed invariants
         run: |
           q() { docker compose --env-file .env.example exec -T postgres psql -U smartestate -d smartestate -Atc "$1"; }
-          test "$(q 'SELECT count(*) FROM listings')" = "300"
+          # 300 in Yerevan plus 40 across Gyumri, Vanadzor and Dilijan, which
+          # exist so the mortgage refund calculator has somewhere it pays out.
+          test "$(q 'SELECT count(*) FROM listings')" = "340"
           test "$(q 'SELECT count(*) FROM districts')" = "15"
-          test "$(q "SELECT count(DISTINCT district_id) FROM listings")" = "12"
-          test "$(q 'SELECT count(*) FROM listing_translations')" = "900"
+          test "$(q "SELECT count(DISTINCT district_id) FROM listings")" = "15"
+          test "$(q 'SELECT count(*) FROM listing_translations')" = "1020"
+          # The province decides whether the refund has been withdrawn, so it has
+          # to be set from the slug and never left to the free-text OSM value.
+          test "$(q "SELECT count(*) FROM districts WHERE marz_code IS NULL")" = "0"
+          test "$(q "SELECT marz_code FROM districts WHERE slug = 'gyumri'")" = "SHIRAK"
+          test "$(q "SELECT marz_code FROM districts WHERE slug = 'vanadzor'")" = "LORI"
+          test "$(q "SELECT marz_code FROM districts WHERE slug = 'dilijan'")" = "TAVUSH"
+          test "$(q "SELECT count(*) FROM districts WHERE kind = 'CITY_DISTRICT' AND marz_code <> 'YEREVAN'")" = "0"
+          # The refund rules are data; without the rows the calculator answers nothing.
+          test "$(q 'SELECT count(*) FROM tax_refund_rule_sets')" = "2"
           # Every listing lies inside the polygon of the district it claims.
           test "$(q 'SELECT count(*) FROM listings l JOIN districts d ON d.id = l.district_id WHERE NOT ST_Contains(d.boundary, l.location)')" = "0"
           # Every listing has all three locales and at least one photo.
