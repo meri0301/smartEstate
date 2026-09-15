@@ -99,7 +99,8 @@
     "notFound": "This listing is not available",
     "notFoundHint": "It may have been withdrawn, or the address may be wrong.",
     "advisorPrompt": "Could you do better for the money?",
-    "advisorLink": "Compare with the alternatives"
+    "advisorLink": "Compare with the alternatives",
+    "mortgageLink": "What you would get back in tax"
   },
   "attributes": {
     "rooms": "Rooms",

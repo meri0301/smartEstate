@@ -1,5 +1,5 @@
 /**
- * Market calibration for the synthetic Yerevan dataset.
+ * Market calibration for the synthetic dataset.
  *
  * ASSUMPTION (documented for the thesis): the medians below approximate 2025
  * asking prices per m² observed on public Armenian listing portals, rounded to
@@ -8,6 +8,14 @@
  * dominant housing stock of each district (Soviet panel estates in Nor Nork and
  * Ajapnyak, tuff-stone and Stalin-era blocks in Kentron and Arabkir, new
  * monolith construction concentrated in the centre and Arabkir).
+ *
+ * The three towns outside Yerevan are here for a specific reason and not for
+ * coverage. The mortgage income-tax refund ended for Yerevan on 2025-01-01, so
+ * every Yerevan listing refunds exactly nothing; without somewhere the scheme
+ * still runs, the calculator could only ever demonstrate its refusal path.
+ * Gyumri, Vanadzor and Dilijan are in Shirak, Lori and Tavush, which keep it
+ * until 2029. Their prices are markedly lower than Yerevan's, which is also why
+ * a buyer might actually go there.
  */
 import type { BuildingType } from '../../../src/generated/prisma/enums.js';
 
@@ -181,6 +189,52 @@ export const DISTRICT_CALIBRATION: readonly DistrictCalibration[] = [
       ['PANEL', 50],
       ['STONE', 30],
       ['KHRUSHCHYOVKA', 20],
+    ],
+  },
+  // --- towns outside Yerevan -------------------------------------------------
+  {
+    slug: 'gyumri',
+    listingCount: 18,
+    medianPricePerSqmAmd: 330_000,
+    priceNoiseSigma: 0.16,
+    buildingTypeMix: [
+      // Gyumri's stock is dominated by post-1988 reconstruction and Soviet
+      // panel; the tuff-stone centre survives but is a small share.
+      ['PANEL', 40],
+      ['STONE', 25],
+      ['KHRUSHCHYOVKA', 15],
+      ['NEW_BUILD', 12],
+      ['MONOLITH', 5],
+      ['STALINKA', 3],
+    ],
+  },
+  {
+    slug: 'vanadzor',
+    listingCount: 14,
+    medianPricePerSqmAmd: 300_000,
+    priceNoiseSigma: 0.16,
+    buildingTypeMix: [
+      ['PANEL', 45],
+      ['STONE', 22],
+      ['KHRUSHCHYOVKA', 18],
+      ['NEW_BUILD', 8],
+      ['MONOLITH', 4],
+      ['STALINKA', 3],
+    ],
+  },
+  {
+    slug: 'dilijan',
+    listingCount: 8,
+    medianPricePerSqmAmd: 420_000,
+    priceNoiseSigma: 0.2,
+    buildingTypeMix: [
+      // A resort town: newer construction is a larger share than its size
+      // suggests, and the spread is wider because the market is thin.
+      ['NEW_BUILD', 30],
+      ['STONE', 30],
+      ['PANEL', 20],
+      ['MONOLITH', 12],
+      ['KHRUSHCHYOVKA', 8],
     ],
   },
 ];

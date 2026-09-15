@@ -1,5 +1,5 @@
 /**
- * Real street names per district in the three content locales. Russian names
+ * Real street names per district and town, in the three content locales. Russian names
  * are in the genitive form that follows "улица"; Armenian names precede "փողոց".
  * Used for synthetic building addresses and to seed the street-alias table.
  */
@@ -122,5 +122,34 @@ export const STREETS_BY_DISTRICT: Readonly<Record<string, readonly Street[]>> = 
     { en: 'Tamantsineri', hy: 'Թամանցիների', ru: 'Таманцев' },
     { en: 'Arshakunyats', hy: 'Արշակունյաց', ru: 'Аршакуняц' },
     { en: 'Sharur', hy: 'Շարուր', ru: 'Шарур' },
+  ],
+  // --- towns outside Yerevan -------------------------------------------------
+  gyumri: [
+    { en: 'Abovyan', hy: 'Աբովյան', ru: 'Абовяна' },
+    { en: 'Rustaveli', hy: 'Ռուսթավելի', ru: 'Руставели' },
+    { en: 'Garegin Nzhdeh', hy: 'Գարեգին Նժդեհի', ru: 'Гарегина Нжде' },
+    { en: 'Shirakatsi', hy: 'Շիրակացու', ru: 'Ширакаци' },
+    { en: 'Gorki', hy: 'Գորկու', ru: 'Горького' },
+    { en: 'Tigran Mets', hy: 'Տիգրան Մեծի', ru: 'Тиграна Великого' },
+    { en: 'Jivani', hy: 'Ջիվանու', ru: 'Дживани' },
+    { en: 'Ankakhutyan', hy: 'Անկախության', ru: 'Независимости' },
+  ],
+  vanadzor: [
+    { en: 'Tigran Mets', hy: 'Տիգրան Մեծի', ru: 'Тиграна Великого' },
+    { en: 'Vardanants', hy: 'Վարդանանց', ru: 'Вардананц' },
+    { en: 'Myasnikyan', hy: 'Մյասնիկյան', ru: 'Мясникяна' },
+    { en: 'Batumi', hy: 'Բաթումի', ru: 'Батуми' },
+    { en: 'Grigor Lusavorich', hy: 'Գրիգոր Լուսավորչի', ru: 'Григора Просветителя' },
+    { en: 'Sayat-Nova', hy: 'Սայաթ-Նովա', ru: 'Саят-Новы' },
+    { en: 'Taron', hy: 'Տարոն', ru: 'Тарон' },
+    { en: 'Khnko Aper', hy: 'Խնկո Ապոր', ru: 'Хнко Апера' },
+  ],
+  dilijan: [
+    { en: 'Myasnikyan', hy: 'Մյասնիկյան', ru: 'Мясникяна' },
+    { en: 'Kalinin', hy: 'Կալինինի', ru: 'Калинина' },
+    { en: 'Getapnya', hy: 'Գետափնյա', ru: 'Гетапня' },
+    { en: 'Sharambeyan', hy: 'Շարամբեյան', ru: 'Шарамбеяна' },
+    { en: 'Usanogh', hy: 'Ուսանողական', ru: 'Студенческая' },
+    { en: 'Maxim Gorki', hy: 'Մաքսիմ Գորկու', ru: 'Максима Горького' },
   ],
 };

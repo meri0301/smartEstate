@@ -5,6 +5,7 @@ import { detectLocale, withLocalePath } from '../shared/i18n/detect.js';
 import { AlternativesPage } from './routes/AlternativesPage.js';
 import { HomePage } from './routes/HomePage.js';
 import { ListingDetailPage } from './routes/ListingDetailPage.js';
+import { MortgagePage } from './routes/MortgagePage.js';
 import { LocaleLayout } from './routes/LocaleLayout.js';
 import { NotFoundPage } from './routes/NotFoundPage.js';
 import { SearchPage } from './routes/SearchPage.js';
@@ -38,6 +39,7 @@ export const routes: RouteObject[] = [
       { path: 'listings', element: <SearchPage /> },
       { path: 'listings/:idOrPublicId', element: <ListingDetailPage /> },
       { path: 'listings/:idOrPublicId/alternatives', element: <AlternativesPage /> },
+      { path: 'mortgage', element: <MortgagePage /> },
       { path: '*', element: <NotFoundPage /> },
     ],
   },

@@ -272,10 +272,19 @@ describe('recommendations', () => {
   });
 
   it('names the trade-offs, not only the strengths', async () => {
-    // A recommender that lists only reasons to say yes is an advertisement. Over
-    // a page of results at least one listing should be admitting to something.
-    const result = await recommend({ preferences: preferences(), limit: 10 });
+    // A recommender that lists only reasons to say yes is an advertisement.
+    //
+    // The budget is set just above the cheapest listings a buyer could reach, so
+    // whatever comes back is close to it and scores poorly on price. Asking with
+    // a generous budget instead made this assertion a statement about the seed
+    // rather than about the explainer — it passed until towns outside Yerevan
+    // were seeded, at which point everything affordable was also good.
+    const result = await recommend({
+      preferences: preferences({ budgetAmd: 12_000_000, roomsMin: 1 }),
+      limit: 10,
+    });
 
+    expect(result.items.length).toBeGreaterThan(0);
     const kinds = result.items.flatMap((item) =>
       item.explanation.highlights.map((highlight) => highlight.kind),
     );

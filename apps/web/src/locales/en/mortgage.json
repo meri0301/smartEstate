@@ -1,0 +1,66 @@
+{
+  "title": "Mortgage income-tax refund",
+  "intro": "Armenia refunds the personal income tax you pay, up to the mortgage interest you pay, up to a cap each quarter. The scheme is being withdrawn province by province, so where you buy decides whether you get anything at all.",
+  "form": {
+    "propertyValue": "Property price, AMD",
+    "loanAmount": "Loan amount, AMD",
+    "annualRate": "Interest rate, % a year",
+    "termYears": "Term, years",
+    "agreementDate": "Loan agreement date",
+    "district": "Where the property is",
+    "purchaseKind": "How you are buying it",
+    "quarterlyIncomeTax": "Income tax you pay per quarter, AMD",
+    "quarterlyIncomeTaxHint": "The refund can never exceed this. Roughly three months of the tax withheld from your pay.",
+    "lenderIsResident": "The lender is an Armenian financial institution",
+    "paysArmenianIncomeTax": "I pay Armenian personal income tax",
+    "submit": "Work it out",
+    "failed": "The calculation could not be completed."
+  },
+  "purchaseKind": {
+    "FROM_DEVELOPER": "New build, from the developer",
+    "FROM_STATE_OR_COMMUNITY": "From the state or the community",
+    "SELF_BUILT": "I built it myself, under a permit",
+    "RESALE": "Resale from a private owner"
+  },
+  "result": {
+    "eligibleTitle": "You would get money back",
+    "ineligibleTitle": "This purchase would refund nothing",
+    "quarterly": "Per quarter, at most",
+    "total": "Over the whole term",
+    "effectiveRate": "Your {nominal}% mortgage behaves like a {effective}% one",
+    "monthlyPayment": "Monthly payment",
+    "totalInterest": "Interest over the term",
+    "assumption": "The total assumes you keep paying this much income tax every quarter for {years, plural, one {# year} other {# years}}. The refund shrinks as the interest does.",
+    "wouldHaveBeen": "Had it qualified, it would have refunded up to {amount} a quarter.",
+    "ruleSet": "Calculated with rule set {version}, the one in force on the agreement date.",
+    "scheduleTitle": "Year by year",
+    "year": "Year",
+    "interest": "Interest",
+    "refund": "Refund",
+    "capped": "capped"
+  },
+  "ineligible": {
+    "agreementTooEarly": "The scheme only covers agreements signed on or after {minAgreementDate}.",
+    "phasedOut": "The scheme ended in {marz} for agreements signed on or after {phaseOutDate}. Designated border settlements are exempt.",
+    "propertyTooExpensive": "The property is worth more than the {maxPropertyValueAmd} ceiling the rules allow.",
+    "notEligiblePurchase": "Only newly built housing bought from the developer, the state or the community, or a home you built yourself under a permit, qualifies.",
+    "lenderNotResident": "The loan has to come from a resident Armenian financial institution.",
+    "notAnArmenianTaxpayer": "The refund is of Armenian personal income tax, so you have to pay it.",
+    "applicantTooOld": "The rules in force set an age limit of {maxApplicantAge}.",
+    "noRulesForDate": "No rules are recorded for an agreement dated {agreementDate}."
+  },
+  "marz": {
+    "YEREVAN": "Yerevan",
+    "ARAGATSOTN": "Aragatsotn",
+    "ARARAT": "Ararat",
+    "ARMAVIR": "Armavir",
+    "GEGHARKUNIK": "Gegharkunik",
+    "KOTAYK": "Kotayk",
+    "LORI": "Lori",
+    "SHIRAK": "Shirak",
+    "SYUNIK": "Syunik",
+    "TAVUSH": "Tavush",
+    "VAYOTS_DZOR": "Vayots Dzor"
+  },
+  "disclaimer": "An estimate from publicly available information, not tax advice. Confirm your entitlement with the State Revenue Committee before you rely on it."
+}
