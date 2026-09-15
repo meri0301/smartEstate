@@ -45,6 +45,12 @@
         "SWAGGER_ENABLED"
       ]
     },
+    "embeddings:backfill": {
+      "dependsOn": ["build"],
+      "cache": false,
+      "outputs": [],
+      "env": ["DATABASE_URL", "NODE_ENV", "LOG_LEVEL", "ML_*", "JWT_*", "REDIS_URL"]
+    },
     "build-storybook": {
       "dependsOn": ["^build"],
       "outputs": ["storybook-static/**"]

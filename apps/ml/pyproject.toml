@@ -15,6 +15,11 @@ dependencies = [
   "lightgbm>=4.7,<5.0",
   "numpy>=2.5,<3.0",
   "pandas>=3.0,<4.0",
+  # Embeddings run locally: the brief rules out calling an external embedding
+  # API. This pulls torch, which is the largest thing in the image by far, so
+  # install the CPU build first (see the Dockerfile and the CI workflow) or pip
+  # will fetch a CUDA stack this service has no use for.
+  "sentence-transformers>=6.0,<7.0",
 ]
 
 [project.optional-dependencies]

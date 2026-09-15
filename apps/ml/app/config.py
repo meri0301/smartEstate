@@ -19,6 +19,11 @@ class Settings(BaseSettings):
     log_level: str = "info"
     #: Where the trained valuation artefact is read from.
     model_dir: Path = DEFAULT_MODEL_DIR
+    #: Whether to load the sentence encoder at start-up. Turning it off saves
+    #: roughly a gigabyte of resident memory for a deployment that only wants
+    #: valuations, and is how the test suite avoids fetching half a gigabyte of
+    #: weights to exercise code that never touches them.
+    embeddings_enabled: bool = True
 
 
 @lru_cache(maxsize=1)

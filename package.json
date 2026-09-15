@@ -28,6 +28,7 @@
     "i18n:check": "turbo run i18n:check",
     "storybook": "pnpm --filter @smartestate/web storybook",
     "openapi:export": "turbo run openapi:export",
+    "embeddings:backfill": "turbo run embeddings:backfill",
     "format": "prettier --write .",
     "format:check": "prettier --check .",
     "docker:up": "docker compose up -d --build --wait",

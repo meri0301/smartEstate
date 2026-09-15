@@ -8,6 +8,7 @@ import type { ListingSearchQuery } from '@smartestate/contracts';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 import type { AuthenticatedUser } from '../../common/auth/authenticated-user.js';
 import type { AuditService } from '../admin/audit.service.js';
+import type { EmbeddingsService } from '../embeddings/embeddings.service.js';
 import type { ListingRow } from './listing-row.js';
 import { IllegalListingTransitionError } from './listing-lifecycle.js';
 import { ListingAccessDeniedError, ListingQuotaExceededError } from './listing.policy.js';
@@ -191,14 +192,17 @@ describe('scopeSearch', () => {
 describe('ListingsService', () => {
   let repository: ReturnType<typeof createRepositoryMock>;
   let audit: { record: ReturnType<typeof vi.fn> };
+  let embeddings: { embedListing: ReturnType<typeof vi.fn> };
   let service: ListingsService;
 
   beforeEach(() => {
     repository = createRepositoryMock();
     audit = { record: vi.fn().mockResolvedValue(undefined) };
+    embeddings = { embedListing: vi.fn().mockResolvedValue(undefined) };
     service = new ListingsService(
       repository as unknown as ListingsRepository,
       audit as unknown as AuditService,
+      embeddings as unknown as EmbeddingsService,
     );
   });
 

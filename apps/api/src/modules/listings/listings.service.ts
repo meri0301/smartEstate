@@ -22,6 +22,7 @@ import { uuidV7 } from '../../common/ids/uuid-v7.js';
 import { toPage } from '../../common/pagination/cursor.js';
 import type { Prisma } from '../../generated/prisma/client.js';
 import { AuditService } from '../admin/audit.service.js';
+import { EmbeddingsService } from '../embeddings/embeddings.service.js';
 import type { ListingRow } from './listing-row.js';
 import { applyTransition, initialStatus } from './listing-lifecycle.js';
 import {
@@ -79,6 +80,7 @@ export class ListingsService {
   constructor(
     private readonly repository: ListingsRepository,
     private readonly audit: AuditService,
+    private readonly embeddings: EmbeddingsService,
   ) {}
 
   async search(
@@ -263,6 +265,13 @@ export class ListingsService {
       reason: body.reason,
     });
     await this.repository.applyStateChange(id, change);
+    if (change.status === 'PUBLISHED') {
+      // Fire-and-wait, but never fire-and-fail: a listing that has just been
+      // approved must not report an error because the encoder is restarting.
+      // Without a vector it is still found lexically, and the next backfill
+      // picks it up.
+      await this.embeddings.embedListing(id);
+    }
     await this.audit.record({
       actorId: actor.id,
       action: `listing.${body.action.toLowerCase()}`,

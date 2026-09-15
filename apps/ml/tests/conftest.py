@@ -119,3 +119,24 @@ def one_listing(synthetic_rows):
     row.pop("public_id")
     row.pop("price_amd")
     return row
+
+
+@pytest.fixture(scope="session", autouse=True)
+def _no_embedding_download():
+    """
+    Keep the encoder out of every application start-up in the suite.
+
+    The lifespan loads it, and loading it means half a gigabyte of weights from
+    the network. The tests that are actually about embeddings put a fake encoder
+    on `app.state` themselves, which is both faster and a better test: it exercises
+    this code rather than sentence-transformers.
+    """
+    import os
+
+    from app.config import get_settings
+
+    os.environ["ML_EMBEDDINGS_ENABLED"] = "false"
+    get_settings.cache_clear()
+    yield
+    del os.environ["ML_EMBEDDINGS_ENABLED"]
+    get_settings.cache_clear()

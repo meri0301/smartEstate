@@ -387,21 +387,28 @@ model ListingTranslation {
   source      TranslationSource @default(HUMAN)
   isReviewed  Boolean           @default(false) @map("is_reviewed")
   updatedAt   DateTime          @updatedAt @map("updated_at") @db.Timestamptz(3)
+  /// Full-text index over title and description, maintained by the database.
+  /// Generated, never written: see the hybrid_search migration for the per-locale
+  /// text search configuration and why Armenian falls back to `simple`.
+  searchVector Unsupported("tsvector")? @map("search_vector")
 
   listing Listing @relation(fields: [listingId], references: [id], onDelete: Cascade)
 
   @@id([listingId, locale])
+  @@index([searchVector], type: Gin)
   @@map("listing_translations")
 }
 
 /// Sentence embedding of the listing text for hybrid semantic search.
-/// Dimension 768 matches LaBSE / multilingual-e5-base; a model change is a migration.
+/// Dimension 384 matches multilingual-e5-small, which is what apps/ml runs; the
+/// model name and revision are stored per row, and changing either is a
+/// migration plus a re-embed, never a config change.
 model ListingEmbedding {
   listingId    String   @id @map("listing_id") @db.Uuid
   modelVersion String   @map("model_version")
   /// SHA-256 of the embedded text; lets the worker skip unchanged listings.
   sourceHash   String   @map("source_hash")
-  embedding    Unsupported("vector(768)")
+  embedding    Unsupported("vector(384)")
   createdAt    DateTime @default(now()) @map("created_at") @db.Timestamptz(3)
 
   listing Listing @relation(fields: [listingId], references: [id], onDelete: Cascade)

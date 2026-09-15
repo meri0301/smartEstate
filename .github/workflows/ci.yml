@@ -80,6 +80,9 @@ jobs:
         with:
           python-version-file: apps/ml/.python-version
           cache: pip
+      # The CPU build first: sentence-transformers depends on torch, and the
+      # default wheel on Linux carries a CUDA stack this service never uses.
+      - run: pip install --index-url https://download.pytorch.org/whl/cpu "torch>=2.14,<3.0"
       - run: pip install -e ".[dev]"
       - run: ruff check .
       - run: ruff format --check .

@@ -31,6 +31,7 @@ export interface AppConfig {
   readonly ml: {
     readonly baseUrl: string;
     readonly timeoutMs: number;
+    readonly embedTimeoutMs: number;
   };
   readonly redisUrl: string | undefined;
   readonly llm: {
@@ -96,6 +97,7 @@ export function loadConfig(
       // Trailing slashes would double up when a path is appended.
       baseUrl: env.ML_BASE_URL.replace(/\/+$/, ''),
       timeoutMs: env.ML_TIMEOUT_MS,
+      embedTimeoutMs: env.ML_EMBED_TIMEOUT_MS,
     },
     redisUrl: env.REDIS_URL,
     llm: {

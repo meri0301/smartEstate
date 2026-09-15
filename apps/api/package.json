@@ -26,7 +26,8 @@
     "erd": "tsx prisma/erd/generate-erd.ts",
     "osm:fetch": "node prisma/seed/scripts/fetch-osm.ts",
     "openapi:export": "node dist/openapi/export.js",
-    "test:integration": "vitest run --project integration"
+    "test:integration": "vitest run --project integration",
+    "embeddings:backfill": "node dist/scripts/backfill-embeddings.js"
   },
   "dependencies": {
     "@fastify/cookie": "11.1.2",

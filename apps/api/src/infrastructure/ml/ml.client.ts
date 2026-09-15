@@ -75,6 +75,31 @@ export type MlPrediction = z.infer<typeof predictResponseSchema>;
 /** The service refuses a larger batch, and so does this client, with a clearer message. */
 export const ML_MAX_BATCH = 100;
 
+/** `/embed` has a tighter limit than `/predict`: encoding is far slower than a tree. */
+export const ML_MAX_EMBED_BATCH = 64;
+
+/**
+ * Which end of a search a text belongs to.
+ *
+ * The encoder was trained with different prefixes for the two, and using the
+ * wrong one costs retrieval quality with nothing to notice, so it is part of the
+ * call rather than a default anybody can forget.
+ */
+export type MlTextKind = 'query' | 'passage';
+
+const embedResponseSchema = z.object({
+  modelVersion: z.string().min(1),
+  dimensions: z.number().int().positive(),
+  embeddings: z.array(z.array(z.number())),
+});
+export type MlEmbeddings = z.infer<typeof embedResponseSchema>;
+
+const embeddingModelSchema = z.object({
+  modelVersion: z.string().min(1),
+  dimensions: z.number().int().positive(),
+});
+export type MlEmbeddingModel = z.infer<typeof embeddingModelSchema>;
+
 const modelInfoSchema = z.object({
   modelVersion: z.string().min(1),
   trainedAt: z.string(),
@@ -88,7 +113,7 @@ export class MlUnavailableError extends DomainError {
   readonly status = 503;
 
   constructor(reason: string) {
-    super(`The valuation service is unavailable: ${reason}`);
+    super(`The model service is unavailable: ${reason}`);
   }
 }
 
@@ -99,6 +124,7 @@ const MODEL_VERSION_TTL_MS = 5 * 60 * 1000;
 export class MlClient {
   private readonly logger = new Logger(MlClient.name);
   private cachedVersion: { value: string; expiresAt: number } | undefined;
+  private cachedEmbeddingModel: { value: MlEmbeddingModel; expiresAt: number } | undefined;
 
   constructor(@InjectConfig() private readonly config: AppConfig) {}
 
@@ -166,13 +192,86 @@ export class MlClient {
     return parsed.data;
   }
 
-  private async request(method: 'GET' | 'POST', path: string, body?: unknown): Promise<unknown> {
+  /**
+   * Which encoder is loaded, cached briefly.
+   *
+   * A search asks on every request and does not care whether the answer is a few
+   * minutes old, so the cache saves a round trip per search.
+   *
+   * A backfill passes `fresh` and must: it decides from this answer which stored
+   * vectors are from other weights and therefore get deleted. Acting on a
+   * five-minute-old version could delete the current rows and keep the stale
+   * ones, which is the one mistake this whole versioning scheme exists to
+   * prevent.
+   */
+  async embeddingModel(options: { fresh?: boolean } = {}): Promise<MlEmbeddingModel> {
+    const now = Date.now();
+    if (
+      options.fresh !== true &&
+      this.cachedEmbeddingModel !== undefined &&
+      this.cachedEmbeddingModel.expiresAt > now
+    ) {
+      return this.cachedEmbeddingModel.value;
+    }
+    const parsed = embeddingModelSchema.safeParse(await this.request('GET', '/embed/model'));
+    if (!parsed.success) {
+      throw new MlUnavailableError('it answered /embed/model with an unexpected shape');
+    }
+    this.cachedEmbeddingModel = { value: parsed.data, expiresAt: now + MODEL_VERSION_TTL_MS };
+    return parsed.data;
+  }
+
+  /**
+   * Encode a batch of texts as vectors, in order.
+   *
+   * Position is the only thing tying a vector back to its text, so a short or
+   * long answer is refused rather than zipped optimistically: attaching one
+   * listing's meaning to another would be undetectable afterwards.
+   */
+  async embed(texts: readonly string[], kind: MlTextKind): Promise<MlEmbeddings> {
+    if (texts.length === 0) {
+      const model = await this.embeddingModel();
+      return { ...model, embeddings: [] };
+    }
+    if (texts.length > ML_MAX_EMBED_BATCH) {
+      throw new MlUnavailableError(
+        `a batch of ${String(texts.length)} exceeds the embedding limit of ${String(ML_MAX_EMBED_BATCH)}`,
+      );
+    }
+    const parsed = embedResponseSchema.safeParse(
+      await this.request('POST', '/embed', { texts, kind }, this.config.ml.embedTimeoutMs),
+    );
+    if (!parsed.success) {
+      throw new MlUnavailableError('it answered /embed with an unexpected shape');
+    }
+    if (parsed.data.embeddings.length !== texts.length) {
+      throw new MlUnavailableError(
+        `it returned ${String(parsed.data.embeddings.length)} vectors for ${String(texts.length)} texts`,
+      );
+    }
+    const wrong = parsed.data.embeddings.find((vector) => vector.length !== parsed.data.dimensions);
+    if (wrong !== undefined) {
+      // The column is fixed width. A vector of the wrong length would fail the
+      // insert, and one of the right length but the wrong model would not.
+      throw new MlUnavailableError(
+        `it returned a vector of ${String(wrong.length)} dimensions, not ${String(parsed.data.dimensions)}`,
+      );
+    }
+    return parsed.data;
+  }
+
+  private async request(
+    method: 'GET' | 'POST',
+    path: string,
+    body?: unknown,
+    timeoutMs: number = this.config.ml.timeoutMs,
+  ): Promise<unknown> {
     const url = `${this.config.ml.baseUrl}${path}`;
     let response: Response;
     try {
       response = await fetch(url, {
         method,
-        signal: AbortSignal.timeout(this.config.ml.timeoutMs),
+        signal: AbortSignal.timeout(timeoutMs),
         ...(body === undefined
           ? {}
           : { headers: { 'content-type': 'application/json' }, body: JSON.stringify(body) }),

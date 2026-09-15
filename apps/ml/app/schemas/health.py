@@ -30,5 +30,10 @@ class ReadinessResponse(BaseModel):
     version: str
     model_loaded: bool
     model_version: str | None
+    #: Whether the sentence encoder for hybrid search came up. Reported
+    #: separately because the two models fail for entirely different reasons: one
+    #: needs a training run, the other needs its weights on disk.
+    embeddings_loaded: bool
+    embedding_model_version: str | None
     #: Why it is degraded, in words a developer can act on.
     detail: str | None

@@ -41,6 +41,14 @@ export const envSchema = z.object({
    * long for one. Two seconds is generous for a single tree ensemble.
    */
   ML_TIMEOUT_MS: z.coerce.number().int().min(100).max(30_000).default(2_000),
+  /**
+   * Embedding is a different order of work from valuation and gets its own
+   * budget. A LightGBM prediction is a tree traversal measured in microseconds;
+   * encoding a batch of sixty-four listing descriptions is seconds of CPU in a
+   * transformer. One timeout for both would either cut the encoder off or make a
+   * dead valuation service hold a listing page open for half a minute.
+   */
+  ML_EMBED_TIMEOUT_MS: z.coerce.number().int().min(1_000).max(300_000).default(60_000),
 
   /** Optional. Without it the application runs, uncached. */
   REDIS_URL: z.string().min(1).optional(),

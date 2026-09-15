@@ -10,8 +10,9 @@ from fastapi import FastAPI
 from app import SERVICE_VERSION
 from app.config import get_settings
 from app.pipelines.artifact import ArtifactError, load_artifact
+from app.pipelines.embedding import EmbeddingError, load_embedding_model
 from app.pipelines.valuation import ValuationModel
-from app.routers import health, valuation
+from app.routers import embed, health, valuation
 
 logger = logging.getLogger("smartestate.ml")
 
@@ -35,10 +36,37 @@ def load_valuation_model(app: FastAPI, model_dir: Path) -> None:
         logger.warning("no valuation model loaded: %s", error)
 
 
+def load_encoder(app: FastAPI, enabled: bool) -> None:
+    """
+    Load the sentence encoder, or record why it could not be.
+
+    Same contract as the valuation artefact, for the same reason: a service that
+    cannot embed should still value listings, and an API that cannot embed should
+    still search lexically. Neither is a reason to refuse to start.
+
+    Switched off deliberately is not the same as broken: it leaves no error
+    behind, so readiness reports a configured service rather than a degraded one.
+    """
+    app.state.embedding_model = None
+    app.state.embedding_model_error = None
+    if not enabled:
+        logger.info("embeddings are switched off (ML_EMBEDDINGS_ENABLED=false)")
+        return
+    try:
+        app.state.embedding_model = load_embedding_model()
+        app.state.embedding_model_error = None
+        logger.info("embedding model %s loaded", app.state.embedding_model.version)
+    except EmbeddingError as error:
+        app.state.embedding_model_error = error
+        logger.warning("no embedding model loaded: %s", error)
+
+
 @asynccontextmanager
 async def lifespan(app: FastAPI) -> AsyncIterator[None]:
-    """Load the model once at start-up; a request should never read from disk."""
-    load_valuation_model(app, get_settings().model_dir)
+    """Load both models once at start-up; a request should never read from disk."""
+    settings = get_settings()
+    load_valuation_model(app, settings.model_dir)
+    load_encoder(app, settings.embeddings_enabled)
     yield
 
 
@@ -52,6 +80,7 @@ def create_app() -> FastAPI:
     )
     application.include_router(health.router)
     application.include_router(valuation.router)
+    application.include_router(embed.router)
     return application
 
 
