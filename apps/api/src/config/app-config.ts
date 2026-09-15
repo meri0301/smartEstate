@@ -21,6 +21,10 @@ export interface AppConfig {
     readonly perMinute: number;
   };
   readonly swaggerEnabled: boolean;
+  readonly ml: {
+    readonly baseUrl: string;
+    readonly timeoutMs: number;
+  };
 }
 
 export const APP_CONFIG = Symbol('APP_CONFIG');
@@ -68,5 +72,10 @@ export function loadConfig(
       perMinute: env.RATE_LIMIT_MAX,
     },
     swaggerEnabled: env.SWAGGER_ENABLED,
+    ml: {
+      // Trailing slashes would double up when a path is appended.
+      baseUrl: env.ML_BASE_URL.replace(/\/+$/, ''),
+      timeoutMs: env.ML_TIMEOUT_MS,
+    },
   };
 }

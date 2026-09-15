@@ -1263,6 +1263,46 @@
         ]
       }
     },
+    "/api/listings/{id}/valuation": {
+      "get": {
+        "description": "Every figure comes from the model or the database. A stored valuation is reused while the listing is unchanged, and served with isStale set when the model cannot be reached to refresh it.",
+        "operationId": "Valuation.forListing",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "format": "uuid",
+              "pattern": "^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}|00000000-0000-0000-0000-000000000000|ffffffff-ffff-ffff-ffff-ffffffffffff)$",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ValuationDto"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Unknown, or not visible to the caller"
+          },
+          "503": {
+            "description": "No model is deployed and nothing has been valued before"
+          }
+        },
+        "summary": "What the model thinks this listing is worth, and why",
+        "tags": [
+          "valuation"
+        ]
+      }
+    },
     "/health": {
       "get": {
         "operationId": "Health.check",
@@ -3175,6 +3215,110 @@
           "hasElevator",
           "location"
         ]
+      },
+      "ValuationDto": {
+        "type": "object",
+        "properties": {
+          "listingId": {
+            "type": "string",
+            "format": "uuid",
+            "pattern": "^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}|00000000-0000-0000-0000-000000000000|ffffffff-ffff-ffff-ffff-ffffffffffff)$"
+          },
+          "modelVersion": {
+            "type": "string"
+          },
+          "fairPriceAmd": {
+            "type": "integer",
+            "minimum": 0,
+            "maximum": 9007199254740991
+          },
+          "lowerBoundAmd": {
+            "type": "integer",
+            "minimum": 0,
+            "maximum": 9007199254740991
+          },
+          "upperBoundAmd": {
+            "type": "integer",
+            "minimum": 0,
+            "maximum": 9007199254740991
+          },
+          "deviationPct": {
+            "type": "number"
+          },
+          "verdict": {
+            "type": "string",
+            "enum": [
+              "UNDERPRICED",
+              "FAIR",
+              "OVERPRICED"
+            ]
+          },
+          "factors": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "feature": {
+                  "type": "string"
+                },
+                "value": {
+                  "anyOf": [
+                    {
+                      "type": "string"
+                    },
+                    {
+                      "type": "number"
+                    },
+                    {
+                      "type": "boolean"
+                    },
+                    {
+                      "type": "string",
+                      "nullable": true,
+                      "enum": [
+                        null
+                      ]
+                    }
+                  ]
+                },
+                "effect": {
+                  "type": "number"
+                },
+                "impactAmd": {
+                  "type": "number"
+                }
+              },
+              "required": [
+                "feature",
+                "value",
+                "effect",
+                "impactAmd"
+              ],
+              "additionalProperties": false
+            }
+          },
+          "calculatedAt": {
+            "type": "string",
+            "format": "date-time",
+            "pattern": "^(?:(?:\\d\\d[2468][048]|\\d\\d[13579][26]|\\d\\d0[48]|[02468][048]00|[13579][26]00)-02-29|\\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\\d|30)|(?:02)-(?:0[1-9]|1\\d|2[0-8])))T(?:(?:[01]\\d|2[0-3]):[0-5]\\d:[0-5]\\d(?:\\.\\d+)?(?:Z|([+-](?:[01]\\d|2[0-3]):[0-5]\\d)))$"
+          },
+          "isStale": {
+            "type": "boolean"
+          }
+        },
+        "required": [
+          "listingId",
+          "modelVersion",
+          "fairPriceAmd",
+          "lowerBoundAmd",
+          "upperBoundAmd",
+          "deviationPct",
+          "verdict",
+          "factors",
+          "calculatedAt",
+          "isStale"
+        ],
+        "additionalProperties": false
       }
     }
   }

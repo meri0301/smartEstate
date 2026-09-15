@@ -134,7 +134,7 @@ Health probes live outside the prefix: `/health` (liveness) and `/health/ready` 
 | buildings | `GET /buildings/:id`, agent: `POST /buildings` (district derived from coordinates)                                                                                                          |
 | geo       | `GET /districts`, `GET /districts/:slug/boundary` (GeoJSON)                                                                                                                                 |
 
-The ML service has its own section below; the API does not call it yet.
+Valuation is documented in its own section below.
 
 - **Sessions.** Access token: 15-minute JWT in `Authorization: Bearer`. Refresh token: httpOnly,
   SameSite=Strict cookie scoped to `/api/auth`, rotated on every refresh; replaying a consumed
@@ -182,6 +182,26 @@ DRAFT ──SUBMIT──▶ PENDING_REVIEW ──APPROVE──▶ PUBLISHED ─�
 Tests: `pnpm --filter @smartestate/api test:unit` (no I/O) and `test:integration` (boots the
 real app against a Testcontainers PostgreSQL built from `docker/postgres`, migrated and seeded;
 needs Docker). `pnpm test` runs both.
+
+## Valuation
+
+`GET /api/listings/:id/valuation` answers what the model thinks a listing is worth, and why. The
+listing detail page shows it as a price check; a listing whose valuation cannot be produced simply
+shows no panel.
+
+- **Nothing is recomputed without reason.** A stored valuation is reused while the listing has not
+  changed and the model has not been retrained. Recomputing an unchanged listing would produce a
+  second figure differing from the first for no reason a reader could see.
+- **A dead model service is not a dead listing page.** The last stored valuation is served instead,
+  flagged as out of date when the listing has moved on since. Only when nothing was ever stored
+  does the caller get a 503, and the interface then hides the panel rather than showing an error.
+- **The request is not retried, and it times out in two seconds** (`ML_TIMEOUT_MS`). An estimate is
+  an enhancement to the page; making the page slower to fail serves nobody.
+- **Every figure is written down** in `valuation_records` with the model version that produced it,
+  so a number in a screenshot can be traced months later and the A/B evaluation can compare models
+  on the same listings.
+- **Every number comes from the model or the database.** Nothing on that panel is generated text,
+  and the disclaimer says plainly that this estimates an asking price, not a sale price.
 
 ## ML service
 

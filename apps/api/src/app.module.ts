@@ -8,6 +8,7 @@ import { HttpExceptionFilter } from './common/filters/http-exception.filter.js';
 import { ZodValidationPipe } from './common/zod/zod-validation.pipe.js';
 import { APP_CONFIG, type AppConfig } from './config/app-config.js';
 import { ConfigModule } from './config/config.module.js';
+import { MlModule } from './infrastructure/ml/ml.module.js';
 import { PrismaModule } from './infrastructure/prisma/prisma.module.js';
 import { AdminModule } from './modules/admin/admin.module.js';
 import { AuthModule } from './modules/auth/auth.module.js';
@@ -15,6 +16,7 @@ import { GeoModule } from './modules/geo/geo.module.js';
 import { HealthModule } from './modules/health/health.module.js';
 import { ListingsModule } from './modules/listings/listings.module.js';
 import { UsersModule } from './modules/users/users.module.js';
+import { ValuationModule } from './modules/valuation/valuation.module.js';
 
 function loggerParams(config: AppConfig): Params {
   return {
@@ -52,11 +54,13 @@ function loggerParams(config: AppConfig): Params {
     ConfigModule,
     LoggerModule.forRootAsync({ inject: [APP_CONFIG], useFactory: loggerParams }),
     PrismaModule,
+    MlModule,
     AdminModule,
     AuthModule,
     UsersModule,
     GeoModule,
     ListingsModule,
+    ValuationModule,
     HealthModule,
   ],
   providers: [

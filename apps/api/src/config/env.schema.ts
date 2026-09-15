@@ -33,6 +33,14 @@ export const envSchema = z.object({
   /** Requests per minute per IP for ordinary routes; credential routes carry stricter, route-level limits. */
   RATE_LIMIT_MAX: z.coerce.number().int().min(1).default(300),
   SWAGGER_ENABLED: booleanString.default(true),
+
+  /** Where the Python ML service listens. Compose puts it on the host network. */
+  ML_BASE_URL: z.url().default('http://localhost:8000'),
+  /**
+   * A valuation is an enhancement to a listing page, so the page must not wait
+   * long for one. Two seconds is generous for a single tree ensemble.
+   */
+  ML_TIMEOUT_MS: z.coerce.number().int().min(100).max(30_000).default(2_000),
 });
 
 export type Env = z.infer<typeof envSchema>;

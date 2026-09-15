@@ -11,6 +11,6 @@ import { ListingsService } from './listings.service.js';
   imports: [AdminModule],
   controllers: [ListingsController, BuildingsController],
   providers: [ListingsRepository, ListingsService, BuildingsService],
-  exports: [ListingsService],
+  exports: [ListingsService, ListingsRepository],
 })
 export class ListingsModule {}

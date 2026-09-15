@@ -13,6 +13,10 @@ export const queryKeys = {
     detail: (idOrPublicId: string, locale?: string) =>
       ['listings', 'detail', idOrPublicId, locale ?? null] as const,
   },
+  valuation: {
+    all: ['valuation'] as const,
+    forListing: (listingId: string) => ['valuation', listingId] as const,
+  },
   geo: {
     districts: ['geo', 'districts'] as const,
     boundary: (slug: string) => ['geo', 'boundary', slug] as const,

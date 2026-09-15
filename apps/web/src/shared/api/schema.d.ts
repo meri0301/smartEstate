@@ -328,6 +328,26 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/api/listings/{id}/valuation": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * What the model thinks this listing is worth, and why
+         * @description Every figure comes from the model or the database. A stored valuation is reused while the listing is unchanged, and served with isStale set when the model cannot be reached to refresh it.
+         */
+        get: operations["Valuation.forListing"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/health": {
         parameters: {
             query?: never;
@@ -788,6 +808,26 @@ export interface components {
                 lon: number;
             };
         };
+        ValuationDto: {
+            /** Format: uuid */
+            listingId: string;
+            modelVersion: string;
+            fairPriceAmd: number;
+            lowerBoundAmd: number;
+            upperBoundAmd: number;
+            deviationPct: number;
+            /** @enum {string} */
+            verdict: "UNDERPRICED" | "FAIR" | "OVERPRICED";
+            factors: {
+                feature: string;
+                value: string | number | boolean | (null);
+                effect: number;
+                impactAmd: number;
+            }[];
+            /** Format: date-time */
+            calculatedAt: string;
+            isStale: boolean;
+        };
     };
     responses: never;
     parameters: never;
@@ -813,6 +853,7 @@ export type UpdateListingBodyDto = components['schemas']['UpdateListingBodyDto']
 export type ListingTransitionBodyDto = components['schemas']['ListingTransitionBodyDto'];
 export type BuildingDto = components['schemas']['BuildingDto'];
 export type CreateBuildingBodyDto = components['schemas']['CreateBuildingBodyDto'];
+export type ValuationDto = components['schemas']['ValuationDto'];
 export type $defs = Record<string, never>;
 export interface operations {
     "Auth.register": {
@@ -1422,6 +1463,41 @@ export interface operations {
             };
             /** @description Coordinates fall outside every supported district */
             422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    "Valuation.forListing": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ValuationDto"];
+                };
+            };
+            /** @description Unknown, or not visible to the caller */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description No model is deployed and nothing has been valued before */
+            503: {
                 headers: {
                     [name: string]: unknown;
                 };

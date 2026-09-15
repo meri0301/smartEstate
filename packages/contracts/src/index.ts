@@ -10,3 +10,4 @@ export * from './common/index.js';
 export * from './geo.js';
 export * from './listings.js';
 export * from './users.js';
+export * from './valuation.js';

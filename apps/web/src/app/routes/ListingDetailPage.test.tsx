@@ -1,5 +1,5 @@
 import { QueryClientProvider } from '@tanstack/react-query';
-import type { ListingDetail } from '@smartestate/contracts';
+import type { ListingDetail, Valuation } from '@smartestate/contracts';
 import { render, screen, within } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { createMemoryRouter, RouterProvider } from 'react-router';
@@ -97,13 +97,61 @@ const detail = (overrides: Partial<ListingDetail> = {}): ListingDetail => ({
   ...overrides,
 });
 
+const valuation = (overrides: Partial<Valuation> = {}): Valuation => ({
+  listingId: '018f6d3e-7b6c-7c3a-9a0e-1f2b3c4d5e6f',
+  modelVersion: 'valuation-lgbm-20260914-65982e00',
+  fairPriceAmd: 39_600_000,
+  lowerBoundAmd: 30_000_000,
+  upperBoundAmd: 50_000_000,
+  deviationPct: 13.64,
+  verdict: 'OVERPRICED',
+  factors: [
+    { feature: 'district_slug', value: 'arabkir', effect: 0.2, impactAmd: 6_600_000 },
+    { feature: 'is_ground_floor', value: 1, effect: -0.06, impactAmd: -2_400_000 },
+  ],
+  calculatedAt: '2026-09-15T08:00:00.000Z',
+  isStale: false,
+  ...overrides,
+});
+
+const json = (status: number, body: unknown): Response =>
+  new Response(JSON.stringify(body), {
+    status,
+    headers: { 'content-type': 'application/json' },
+  });
+
+interface StubOptions {
+  /** Status and body for the listing itself. */
+  status?: number;
+  body?: unknown;
+  /** The valuation, or a status to fail it with. Omitted means 503, as it would be with no model. */
+  valuation?: Valuation;
+  valuationStatus?: number;
+}
+
+/** Routes by path, because the page asks for the listing and its valuation separately. */
+function stubApi(options: StubOptions = {}): void {
+  vi.spyOn(globalThis, 'fetch').mockImplementation((input) => {
+    const url = new URL((input as Request).url);
+    if (url.pathname.endsWith('/valuation')) {
+      return Promise.resolve(
+        options.valuation === undefined
+          ? json(options.valuationStatus ?? 503, {
+              statusCode: options.valuationStatus ?? 503,
+              error: 'Service Unavailable',
+              message: 'No model',
+              code: 'ML_UNAVAILABLE',
+            })
+          : json(200, options.valuation),
+      );
+    }
+    return Promise.resolve(json(options.status ?? 200, options.body ?? detail()));
+  });
+}
+
+/** Shorthand for the many tests that only care about the listing. */
 function stub(status: number, body: unknown): void {
-  vi.spyOn(globalThis, 'fetch').mockResolvedValue(
-    new Response(JSON.stringify(body), {
-      status,
-      headers: { 'content-type': 'application/json' },
-    }),
-  );
+  stubApi({ status, body });
 }
 
 function renderDetail(path = '/en/listings/L-ABC234') {
@@ -231,5 +279,70 @@ describe('the listing detail screen', () => {
     renderDetail();
 
     expect(await screen.findByText('Awaiting review')).toBeInTheDocument();
+  });
+});
+
+describe('the price check', () => {
+  it('shows the verdict, the estimate and the range', async () => {
+    stubApi({ valuation: valuation() });
+    renderDetail();
+
+    expect(await screen.findByRole('heading', { name: 'Price check' })).toBeInTheDocument();
+    expect(screen.getByText('Above the estimate')).toBeInTheDocument();
+    expect(screen.getByText(/Estimated at/)).toBeInTheDocument();
+    expect(screen.getByText(/Comparable properties are asked at/)).toBeInTheDocument();
+  });
+
+  it('says which way the asking price differs, and by how much', async () => {
+    stubApi({ valuation: valuation() });
+    renderDetail();
+
+    expect(
+      await screen.findByText('This listing asks +13.6% above the estimate.'),
+    ).toBeInTheDocument();
+  });
+
+  it('describes a price that matches the estimate without claiming a direction', async () => {
+    stubApi({ valuation: valuation({ deviationPct: 0.4, verdict: 'FAIR' }) });
+    renderDetail();
+
+    expect(
+      await screen.findByText('This listing asks about what the estimate says.'),
+    ).toBeInTheDocument();
+  });
+
+  it('names the factors in the reader\u2019s language, not the model\u2019s column names', async () => {
+    stubApi({ valuation: valuation() });
+    renderDetail();
+
+    expect(await screen.findByText('District')).toBeInTheDocument();
+    expect(screen.getByText('Ground floor')).toBeInTheDocument();
+    expect(screen.queryByText('district_slug')).not.toBeInTheDocument();
+  });
+
+  it('always carries the disclaimer and the model it came from', async () => {
+    stubApi({ valuation: valuation() });
+    renderDetail();
+
+    expect(await screen.findByText(/It is not a valuation/)).toBeInTheDocument();
+    expect(screen.getByText(/valuation-lgbm-20260914-65982e00/)).toBeInTheDocument();
+  });
+
+  it('says so when the listing has moved on since the estimate', async () => {
+    stubApi({ valuation: valuation({ isStale: true }) });
+    renderDetail();
+
+    expect(await screen.findByText('Out of date')).toBeInTheDocument();
+    expect(screen.getByText(/has not been recalculated/)).toBeInTheDocument();
+  });
+
+  it('is simply absent when no estimate can be had, leaving the listing intact', async () => {
+    stubApi({});
+    renderDetail();
+
+    expect(await screen.findByRole('heading', { level: 1 })).toBeInTheDocument();
+    expect(screen.queryByRole('heading', { name: 'Price check' })).not.toBeInTheDocument();
+    // The rest of the page is unaffected.
+    expect(screen.getByText('Komitas 12')).toBeInTheDocument();
   });
 });

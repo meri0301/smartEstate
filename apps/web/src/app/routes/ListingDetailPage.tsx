@@ -8,6 +8,7 @@ import {
   useListing,
 } from '../../features/listings/index.js';
 import { ListingMap } from '../../features/map/index.js';
+import { useValuation, ValuationPanel } from '../../features/valuation/index.js';
 import { useCurrentLocale } from '../../shared/i18n/I18nProvider.js';
 import { formatAmd, formatDate, formatRelativeTime } from '../../shared/i18n/formatters.js';
 import {
@@ -32,6 +33,9 @@ export function ListingDetailPage(): JSX.Element {
   const locale = useCurrentLocale();
   const { idOrPublicId } = useParams();
   const listing = useListing(idOrPublicId ?? '', locale);
+  // Keyed on the uuid, which is only known once the listing has loaded; the
+  // route may have been entered with the short public id instead.
+  const valuation = useValuation(listing.data?.id);
 
   if (listing.isPending) {
     return <DetailSkeleton />;
@@ -117,6 +121,15 @@ export function ListingDetailPage(): JSX.Element {
       </header>
 
       <ListingGallery media={data.media} title={data.title} />
+
+      {/*
+        No estimate is a normal state, not an error: the model service may be
+        down, or no model may be deployed at all. The panel simply does not
+        appear, and the rest of the listing is unaffected.
+      */}
+      {valuation.data !== undefined && (
+        <ValuationPanel valuation={valuation.data} askingPriceAmd={data.priceAmd} />
+      )}
 
       {machineTranslated !== undefined && (
         <Card tone="muted" className="flex flex-col gap-1">
