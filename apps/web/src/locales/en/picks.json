@@ -1,0 +1,40 @@
+{
+  "title": "Picks for you",
+  "intro": "Tell us what matters and we rank the catalogue against it. Every result carries the reasons it is where it is, and nothing is weighted that you did not weight.",
+  "form": {
+    "budget": "Budget, AMD",
+    "roomsMin": "Rooms, at least",
+    "districts": "Districts",
+    "districtsHint": "Leave empty for anywhere.",
+    "submit": "Show my picks",
+    "failed": "The ranking could not be completed."
+  },
+  "results": {
+    "count": "{count, plural, one {# pick} other {# picks}} from {candidates} that fit your limits",
+    "omitted": "Not scored, because it could not be measured: {criteria}.",
+    "strengths": "Why it is here",
+    "tradeoffs": "What to weigh against that",
+    "favourite": "Save",
+    "unfavourite": "Saved",
+    "dismiss": "Not for me",
+    "dismissed": "Hidden",
+    "view": "View the listing"
+  },
+  "criterion": {
+    "price": "price against your budget",
+    "value": "price against the estimate",
+    "size": "floor area",
+    "rooms": "room count",
+    "location": "location",
+    "condition": "state of repair",
+    "building": "the building"
+  },
+  "fact": {
+    "budgetHeadroomPct": "{value}% under budget",
+    "priceVsEstimatePct": "{value}% against the estimate",
+    "areaSqm": "{value} m²",
+    "rooms": "{count, plural, one {# room} other {# rooms}}",
+    "distanceM": "{value} m away",
+    "buildingAgeYears": "{count, plural, one {# year} other {# years}} old"
+  }
+}

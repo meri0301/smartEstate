@@ -203,9 +203,19 @@ erDiagram
     string anonymous_id "nullable"
     RankingStrategy strategy
     string experiment_key "nullable"
+    string arm "nullable"
     jsonb preferences
     jsonb results
     jsonb llm_trace "nullable"
+    timestamptz created_at
+  }
+  experiments {
+    uuid id PK
+    string key UK
+    string name
+    string description
+    jsonb arms
+    boolean is_active
     timestamptz created_at
   }
   user_interactions {

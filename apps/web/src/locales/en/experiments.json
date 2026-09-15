@@ -1,0 +1,41 @@
+{
+  "title": "Experiments",
+  "intro": "Which ranking strategy do buyers actually act on? Every ranking served under an experiment is one exposure; every click, save or dismissal on its results is a verdict. Nothing here is simulated.",
+  "failed": "The results could not be loaded.",
+  "back": "← All experiments",
+  "arms": "Arms",
+  "arm": "Arm {name}",
+  "allocation": "{share}% of traffic · {strategy} · {method}",
+  "sessions": "{count, plural, one {# session} other {# sessions}}",
+  "withFeedback": "{count, plural, one {# with feedback} other {# with feedback}}",
+  "metric": {
+    "clickThroughRate": "Click-through rate",
+    "precisionAtK": "Precision@{k}",
+    "ndcgAtK": "NDCG@{k}"
+  },
+  "metricHint": {
+    "clickThroughRate": "Share of sessions in which anything shown was acted on.",
+    "precisionAtK": "Over sessions with feedback: share of the top {k} that were acted on.",
+    "ndcgAtK": "Over sessions with feedback: how well the order matched what the reader wanted, 1 being perfect."
+  },
+  "se": "± {value} s.e.",
+  "noData": "no data",
+  "notYet": "Not enough data to compare the arms yet. Each arm needs at least {minimum} sessions; below that a difference is a story, not a finding.",
+  "comparisonsTitle": "Comparison",
+  "comparison": "{first} − {second} on {metric}",
+  "interval": "{difference} (95% CI {low} to {high})",
+  "distinguishable": "The interval excludes zero.",
+  "indistinguishable": "The interval includes zero: no difference can be claimed.",
+  "gainsTitle": "How feedback was graded",
+  "gainsIntro": "Nobody rates listings; relevance is read from behaviour. These weights are a judgement, published so it can be disagreed with.",
+  "computedAt": "Computed {when}.",
+  "interaction": {
+    "CONTACT": "Contacted the seller",
+    "FAVORITE": "Saved",
+    "COMPARE": "Added to a comparison",
+    "DWELL": "Read for a while",
+    "VIEW": "Opened",
+    "UNFAVORITE": "Removed from saved",
+    "DISMISS": "Dismissed"
+  }
+}

@@ -1,20 +1,26 @@
 import enAlternatives from '../../locales/en/alternatives.json';
 import enAuth from '../../locales/en/auth.json';
+import enExperiments from '../../locales/en/experiments.json';
 import enMortgage from '../../locales/en/mortgage.json';
+import enPicks from '../../locales/en/picks.json';
 import enCommon from '../../locales/en/common.json';
 import enErrors from '../../locales/en/errors.json';
 import enListings from '../../locales/en/listings.json';
 import enValuation from '../../locales/en/valuation.json';
 import hyAlternatives from '../../locales/hy/alternatives.json';
 import hyAuth from '../../locales/hy/auth.json';
+import hyExperiments from '../../locales/hy/experiments.json';
 import hyMortgage from '../../locales/hy/mortgage.json';
+import hyPicks from '../../locales/hy/picks.json';
 import hyCommon from '../../locales/hy/common.json';
 import hyErrors from '../../locales/hy/errors.json';
 import hyListings from '../../locales/hy/listings.json';
 import hyValuation from '../../locales/hy/valuation.json';
 import ruAlternatives from '../../locales/ru/alternatives.json';
 import ruAuth from '../../locales/ru/auth.json';
+import ruExperiments from '../../locales/ru/experiments.json';
 import ruMortgage from '../../locales/ru/mortgage.json';
+import ruPicks from '../../locales/ru/picks.json';
 import ruCommon from '../../locales/ru/common.json';
 import ruErrors from '../../locales/ru/errors.json';
 import ruListings from '../../locales/ru/listings.json';
@@ -35,6 +41,8 @@ export const NAMESPACES = [
   'valuation',
   'alternatives',
   'mortgage',
+  'picks',
+  'experiments',
   'auth',
   'errors',
 ] as const;
@@ -49,6 +57,8 @@ export const resources = {
     valuation: enValuation,
     alternatives: enAlternatives,
     mortgage: enMortgage,
+    picks: enPicks,
+    experiments: enExperiments,
     auth: enAuth,
     errors: enErrors,
   },
@@ -58,6 +68,8 @@ export const resources = {
     valuation: hyValuation,
     alternatives: hyAlternatives,
     mortgage: hyMortgage,
+    picks: hyPicks,
+    experiments: hyExperiments,
     auth: hyAuth,
     errors: hyErrors,
   },
@@ -67,6 +79,8 @@ export const resources = {
     valuation: ruValuation,
     alternatives: ruAlternatives,
     mortgage: ruMortgage,
+    picks: ruPicks,
+    experiments: ruExperiments,
     auth: ruAuth,
     errors: ruErrors,
   },
