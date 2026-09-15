@@ -1344,6 +1344,42 @@
         ]
       }
     },
+    "/api/mortgage/refund": {
+      "post": {
+        "description": "Armenia refunds the personal income tax a buyer pays, up to the mortgage interest they pay, up to a quarterly cap. The rules are stored as effective-dated rows and selected by the loan agreement date, so an answer stays reproducible after the law changes, and the response names the rule set that produced it. When a buyer does not qualify, every failed condition is returned as a translatable code together with what the refund would have been. Every figure is an estimate from public information and not tax advice.",
+        "operationId": "Mortgage.refund",
+        "parameters": [],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/MortgageRefundRequestDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/MortgageRefundResponseDto"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Unknown district"
+          }
+        },
+        "summary": "What the income-tax refund on this mortgage would be",
+        "tags": [
+          "mortgage"
+        ]
+      }
+    },
     "/api/listings/{id}/valuation": {
       "get": {
         "description": "Every figure comes from the model or the database. A stored valuation is reused while the listing is unchanged, and served with isStale set when the model cannot be reached to refresh it.",
@@ -3952,6 +3988,210 @@
         "required": [
           "slug",
           "boundary"
+        ],
+        "additionalProperties": false
+      },
+      "MortgageRefundRequestDto": {
+        "type": "object",
+        "properties": {
+          "propertyValueAmd": {
+            "type": "integer",
+            "minimum": 0,
+            "maximum": 9007199254740991
+          },
+          "loanAmountAmd": {
+            "type": "integer",
+            "minimum": 0,
+            "maximum": 9007199254740991
+          },
+          "annualRatePct": {
+            "type": "number",
+            "minimum": 0.1,
+            "maximum": 30
+          },
+          "termYears": {
+            "type": "integer",
+            "minimum": 1,
+            "maximum": 30
+          },
+          "agreementDate": {
+            "type": "string",
+            "format": "date",
+            "pattern": "^(?:(?:\\d\\d[2468][048]|\\d\\d[13579][26]|\\d\\d0[48]|[02468][048]00|[13579][26]00)-02-29|\\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\\d|30)|(?:02)-(?:0[1-9]|1\\d|2[0-8])))$"
+          },
+          "districtSlug": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 64
+          },
+          "purchaseKind": {
+            "type": "string",
+            "enum": [
+              "FROM_DEVELOPER",
+              "FROM_STATE_OR_COMMUNITY",
+              "SELF_BUILT",
+              "RESALE"
+            ]
+          },
+          "lenderIsResident": {
+            "default": true,
+            "type": "boolean"
+          },
+          "paysArmenianIncomeTax": {
+            "default": true,
+            "type": "boolean"
+          },
+          "quarterlyIncomeTaxAmd": {
+            "type": "integer",
+            "minimum": 0,
+            "maximum": 9007199254740991
+          },
+          "monthlyIncomeAmd": {
+            "type": "integer",
+            "minimum": 0,
+            "maximum": 9007199254740991
+          },
+          "applicantAge": {
+            "type": "integer",
+            "minimum": 18,
+            "maximum": 100
+          }
+        },
+        "required": [
+          "propertyValueAmd",
+          "loanAmountAmd",
+          "annualRatePct",
+          "termYears",
+          "agreementDate",
+          "districtSlug",
+          "purchaseKind"
+        ]
+      },
+      "MortgageRefundResponseDto": {
+        "type": "object",
+        "properties": {
+          "eligible": {
+            "type": "boolean"
+          },
+          "ineligibilityReasons": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "code": {
+                  "type": "string",
+                  "enum": [
+                    "AGREEMENT_TOO_EARLY",
+                    "PHASED_OUT",
+                    "PROPERTY_TOO_EXPENSIVE",
+                    "NOT_ELIGIBLE_PURCHASE",
+                    "LENDER_NOT_RESIDENT",
+                    "NOT_AN_ARMENIAN_TAXPAYER",
+                    "APPLICANT_TOO_OLD",
+                    "NO_RULES_FOR_DATE"
+                  ]
+                },
+                "messageKey": {
+                  "type": "string"
+                },
+                "params": {
+                  "type": "object",
+                  "additionalProperties": {
+                    "anyOf": [
+                      {
+                        "type": "string"
+                      },
+                      {
+                        "type": "number"
+                      }
+                    ]
+                  }
+                }
+              },
+              "required": [
+                "code",
+                "messageKey",
+                "params"
+              ],
+              "additionalProperties": false
+            }
+          },
+          "quarterlyRefund": {
+            "type": "number",
+            "minimum": 0
+          },
+          "totalRefundOverTerm": {
+            "type": "number",
+            "minimum": 0
+          },
+          "effectiveInterestRate": {
+            "type": "number",
+            "minimum": 0
+          },
+          "monthlyPaymentAmd": {
+            "type": "number",
+            "minimum": 0
+          },
+          "totalInterestAmd": {
+            "type": "number",
+            "minimum": 0
+          },
+          "schedule": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "year": {
+                  "type": "integer",
+                  "minimum": 1,
+                  "maximum": 9007199254740991
+                },
+                "interestAmd": {
+                  "type": "number",
+                  "minimum": 0
+                },
+                "refundAmd": {
+                  "type": "number",
+                  "minimum": 0
+                },
+                "cappedInAnyQuarter": {
+                  "type": "boolean"
+                }
+              },
+              "required": [
+                "year",
+                "interestAmd",
+                "refundAmd",
+                "cappedInAnyQuarter"
+              ],
+              "additionalProperties": false
+            }
+          },
+          "forgoneQuarterlyRefund": {
+            "type": "number",
+            "minimum": 0
+          },
+          "ruleSetVersion": {
+            "type": "integer",
+            "minimum": -9007199254740991,
+            "maximum": 9007199254740991
+          },
+          "calculatedAt": {
+            "type": "string",
+            "format": "date-time",
+            "pattern": "^(?:(?:\\d\\d[2468][048]|\\d\\d[13579][26]|\\d\\d0[48]|[02468][048]00|[13579][26]00)-02-29|\\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\\d|30)|(?:02)-(?:0[1-9]|1\\d|2[0-8])))T(?:(?:[01]\\d|2[0-3]):[0-5]\\d:[0-5]\\d(?:\\.\\d+)?(?:Z|([+-](?:[01]\\d|2[0-3]):[0-5]\\d)))$"
+          }
+        },
+        "required": [
+          "eligible",
+          "ineligibilityReasons",
+          "quarterlyRefund",
+          "totalRefundOverTerm",
+          "effectiveInterestRate",
+          "monthlyPaymentAmd",
+          "totalInterestAmd",
+          "schedule",
+          "calculatedAt"
         ],
         "additionalProperties": false
       },

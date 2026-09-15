@@ -33,6 +33,10 @@ export interface AppConfig {
     readonly timeoutMs: number;
     readonly embedTimeoutMs: number;
   };
+  readonly mortgage: {
+    /** Undefined when nobody has configured a rate. A supported state, not a gap. */
+    readonly incomeTaxRatePct: number | undefined;
+  };
   readonly redisUrl: string | undefined;
   readonly llm: {
     readonly provider: 'rule-based' | 'gemini' | 'ollama';
@@ -99,6 +103,7 @@ export function loadConfig(
       timeoutMs: env.ML_TIMEOUT_MS,
       embedTimeoutMs: env.ML_EMBED_TIMEOUT_MS,
     },
+    mortgage: { incomeTaxRatePct: env.MORTGAGE_INCOME_TAX_RATE_PCT },
     redisUrl: env.REDIS_URL,
     llm: {
       provider: env.LLM_PROVIDER,

@@ -18,6 +18,7 @@ import { AuthModule } from './modules/auth/auth.module.js';
 import { GeoModule } from './modules/geo/geo.module.js';
 import { HealthModule } from './modules/health/health.module.js';
 import { ListingsModule } from './modules/listings/listings.module.js';
+import { MortgageModule } from './modules/mortgage/mortgage.module.js';
 import { RecommendationsModule } from './modules/recommendations/recommendations.module.js';
 import { SearchModule } from './modules/search/search.module.js';
 import { UsersModule } from './modules/users/users.module.js';
@@ -68,6 +69,7 @@ function loggerParams(config: AppConfig): Params {
     UsersModule,
     GeoModule,
     ListingsModule,
+    MortgageModule,
     ValuationModule,
     RecommendationsModule,
     SearchModule,

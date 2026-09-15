@@ -212,6 +212,23 @@ model RefreshToken {
 // Geography
 // ---------------------------------------------------------------------------
 
+/// The eleven provinces plus Yerevan, which is administratively its own unit.
+/// Named here rather than derived from text because the refund phase-out is
+/// keyed on it.
+enum Marz {
+  YEREVAN
+  ARAGATSOTN
+  ARARAT
+  ARMAVIR
+  GEGHARKUNIK
+  KOTAYK
+  LORI
+  SHIRAK
+  SYUNIK
+  TAVUSH
+  VAYOTS_DZOR
+}
+
 /// Administrative district (Yerevan) or town (marz level). Boundaries come from
 /// OpenStreetMap (ODbL) and are loaded by the seed.
 model District {
@@ -222,7 +239,16 @@ model District {
   nameRu   String       @map("name_ru")
   nameEn   String       @map("name_en")
   city     String
+  /// Free text as OpenStreetMap returned it. Often a community rather than a
+  /// province; kept for provenance and never used to decide anything.
   marz     String
+  /// The province, authoritative. The mortgage refund phases out province by
+  /// province, so this has to be right and is set from the slug, not from OSM.
+  marzCode Marz         @map("marz_code")
+  /// Designated border settlements are exempt from that phase-out. Defaults to
+  /// false because this project has no authoritative copy of the list, and
+  /// false under-claims the refund rather than promising one.
+  isBorderSettlement Boolean @default(false) @map("is_border_settlement")
   osmType  String?      @map("osm_type")
   osmId    BigInt?      @map("osm_id")
   boundary Unsupported("geometry(MultiPolygon, 4326)")
@@ -498,6 +524,7 @@ model TaxRefundRuleSet {
   rules         Json
   createdAt     DateTime  @default(now()) @map("created_at") @db.Timestamptz(3)
 
+  @@index([effectiveFrom(sort: Desc)])
   @@map("tax_refund_rule_sets")
 }
 

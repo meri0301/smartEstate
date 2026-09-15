@@ -22,5 +22,6 @@ direction is a new record that supersedes the old one.
 | [0014](0014-explanations-and-numeric-grounding.md)               | Explanations: computed reasons, and a paragraph checked against its figures    | Accepted |
 | [0015](0015-hybrid-search.md)                                    | Hybrid search: local embeddings, full text, and reciprocal rank fusion         | Accepted |
 | [0016](0016-dominance-and-alternatives.md)                       | The "better option" engine: Pareto dominance with indifference thresholds      | Accepted |
+| [0017](0017-mortgage-refund-rules-engine.md)                     | The mortgage refund: rules as data, not as code                                | Accepted |
 
 Template: [0000-template.md](0000-template.md)

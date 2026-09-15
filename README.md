@@ -134,7 +134,7 @@ Health probes live outside the prefix: `/health` (liveness) and `/health/ready` 
 | buildings | `GET /buildings/:id`, agent: `POST /buildings` (district derived from coordinates)                                                                                                          |
 | geo       | `GET /districts`, `GET /districts/:slug/boundary` (GeoJSON)                                                                                                                                 |
 
-Valuation, recommendations, better options, hybrid search and natural-language parsing have sections of their own below.
+Valuation, recommendations, better options, the mortgage refund, hybrid search and natural-language parsing have sections of their own below.
 
 - **Sessions.** Access token: 15-minute JWT in `Authorization: Bearer`. Refresh token: httpOnly,
   SameSite=Strict cookie scoped to `/api/auth`, rotated on every refresh; replaying a consumed
@@ -273,6 +273,40 @@ GET /api/listings/:id/alternatives?limit=6&anchorLat=&anchorLon=&locale=en
 Measured over the 21 two-room flats in Kentron: 3 have a strictly better alternative, 17 have only
 trade-offs, 1 has nothing better. A mechanism that fired on everything would be describing
 similarity, not superiority.
+
+## Mortgage income-tax refund
+
+Armenia refunds the personal income tax a buyer pays, up to the mortgage interest they pay, up to a
+quarterly cap. It is large, it is specific to this market, and it is being withdrawn province by
+province between now and 2029. See [ADR-0017](docs/adr/0017-mortgage-refund-rules-engine.md).
+
+```
+POST /api/mortgage/refund   { propertyValueAmd, loanAmountAmd, annualRatePct, termYears,
+                              agreementDate, districtSlug, purchaseKind, quarterlyIncomeTaxAmd }
+  -> { eligible, ineligibilityReasons, quarterlyRefund, totalRefundOverTerm,
+       effectiveInterestRate, schedule, ruleSetVersion, calculatedAt }
+```
+
+- **The rules are rows, not constants.** `tax_refund_rule_sets` carries the property ceiling, the
+  quarterly cap, the age limit and the per-province phase-out dates, with `effective_from` and
+  `effective_to`. A change in the law is an insert, not a deployment.
+- **Selected by the loan agreement date, never by today.** Which cap applies is a property of the
+  loan, so a mortgage signed in 2024 keeps its 1,500,000 ֏ cap and a figure quoted then still
+  reproduces now. The response names the rule set that produced it.
+- **Per quarter, `refund = MIN(interest paid, income tax paid, cap)`**, with no carry-over. Unused
+  interest in a capped quarter is simply lost, which is why the answer is a schedule and not a
+  total.
+- **A refusal is an explanation.** Every failed condition comes back — not the first — as a code and
+  an i18n key with parameters, together with what the refund would have been.
+- **Two numbers are not invented.** `maxApplicantAge` is null, meaning the condition does not
+  exist rather than that the limit is unknown. The income tax rate is
+  `MORTGAGE_INCOME_TAX_RATE_PCT` **with no default**: unset, the calculator asks for the tax paid
+  instead of deriving it from a salary.
+- **Not tax advice.** Every figure is an estimate from public information; the interface says so in
+  all three languages and points at the State Revenue Committee.
+
+A Yerevan mortgage signed today refunds nothing — the scheme ended there on 2025-01-01 — which is
+why the seed includes listings in Gyumri, Vanadzor and Dilijan.
 
 ## Language model layer
 

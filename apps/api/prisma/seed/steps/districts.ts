@@ -97,7 +97,7 @@ export async function seedDistricts(ctx: SeedContext): Promise<SeededDistrict[]>
 
     await ctx.prisma.$executeRaw`
       INSERT INTO districts
-        (id, slug, kind, name_hy, name_ru, name_en, city, marz, osm_type, osm_id, boundary, centroid)
+        (id, slug, kind, name_hy, name_ru, name_en, city, marz, marz_code, osm_type, osm_id, boundary, centroid)
       VALUES (
         ${id}::uuid,
         ${props.slug},
@@ -107,6 +107,7 @@ export async function seedDistricts(ctx: SeedContext): Promise<SeededDistrict[]>
         ${nameEn},
         ${props.city},
         ${props.marz ?? props.city},
+        ${marzOf(props.slug, props.kind)}::"Marz",
         ${props.osmType},
         ${String(props.osmId)}::bigint,
         ST_Multi(ST_SetSRID(ST_GeomFromGeoJSON(${geometryJson}), 4326)),
@@ -124,4 +125,39 @@ export async function seedDistricts(ctx: SeedContext): Promise<SeededDistrict[]>
     });
   }
   return seeded;
+}
+
+/**
+ * Which province each town outside Yerevan is in.
+ *
+ * Keyed by slug, which this project controls, and never taken from the `marz`
+ * text OpenStreetMap returns — that holds community names such as
+ * "Գյումրի-Ախուրյան սահման". The mortgage refund phases out province by
+ * province, so this has to be right rather than approximately right.
+ */
+const MARZ_BY_SLUG: Readonly<Record<string, string>> = {
+  gyumri: 'SHIRAK',
+  vanadzor: 'LORI',
+  dilijan: 'TAVUSH',
+};
+
+/**
+ * The province for one district.
+ *
+ * Yerevan is modelled at district level and every other place at town level, so
+ * the kind settles the common case. A town nobody has given a province throws:
+ * defaulting it to anywhere would put a district in the wrong phase-out group
+ * and quietly promise or deny a refund.
+ */
+function marzOf(slug: string, kind: string): string {
+  if (kind === 'CITY_DISTRICT') {
+    return 'YEREVAN';
+  }
+  const named = MARZ_BY_SLUG[slug];
+  if (named === undefined) {
+    throw new Error(
+      `Town "${slug}" has no province. Add it to MARZ_BY_SLUG: the mortgage refund phases out by province and cannot guess.`,
+    );
+  }
+  return named;
 }

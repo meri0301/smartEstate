@@ -348,6 +348,26 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/api/mortgage/refund": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * What the income-tax refund on this mortgage would be
+         * @description Armenia refunds the personal income tax a buyer pays, up to the mortgage interest they pay, up to a quarterly cap. The rules are stored as effective-dated rows and selected by the loan agreement date, so an answer stays reproducible after the law changes, and the response names the rule set that produced it. When a buyer does not qualify, every failed condition is returned as a translatable code together with what the refund would have been. Every figure is an estimate from public information and not tax advice.
+         */
+        post: operations["Mortgage.refund"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/api/listings/{id}/valuation": {
         parameters: {
             query?: never;
@@ -989,6 +1009,50 @@ export interface components {
                 coordinates: (number)[][][][];
             };
         };
+        MortgageRefundRequestDto: {
+            propertyValueAmd: number;
+            loanAmountAmd: number;
+            annualRatePct: number;
+            termYears: number;
+            /** Format: date */
+            agreementDate: string;
+            districtSlug: string;
+            /** @enum {string} */
+            purchaseKind: "FROM_DEVELOPER" | "FROM_STATE_OR_COMMUNITY" | "SELF_BUILT" | "RESALE";
+            /** @default true */
+            lenderIsResident?: boolean;
+            /** @default true */
+            paysArmenianIncomeTax?: boolean;
+            quarterlyIncomeTaxAmd?: number;
+            monthlyIncomeAmd?: number;
+            applicantAge?: number;
+        };
+        MortgageRefundResponseDto: {
+            eligible: boolean;
+            ineligibilityReasons: {
+                /** @enum {string} */
+                code: "AGREEMENT_TOO_EARLY" | "PHASED_OUT" | "PROPERTY_TOO_EXPENSIVE" | "NOT_ELIGIBLE_PURCHASE" | "LENDER_NOT_RESIDENT" | "NOT_AN_ARMENIAN_TAXPAYER" | "APPLICANT_TOO_OLD" | "NO_RULES_FOR_DATE";
+                messageKey: string;
+                params: {
+                    [key: string]: string | number;
+                };
+            }[];
+            quarterlyRefund: number;
+            totalRefundOverTerm: number;
+            effectiveInterestRate: number;
+            monthlyPaymentAmd: number;
+            totalInterestAmd: number;
+            schedule: {
+                year: number;
+                interestAmd: number;
+                refundAmd: number;
+                cappedInAnyQuarter: boolean;
+            }[];
+            forgoneQuarterlyRefund?: number;
+            ruleSetVersion?: number;
+            /** Format: date-time */
+            calculatedAt: string;
+        };
         ValuationDto: {
             /** Format: uuid */
             listingId: string;
@@ -1288,6 +1352,8 @@ export type UpdateUserRoleBodyDto = components['schemas']['UpdateUserRoleBodyDto
 export type AdminUserDto = components['schemas']['AdminUserDto'];
 export type DistrictDto = components['schemas']['DistrictDto'];
 export type DistrictBoundaryResponseDto = components['schemas']['DistrictBoundaryResponseDto'];
+export type MortgageRefundRequestDto = components['schemas']['MortgageRefundRequestDto'];
+export type MortgageRefundResponseDto = components['schemas']['MortgageRefundResponseDto'];
 export type ValuationDto = components['schemas']['ValuationDto'];
 export type RecommendationRequestDto = components['schemas']['RecommendationRequestDto'];
 export type RecommendationResponseDto = components['schemas']['RecommendationResponseDto'];
@@ -1936,6 +2002,36 @@ export interface operations {
                 };
             };
             /** @description Unknown district slug */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    "Mortgage.refund": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["MortgageRefundRequestDto"];
+            };
+        };
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["MortgageRefundResponseDto"];
+                };
+            };
+            /** @description Unknown district */
             404: {
                 headers: {
                     [name: string]: unknown;

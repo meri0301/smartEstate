@@ -53,6 +53,8 @@ erDiagram
     string name_en
     string city
     string marz
+    Marz marz_code
+    boolean is_border_settlement
     string osm_type "nullable"
     bigint osm_id "nullable"
   }

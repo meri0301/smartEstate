@@ -49,6 +49,16 @@ export const envSchema = z.object({
    * dead valuation service hold a listing page open for half a minute.
    */
   ML_EMBED_TIMEOUT_MS: z.coerce.number().int().min(1_000).max(300_000).default(60_000),
+  /**
+   * Personal income tax rate, as a percentage, for the mortgage refund.
+   *
+   * Deliberately without a default. The rate is a real number set by Armenian
+   * law and this project has no authoritative source for its current value, so
+   * assuming one would put a confident figure in front of a buyer that is wrong
+   * by however much the guess was wrong. Unset, the calculator asks for the tax
+   * paid instead of deriving it from a salary — see ADR-0017.
+   */
+  MORTGAGE_INCOME_TAX_RATE_PCT: z.coerce.number().min(0).max(60).optional(),
 
   /** Optional. Without it the application runs, uncached. */
   REDIS_URL: z.string().min(1).optional(),
