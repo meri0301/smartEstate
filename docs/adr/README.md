@@ -21,5 +21,6 @@ direction is a new record that supersedes the old one.
 | [0013](0013-natural-language-query-parsing.md)                   | Natural-language query parsing: rules first, the model as a second opinion     | Accepted |
 | [0014](0014-explanations-and-numeric-grounding.md)               | Explanations: computed reasons, and a paragraph checked against its figures    | Accepted |
 | [0015](0015-hybrid-search.md)                                    | Hybrid search: local embeddings, full text, and reciprocal rank fusion         | Accepted |
+| [0016](0016-dominance-and-alternatives.md)                       | The "better option" engine: Pareto dominance with indifference thresholds      | Accepted |
 
 Template: [0000-template.md](0000-template.md)

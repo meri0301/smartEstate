@@ -1,327 +1,10 @@
 {
   "openapi": "3.0.0",
   "paths": {
-    "/api/auth/register": {
-      "post": {
-        "operationId": "Auth.register",
-        "parameters": [],
-        "requestBody": {
-          "required": true,
-          "content": {
-            "application/json": {
-              "schema": {
-                "$ref": "#/components/schemas/RegisterBodyDto"
-              }
-            }
-          }
-        },
-        "responses": {
-          "201": {
-            "description": "",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/AuthResponseDto"
-                }
-              }
-            }
-          },
-          "429": {
-            "description": "Rate limit exceeded"
-          }
-        },
-        "summary": "Create an account and start a session",
-        "tags": [
-          "auth"
-        ]
-      }
-    },
-    "/api/auth/login": {
-      "post": {
-        "operationId": "Auth.login",
-        "parameters": [],
-        "requestBody": {
-          "required": true,
-          "content": {
-            "application/json": {
-              "schema": {
-                "$ref": "#/components/schemas/LoginBodyDto"
-              }
-            }
-          }
-        },
-        "responses": {
-          "200": {
-            "description": "",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/AuthResponseDto"
-                }
-              }
-            }
-          },
-          "401": {
-            "description": "Invalid credentials or disabled account"
-          },
-          "429": {
-            "description": "Rate limit exceeded"
-          }
-        },
-        "summary": "Authenticate with email and password",
-        "tags": [
-          "auth"
-        ]
-      }
-    },
-    "/api/auth/refresh": {
-      "post": {
-        "operationId": "Auth.refresh",
-        "parameters": [],
-        "responses": {
-          "200": {
-            "description": "",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/AuthResponseDto"
-                }
-              }
-            }
-          },
-          "401": {
-            "description": "Missing, invalid, expired or replayed refresh token"
-          }
-        },
-        "security": [
-          {
-            "cookie": []
-          }
-        ],
-        "summary": "Rotate the refresh token and issue a new access token",
-        "tags": [
-          "auth"
-        ]
-      }
-    },
-    "/api/auth/logout": {
-      "post": {
-        "operationId": "Auth.logout",
-        "parameters": [],
-        "responses": {
-          "204": {
-            "description": ""
-          }
-        },
-        "security": [
-          {
-            "cookie": []
-          }
-        ],
-        "summary": "End the current session",
-        "tags": [
-          "auth"
-        ]
-      }
-    },
-    "/api/auth/logout-all": {
-      "post": {
-        "operationId": "Auth.logoutAll",
-        "parameters": [],
-        "responses": {
-          "204": {
-            "description": ""
-          }
-        },
-        "security": [
-          {
-            "bearer": []
-          }
-        ],
-        "summary": "End every session of the current user",
-        "tags": [
-          "auth"
-        ]
-      }
-    },
-    "/api/users/me": {
+    "/api/listings/{id}/alternatives": {
       "get": {
-        "operationId": "Users.getMe",
-        "parameters": [],
-        "responses": {
-          "200": {
-            "description": "",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/MeResponseDto"
-                }
-              }
-            }
-          }
-        },
-        "security": [
-          {
-            "bearer": []
-          }
-        ],
-        "summary": "Current account and buyer profile",
-        "tags": [
-          "users"
-        ]
-      },
-      "patch": {
-        "operationId": "Users.updateMe",
-        "parameters": [],
-        "requestBody": {
-          "required": true,
-          "content": {
-            "application/json": {
-              "schema": {
-                "$ref": "#/components/schemas/UpdateMeBodyDto"
-              }
-            }
-          }
-        },
-        "responses": {
-          "200": {
-            "description": "",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/MeResponseDto"
-                }
-              }
-            }
-          }
-        },
-        "security": [
-          {
-            "bearer": []
-          }
-        ],
-        "summary": "Update display name, phone or interface locale",
-        "tags": [
-          "users"
-        ]
-      }
-    },
-    "/api/users/me/preferences": {
-      "put": {
-        "operationId": "Users.updatePreferences",
-        "parameters": [],
-        "requestBody": {
-          "required": true,
-          "content": {
-            "application/json": {
-              "schema": {
-                "$ref": "#/components/schemas/PreferencesBodyDto"
-              }
-            }
-          }
-        },
-        "responses": {
-          "200": {
-            "description": "",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/MeResponseDto"
-                }
-              }
-            }
-          }
-        },
-        "security": [
-          {
-            "bearer": []
-          }
-        ],
-        "summary": "Save onboarding preferences (budget, rooms, priorities, commute anchor)",
-        "tags": [
-          "users"
-        ]
-      }
-    },
-    "/api/users": {
-      "get": {
-        "operationId": "Users.listUsers",
-        "parameters": [
-          {
-            "name": "limit",
-            "required": false,
-            "in": "query",
-            "schema": {
-              "minimum": 1,
-              "maximum": 50,
-              "default": 20,
-              "type": "integer"
-            }
-          },
-          {
-            "name": "cursor",
-            "required": false,
-            "in": "query",
-            "schema": {
-              "minLength": 1,
-              "maxLength": 512,
-              "type": "string"
-            }
-          },
-          {
-            "name": "role",
-            "required": false,
-            "in": "query",
-            "schema": {
-              "type": "string",
-              "enum": [
-                "USER",
-                "AGENT",
-                "MODERATOR",
-                "ADMIN"
-              ]
-            }
-          },
-          {
-            "name": "search",
-            "required": false,
-            "in": "query",
-            "schema": {
-              "minLength": 1,
-              "maxLength": 80,
-              "type": "string"
-            }
-          }
-        ],
-        "responses": {
-          "200": {
-            "description": "",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/AdminUsersPageDto"
-                }
-              }
-            }
-          },
-          "403": {
-            "description": "Requires the ADMIN role"
-          }
-        },
-        "security": [
-          {
-            "bearer": []
-          }
-        ],
-        "summary": "List accounts (admin)",
-        "tags": [
-          "users"
-        ]
-      }
-    },
-    "/api/users/{id}/role": {
-      "patch": {
-        "operationId": "Users.updateRole",
+        "description": "Compares listings a buyer could actually switch to — same district, at least as many rooms, no more than a tenth dearer — against this one, on price, area, condition, the building and the floor, plus location when an anchor is given and value when the model service answers. An alternative that is better on something and worse on nothing dominates it; the rest are trade-offs, and every comparison carries both figures so the claim can be checked.",
+        "operationId": "Alternatives.forListing",
         "parameters": [
           {
             "name": "id",
@@ -332,79 +15,48 @@
               "pattern": "^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}|00000000-0000-0000-0000-000000000000|ffffffff-ffff-ffff-ffff-ffffffffffff)$",
               "type": "string"
             }
-          }
-        ],
-        "requestBody": {
-          "required": true,
-          "content": {
-            "application/json": {
-              "schema": {
-                "$ref": "#/components/schemas/UpdateUserRoleBodyDto"
-              }
-            }
-          }
-        },
-        "responses": {
-          "200": {
-            "description": "",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/AdminUserDto"
-                }
-              }
+          },
+          {
+            "name": "limit",
+            "required": false,
+            "in": "query",
+            "schema": {
+              "minimum": 1,
+              "maximum": 12,
+              "default": 6,
+              "type": "integer"
             }
           },
-          "403": {
-            "description": "Requires the ADMIN role"
-          }
-        },
-        "security": [
           {
-            "bearer": []
-          }
-        ],
-        "summary": "Change the role of an account (admin)",
-        "tags": [
-          "users"
-        ]
-      }
-    },
-    "/api/districts": {
-      "get": {
-        "operationId": "Geo.listDistricts",
-        "parameters": [],
-        "responses": {
-          "200": {
-            "description": "",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "type": "array",
-                  "items": {
-                    "$ref": "#/components/schemas/DistrictDto"
-                  }
-                }
-              }
-            }
-          }
-        },
-        "summary": "All districts and towns with trilingual names and centroids",
-        "tags": [
-          "geo"
-        ]
-      }
-    },
-    "/api/districts/{slug}/boundary": {
-      "get": {
-        "operationId": "Geo.getBoundary",
-        "parameters": [
-          {
-            "name": "slug",
-            "required": true,
-            "in": "path",
+            "name": "anchorLat",
+            "required": false,
+            "in": "query",
             "schema": {
-              "pattern": "^[a-z][a-z0-9-]{1,40}$",
+              "minimum": -90,
+              "maximum": 90,
+              "type": "number"
+            }
+          },
+          {
+            "name": "anchorLon",
+            "required": false,
+            "in": "query",
+            "schema": {
+              "minimum": -180,
+              "maximum": 180,
+              "type": "number"
+            }
+          },
+          {
+            "name": "locale",
+            "required": false,
+            "in": "query",
+            "schema": {
+              "enum": [
+                "hy",
+                "ru",
+                "en"
+              ],
               "type": "string"
             }
           }
@@ -415,18 +67,18 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/DistrictBoundaryResponseDto"
+                  "$ref": "#/components/schemas/AlternativesResponseDto"
                 }
               }
             }
           },
           "404": {
-            "description": "Unknown district slug"
+            "description": "Unknown, or not visible to the caller"
           }
         },
-        "summary": "District boundary as a GeoJSON MultiPolygon",
+        "summary": "Better options than this listing, and what each one costs you",
         "tags": [
-          "geo"
+          "alternatives"
         ]
       }
     },
@@ -1263,6 +915,435 @@
         ]
       }
     },
+    "/api/auth/register": {
+      "post": {
+        "operationId": "Auth.register",
+        "parameters": [],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/RegisterBodyDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AuthResponseDto"
+                }
+              }
+            }
+          },
+          "429": {
+            "description": "Rate limit exceeded"
+          }
+        },
+        "summary": "Create an account and start a session",
+        "tags": [
+          "auth"
+        ]
+      }
+    },
+    "/api/auth/login": {
+      "post": {
+        "operationId": "Auth.login",
+        "parameters": [],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/LoginBodyDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AuthResponseDto"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Invalid credentials or disabled account"
+          },
+          "429": {
+            "description": "Rate limit exceeded"
+          }
+        },
+        "summary": "Authenticate with email and password",
+        "tags": [
+          "auth"
+        ]
+      }
+    },
+    "/api/auth/refresh": {
+      "post": {
+        "operationId": "Auth.refresh",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AuthResponseDto"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Missing, invalid, expired or replayed refresh token"
+          }
+        },
+        "security": [
+          {
+            "cookie": []
+          }
+        ],
+        "summary": "Rotate the refresh token and issue a new access token",
+        "tags": [
+          "auth"
+        ]
+      }
+    },
+    "/api/auth/logout": {
+      "post": {
+        "operationId": "Auth.logout",
+        "parameters": [],
+        "responses": {
+          "204": {
+            "description": ""
+          }
+        },
+        "security": [
+          {
+            "cookie": []
+          }
+        ],
+        "summary": "End the current session",
+        "tags": [
+          "auth"
+        ]
+      }
+    },
+    "/api/auth/logout-all": {
+      "post": {
+        "operationId": "Auth.logoutAll",
+        "parameters": [],
+        "responses": {
+          "204": {
+            "description": ""
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "End every session of the current user",
+        "tags": [
+          "auth"
+        ]
+      }
+    },
+    "/api/users/me": {
+      "get": {
+        "operationId": "Users.getMe",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/MeResponseDto"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Current account and buyer profile",
+        "tags": [
+          "users"
+        ]
+      },
+      "patch": {
+        "operationId": "Users.updateMe",
+        "parameters": [],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/UpdateMeBodyDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/MeResponseDto"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Update display name, phone or interface locale",
+        "tags": [
+          "users"
+        ]
+      }
+    },
+    "/api/users/me/preferences": {
+      "put": {
+        "operationId": "Users.updatePreferences",
+        "parameters": [],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/PreferencesBodyDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/MeResponseDto"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Save onboarding preferences (budget, rooms, priorities, commute anchor)",
+        "tags": [
+          "users"
+        ]
+      }
+    },
+    "/api/users": {
+      "get": {
+        "operationId": "Users.listUsers",
+        "parameters": [
+          {
+            "name": "limit",
+            "required": false,
+            "in": "query",
+            "schema": {
+              "minimum": 1,
+              "maximum": 50,
+              "default": 20,
+              "type": "integer"
+            }
+          },
+          {
+            "name": "cursor",
+            "required": false,
+            "in": "query",
+            "schema": {
+              "minLength": 1,
+              "maxLength": 512,
+              "type": "string"
+            }
+          },
+          {
+            "name": "role",
+            "required": false,
+            "in": "query",
+            "schema": {
+              "type": "string",
+              "enum": [
+                "USER",
+                "AGENT",
+                "MODERATOR",
+                "ADMIN"
+              ]
+            }
+          },
+          {
+            "name": "search",
+            "required": false,
+            "in": "query",
+            "schema": {
+              "minLength": 1,
+              "maxLength": 80,
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AdminUsersPageDto"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Requires the ADMIN role"
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "List accounts (admin)",
+        "tags": [
+          "users"
+        ]
+      }
+    },
+    "/api/users/{id}/role": {
+      "patch": {
+        "operationId": "Users.updateRole",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "format": "uuid",
+              "pattern": "^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}|00000000-0000-0000-0000-000000000000|ffffffff-ffff-ffff-ffff-ffffffffffff)$",
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/UpdateUserRoleBodyDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AdminUserDto"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Requires the ADMIN role"
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Change the role of an account (admin)",
+        "tags": [
+          "users"
+        ]
+      }
+    },
+    "/api/districts": {
+      "get": {
+        "operationId": "Geo.listDistricts",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/DistrictDto"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "summary": "All districts and towns with trilingual names and centroids",
+        "tags": [
+          "geo"
+        ]
+      }
+    },
+    "/api/districts/{slug}/boundary": {
+      "get": {
+        "operationId": "Geo.getBoundary",
+        "parameters": [
+          {
+            "name": "slug",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "pattern": "^[a-z][a-z0-9-]{1,40}$",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/DistrictBoundaryResponseDto"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Unknown district slug"
+          }
+        },
+        "summary": "District boundary as a GeoJSON MultiPolygon",
+        "tags": [
+          "geo"
+        ]
+      }
+    },
     "/api/listings/{id}/valuation": {
       "get": {
         "description": "Every figure comes from the model or the database. A stored valuation is reused while the listing is unchanged, and served with isStale set when the model cannot be reached to refresh it.",
@@ -1511,42 +1592,10 @@
       }
     },
     "schemas": {
-      "RegisterBodyDto": {
+      "AlternativesResponseDto": {
         "type": "object",
         "properties": {
-          "email": {
-            "type": "string"
-          },
-          "password": {
-            "type": "string",
-            "minLength": 10,
-            "maxLength": 128
-          },
-          "displayName": {
-            "type": "string",
-            "minLength": 2,
-            "maxLength": 80
-          },
-          "locale": {
-            "default": "hy",
-            "type": "string",
-            "enum": [
-              "hy",
-              "ru",
-              "en"
-            ]
-          }
-        },
-        "required": [
-          "email",
-          "password",
-          "displayName"
-        ]
-      },
-      "AuthResponseDto": {
-        "type": "object",
-        "properties": {
-          "user": {
+          "subject": {
             "type": "object",
             "properties": {
               "id": {
@@ -1554,16 +1603,18 @@
                 "format": "uuid",
                 "pattern": "^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}|00000000-0000-0000-0000-000000000000|ffffffff-ffff-ffff-ffff-ffffffffffff)$"
               },
-              "email": {
-                "type": "string"
+              "publicId": {
+                "type": "string",
+                "pattern": "^L-[A-HJ-NP-Z2-9]{6}$"
               },
-              "role": {
+              "status": {
                 "type": "string",
                 "enum": [
-                  "USER",
-                  "AGENT",
-                  "MODERATOR",
-                  "ADMIN"
+                  "DRAFT",
+                  "PENDING_REVIEW",
+                  "PUBLISHED",
+                  "REJECTED",
+                  "ARCHIVED"
                 ]
               },
               "locale": {
@@ -1574,143 +1625,108 @@
                   "en"
                 ]
               },
-              "displayName": {
+              "title": {
                 "type": "string"
               },
-              "createdAt": {
+              "priceAmd": {
+                "type": "integer",
+                "minimum": 0,
+                "maximum": 9007199254740991
+              },
+              "pricePerSqmAmd": {
+                "type": "integer",
+                "minimum": 0,
+                "maximum": 9007199254740991
+              },
+              "originalCurrency": {
                 "type": "string",
-                "format": "date-time",
-                "pattern": "^(?:(?:\\d\\d[2468][048]|\\d\\d[13579][26]|\\d\\d0[48]|[02468][048]00|[13579][26]00)-02-29|\\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\\d|30)|(?:02)-(?:0[1-9]|1\\d|2[0-8])))T(?:(?:[01]\\d|2[0-3]):[0-5]\\d:[0-5]\\d(?:\\.\\d+)?(?:Z|([+-](?:[01]\\d|2[0-3]):[0-5]\\d)))$"
-              }
-            },
-            "required": [
-              "id",
-              "email",
-              "role",
-              "locale",
-              "displayName",
-              "createdAt"
-            ],
-            "additionalProperties": false
-          },
-          "accessToken": {
-            "type": "string"
-          },
-          "tokenType": {
-            "type": "string",
-            "enum": [
-              "Bearer"
-            ]
-          },
-          "expiresIn": {
-            "type": "integer",
-            "minimum": 0,
-            "exclusiveMinimum": true,
-            "maximum": 9007199254740991
-          }
-        },
-        "required": [
-          "user",
-          "accessToken",
-          "tokenType",
-          "expiresIn"
-        ],
-        "additionalProperties": false
-      },
-      "LoginBodyDto": {
-        "type": "object",
-        "properties": {
-          "email": {
-            "type": "string"
-          },
-          "password": {
-            "type": "string",
-            "minLength": 1,
-            "maxLength": 128
-          }
-        },
-        "required": [
-          "email",
-          "password"
-        ]
-      },
-      "MeResponseDto": {
-        "type": "object",
-        "properties": {
-          "id": {
-            "type": "string",
-            "format": "uuid",
-            "pattern": "^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}|00000000-0000-0000-0000-000000000000|ffffffff-ffff-ffff-ffff-ffffffffffff)$"
-          },
-          "email": {
-            "type": "string"
-          },
-          "role": {
-            "type": "string",
-            "enum": [
-              "USER",
-              "AGENT",
-              "MODERATOR",
-              "ADMIN"
-            ]
-          },
-          "locale": {
-            "type": "string",
-            "enum": [
-              "hy",
-              "ru",
-              "en"
-            ]
-          },
-          "displayName": {
-            "type": "string"
-          },
-          "createdAt": {
-            "type": "string",
-            "format": "date-time",
-            "pattern": "^(?:(?:\\d\\d[2468][048]|\\d\\d[13579][26]|\\d\\d0[48]|[02468][048]00|[13579][26]00)-02-29|\\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\\d|30)|(?:02)-(?:0[1-9]|1\\d|2[0-8])))T(?:(?:[01]\\d|2[0-3]):[0-5]\\d:[0-5]\\d(?:\\.\\d+)?(?:Z|([+-](?:[01]\\d|2[0-3]):[0-5]\\d)))$"
-          },
-          "profile": {
-            "nullable": true,
-            "type": "object",
-            "properties": {
-              "displayName": {
-                "type": "string"
+                "enum": [
+                  "AMD",
+                  "USD",
+                  "EUR"
+                ]
               },
-              "phone": {
+              "originalPrice": {
                 "nullable": true,
-                "type": "string"
+                "type": "number"
               },
-              "budgetMinAmd": {
-                "nullable": true,
+              "priceNegotiable": {
+                "type": "boolean"
+              },
+              "rooms": {
                 "type": "integer",
-                "minimum": 0,
+                "minimum": -9007199254740991,
                 "maximum": 9007199254740991
               },
-              "budgetMaxAmd": {
-                "nullable": true,
+              "totalArea": {
+                "type": "number"
+              },
+              "floor": {
                 "type": "integer",
-                "minimum": 0,
+                "minimum": -9007199254740991,
                 "maximum": 9007199254740991
               },
-              "preferredRooms": {
-                "type": "array",
-                "items": {
-                  "type": "integer",
-                  "minimum": -9007199254740991,
-                  "maximum": 9007199254740991
-                }
+              "totalFloors": {
+                "type": "integer",
+                "minimum": -9007199254740991,
+                "maximum": 9007199254740991
               },
-              "priorities": {
+              "buildingType": {
+                "type": "string",
+                "enum": [
+                  "STONE",
+                  "PANEL",
+                  "MONOLITH",
+                  "KHRUSHCHYOVKA",
+                  "STALINKA",
+                  "NEW_BUILD"
+                ]
+              },
+              "condition": {
+                "type": "string",
+                "enum": [
+                  "NEEDS_REPAIR",
+                  "OLD_RENOVATION",
+                  "GOOD",
+                  "EURO_RENOVATION",
+                  "DESIGNER"
+                ]
+              },
+              "district": {
                 "type": "object",
-                "additionalProperties": {
-                  "type": "number",
-                  "minimum": 0,
-                  "maximum": 1
-                }
+                "properties": {
+                  "slug": {
+                    "type": "string",
+                    "pattern": "^[a-z][a-z0-9-]{1,40}$"
+                  },
+                  "name": {
+                    "type": "object",
+                    "properties": {
+                      "hy": {
+                        "type": "string"
+                      },
+                      "ru": {
+                        "type": "string"
+                      },
+                      "en": {
+                        "type": "string"
+                      }
+                    },
+                    "required": [
+                      "hy",
+                      "ru",
+                      "en"
+                    ],
+                    "additionalProperties": false
+                  }
+                },
+                "required": [
+                  "slug",
+                  "name"
+                ],
+                "additionalProperties": false
               },
-              "commuteAnchor": {
-                "nullable": true,
+              "location": {
                 "type": "object",
                 "properties": {
                   "lat": {
@@ -1722,420 +1738,364 @@
                     "type": "number",
                     "minimum": -180,
                     "maximum": 180
-                  },
-                  "label": {
-                    "type": "string",
-                    "minLength": 1,
-                    "maxLength": 120
                   }
                 },
                 "required": [
                   "lat",
-                  "lon",
-                  "label"
+                  "lon"
                 ],
                 "additionalProperties": false
               },
-              "onboardingCompletedAt": {
+              "thumbnailUrl": {
                 "nullable": true,
+                "type": "string",
+                "format": "uri"
+              },
+              "publishedAt": {
                 "type": "string",
                 "format": "date-time",
                 "pattern": "^(?:(?:\\d\\d[2468][048]|\\d\\d[13579][26]|\\d\\d0[48]|[02468][048]00|[13579][26]00)-02-29|\\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\\d|30)|(?:02)-(?:0[1-9]|1\\d|2[0-8])))T(?:(?:[01]\\d|2[0-3]):[0-5]\\d:[0-5]\\d(?:\\.\\d+)?(?:Z|([+-](?:[01]\\d|2[0-3]):[0-5]\\d)))$"
               }
             },
             "required": [
-              "displayName",
-              "phone",
-              "budgetMinAmd",
-              "budgetMaxAmd",
-              "preferredRooms",
-              "priorities",
-              "commuteAnchor",
-              "onboardingCompletedAt"
+              "id",
+              "publicId",
+              "status",
+              "locale",
+              "title",
+              "priceAmd",
+              "pricePerSqmAmd",
+              "originalCurrency",
+              "originalPrice",
+              "priceNegotiable",
+              "rooms",
+              "totalArea",
+              "floor",
+              "totalFloors",
+              "buildingType",
+              "condition",
+              "district",
+              "location",
+              "thumbnailUrl",
+              "publishedAt"
             ],
             "additionalProperties": false
-          }
-        },
-        "required": [
-          "id",
-          "email",
-          "role",
-          "locale",
-          "displayName",
-          "createdAt",
-          "profile"
-        ],
-        "additionalProperties": false
-      },
-      "UpdateMeBodyDto": {
-        "type": "object",
-        "properties": {
-          "displayName": {
-            "type": "string",
-            "minLength": 2,
-            "maxLength": 80
           },
-          "phone": {
-            "nullable": true,
-            "type": "string",
-            "pattern": "^\\+?[1-9][0-9]{7,14}$"
-          },
-          "locale": {
-            "type": "string",
-            "enum": [
-              "hy",
-              "ru",
-              "en"
-            ]
-          }
-        }
-      },
-      "PreferencesBodyDto": {
-        "type": "object",
-        "properties": {
-          "budgetMinAmd": {
-            "nullable": true,
-            "type": "integer",
-            "minimum": 0,
-            "maximum": 9007199254740991
-          },
-          "budgetMaxAmd": {
-            "nullable": true,
-            "type": "integer",
-            "minimum": 0,
-            "maximum": 9007199254740991
-          },
-          "preferredRooms": {
-            "maxItems": 10,
+          "criteria": {
             "type": "array",
             "items": {
-              "type": "integer",
-              "minimum": 1,
-              "maximum": 10
+              "type": "string",
+              "enum": [
+                "price",
+                "area",
+                "condition",
+                "building",
+                "floor",
+                "location",
+                "value"
+              ]
             }
           },
-          "priorities": {
-            "type": "object",
-            "additionalProperties": {
-              "type": "number",
-              "minimum": 0,
-              "maximum": 1
+          "omittedCriteria": {
+            "type": "array",
+            "items": {
+              "type": "string",
+              "enum": [
+                "price",
+                "area",
+                "condition",
+                "building",
+                "floor",
+                "location",
+                "value"
+              ]
             }
           },
-          "commuteAnchor": {
-            "nullable": true,
-            "type": "object",
-            "properties": {
-              "lat": {
-                "type": "number",
-                "minimum": -90,
-                "maximum": 90
-              },
-              "lon": {
-                "type": "number",
-                "minimum": -180,
-                "maximum": 180
-              },
-              "label": {
-                "type": "string",
-                "minLength": 1,
-                "maxLength": 120
-              }
-            },
-            "required": [
-              "lat",
-              "lon",
-              "label"
-            ]
-          }
-        },
-        "required": [
-          "budgetMinAmd",
-          "budgetMaxAmd",
-          "preferredRooms",
-          "priorities",
-          "commuteAnchor"
-        ]
-      },
-      "AdminUsersPageDto": {
-        "type": "object",
-        "properties": {
-          "items": {
+          "candidateCount": {
+            "type": "integer",
+            "minimum": 0,
+            "maximum": 9007199254740991
+          },
+          "alternatives": {
             "type": "array",
             "items": {
               "type": "object",
               "properties": {
-                "id": {
-                  "type": "string",
-                  "format": "uuid",
-                  "pattern": "^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}|00000000-0000-0000-0000-000000000000|ffffffff-ffff-ffff-ffff-ffffffffffff)$"
+                "listing": {
+                  "type": "object",
+                  "properties": {
+                    "id": {
+                      "type": "string",
+                      "format": "uuid",
+                      "pattern": "^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}|00000000-0000-0000-0000-000000000000|ffffffff-ffff-ffff-ffff-ffffffffffff)$"
+                    },
+                    "publicId": {
+                      "type": "string",
+                      "pattern": "^L-[A-HJ-NP-Z2-9]{6}$"
+                    },
+                    "status": {
+                      "type": "string",
+                      "enum": [
+                        "DRAFT",
+                        "PENDING_REVIEW",
+                        "PUBLISHED",
+                        "REJECTED",
+                        "ARCHIVED"
+                      ]
+                    },
+                    "locale": {
+                      "type": "string",
+                      "enum": [
+                        "hy",
+                        "ru",
+                        "en"
+                      ]
+                    },
+                    "title": {
+                      "type": "string"
+                    },
+                    "priceAmd": {
+                      "type": "integer",
+                      "minimum": 0,
+                      "maximum": 9007199254740991
+                    },
+                    "pricePerSqmAmd": {
+                      "type": "integer",
+                      "minimum": 0,
+                      "maximum": 9007199254740991
+                    },
+                    "originalCurrency": {
+                      "type": "string",
+                      "enum": [
+                        "AMD",
+                        "USD",
+                        "EUR"
+                      ]
+                    },
+                    "originalPrice": {
+                      "nullable": true,
+                      "type": "number"
+                    },
+                    "priceNegotiable": {
+                      "type": "boolean"
+                    },
+                    "rooms": {
+                      "type": "integer",
+                      "minimum": -9007199254740991,
+                      "maximum": 9007199254740991
+                    },
+                    "totalArea": {
+                      "type": "number"
+                    },
+                    "floor": {
+                      "type": "integer",
+                      "minimum": -9007199254740991,
+                      "maximum": 9007199254740991
+                    },
+                    "totalFloors": {
+                      "type": "integer",
+                      "minimum": -9007199254740991,
+                      "maximum": 9007199254740991
+                    },
+                    "buildingType": {
+                      "type": "string",
+                      "enum": [
+                        "STONE",
+                        "PANEL",
+                        "MONOLITH",
+                        "KHRUSHCHYOVKA",
+                        "STALINKA",
+                        "NEW_BUILD"
+                      ]
+                    },
+                    "condition": {
+                      "type": "string",
+                      "enum": [
+                        "NEEDS_REPAIR",
+                        "OLD_RENOVATION",
+                        "GOOD",
+                        "EURO_RENOVATION",
+                        "DESIGNER"
+                      ]
+                    },
+                    "district": {
+                      "type": "object",
+                      "properties": {
+                        "slug": {
+                          "type": "string",
+                          "pattern": "^[a-z][a-z0-9-]{1,40}$"
+                        },
+                        "name": {
+                          "type": "object",
+                          "properties": {
+                            "hy": {
+                              "type": "string"
+                            },
+                            "ru": {
+                              "type": "string"
+                            },
+                            "en": {
+                              "type": "string"
+                            }
+                          },
+                          "required": [
+                            "hy",
+                            "ru",
+                            "en"
+                          ],
+                          "additionalProperties": false
+                        }
+                      },
+                      "required": [
+                        "slug",
+                        "name"
+                      ],
+                      "additionalProperties": false
+                    },
+                    "location": {
+                      "type": "object",
+                      "properties": {
+                        "lat": {
+                          "type": "number",
+                          "minimum": -90,
+                          "maximum": 90
+                        },
+                        "lon": {
+                          "type": "number",
+                          "minimum": -180,
+                          "maximum": 180
+                        }
+                      },
+                      "required": [
+                        "lat",
+                        "lon"
+                      ],
+                      "additionalProperties": false
+                    },
+                    "thumbnailUrl": {
+                      "nullable": true,
+                      "type": "string",
+                      "format": "uri"
+                    },
+                    "publishedAt": {
+                      "type": "string",
+                      "format": "date-time",
+                      "pattern": "^(?:(?:\\d\\d[2468][048]|\\d\\d[13579][26]|\\d\\d0[48]|[02468][048]00|[13579][26]00)-02-29|\\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\\d|30)|(?:02)-(?:0[1-9]|1\\d|2[0-8])))T(?:(?:[01]\\d|2[0-3]):[0-5]\\d:[0-5]\\d(?:\\.\\d+)?(?:Z|([+-](?:[01]\\d|2[0-3]):[0-5]\\d)))$"
+                    }
+                  },
+                  "required": [
+                    "id",
+                    "publicId",
+                    "status",
+                    "locale",
+                    "title",
+                    "priceAmd",
+                    "pricePerSqmAmd",
+                    "originalCurrency",
+                    "originalPrice",
+                    "priceNegotiable",
+                    "rooms",
+                    "totalArea",
+                    "floor",
+                    "totalFloors",
+                    "buildingType",
+                    "condition",
+                    "district",
+                    "location",
+                    "thumbnailUrl",
+                    "publishedAt"
+                  ],
+                  "additionalProperties": false
                 },
-                "email": {
-                  "type": "string"
-                },
-                "role": {
+                "relation": {
                   "type": "string",
                   "enum": [
-                    "USER",
-                    "AGENT",
-                    "MODERATOR",
-                    "ADMIN"
+                    "DOMINATES",
+                    "TRADE_OFF",
+                    "EQUIVALENT"
                   ]
                 },
-                "locale": {
-                  "type": "string",
-                  "enum": [
-                    "hy",
-                    "ru",
-                    "en"
-                  ]
+                "comparisons": {
+                  "type": "array",
+                  "items": {
+                    "type": "object",
+                    "properties": {
+                      "criterion": {
+                        "type": "string",
+                        "enum": [
+                          "price",
+                          "area",
+                          "condition",
+                          "building",
+                          "floor",
+                          "location",
+                          "value"
+                        ]
+                      },
+                      "direction": {
+                        "type": "string",
+                        "enum": [
+                          "better",
+                          "worse",
+                          "same"
+                        ]
+                      },
+                      "subject": {
+                        "type": "number"
+                      },
+                      "alternative": {
+                        "type": "number"
+                      },
+                      "unit": {
+                        "type": "string",
+                        "enum": [
+                          "amd",
+                          "sqm",
+                          "metres",
+                          "years",
+                          "percent",
+                          "score"
+                        ]
+                      }
+                    },
+                    "required": [
+                      "criterion",
+                      "direction",
+                      "subject",
+                      "alternative",
+                      "unit"
+                    ],
+                    "additionalProperties": false
+                  }
                 },
-                "displayName": {
-                  "type": "string"
+                "betterCount": {
+                  "type": "integer",
+                  "minimum": 0,
+                  "maximum": 9007199254740991
                 },
-                "createdAt": {
-                  "type": "string",
-                  "format": "date-time",
-                  "pattern": "^(?:(?:\\d\\d[2468][048]|\\d\\d[13579][26]|\\d\\d0[48]|[02468][048]00|[13579][26]00)-02-29|\\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\\d|30)|(?:02)-(?:0[1-9]|1\\d|2[0-8])))T(?:(?:[01]\\d|2[0-3]):[0-5]\\d:[0-5]\\d(?:\\.\\d+)?(?:Z|([+-](?:[01]\\d|2[0-3]):[0-5]\\d)))$"
-                },
-                "isActive": {
-                  "type": "boolean"
-                },
-                "updatedAt": {
-                  "type": "string",
-                  "format": "date-time",
-                  "pattern": "^(?:(?:\\d\\d[2468][048]|\\d\\d[13579][26]|\\d\\d0[48]|[02468][048]00|[13579][26]00)-02-29|\\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\\d|30)|(?:02)-(?:0[1-9]|1\\d|2[0-8])))T(?:(?:[01]\\d|2[0-3]):[0-5]\\d:[0-5]\\d(?:\\.\\d+)?(?:Z|([+-](?:[01]\\d|2[0-3]):[0-5]\\d)))$"
+                "worseCount": {
+                  "type": "integer",
+                  "minimum": 0,
+                  "maximum": 9007199254740991
                 }
               },
               "required": [
-                "id",
-                "email",
-                "role",
-                "locale",
-                "displayName",
-                "createdAt",
-                "isActive",
-                "updatedAt"
+                "listing",
+                "relation",
+                "comparisons",
+                "betterCount",
+                "worseCount"
               ],
               "additionalProperties": false
             }
-          },
-          "nextCursor": {
-            "nullable": true,
-            "type": "string"
           }
         },
         "required": [
-          "items",
-          "nextCursor"
-        ],
-        "additionalProperties": false
-      },
-      "UpdateUserRoleBodyDto": {
-        "type": "object",
-        "properties": {
-          "role": {
-            "type": "string",
-            "enum": [
-              "USER",
-              "AGENT",
-              "MODERATOR",
-              "ADMIN"
-            ]
-          }
-        },
-        "required": [
-          "role"
-        ]
-      },
-      "AdminUserDto": {
-        "type": "object",
-        "properties": {
-          "id": {
-            "type": "string",
-            "format": "uuid",
-            "pattern": "^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}|00000000-0000-0000-0000-000000000000|ffffffff-ffff-ffff-ffff-ffffffffffff)$"
-          },
-          "email": {
-            "type": "string"
-          },
-          "role": {
-            "type": "string",
-            "enum": [
-              "USER",
-              "AGENT",
-              "MODERATOR",
-              "ADMIN"
-            ]
-          },
-          "locale": {
-            "type": "string",
-            "enum": [
-              "hy",
-              "ru",
-              "en"
-            ]
-          },
-          "displayName": {
-            "type": "string"
-          },
-          "createdAt": {
-            "type": "string",
-            "format": "date-time",
-            "pattern": "^(?:(?:\\d\\d[2468][048]|\\d\\d[13579][26]|\\d\\d0[48]|[02468][048]00|[13579][26]00)-02-29|\\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\\d|30)|(?:02)-(?:0[1-9]|1\\d|2[0-8])))T(?:(?:[01]\\d|2[0-3]):[0-5]\\d:[0-5]\\d(?:\\.\\d+)?(?:Z|([+-](?:[01]\\d|2[0-3]):[0-5]\\d)))$"
-          },
-          "isActive": {
-            "type": "boolean"
-          },
-          "updatedAt": {
-            "type": "string",
-            "format": "date-time",
-            "pattern": "^(?:(?:\\d\\d[2468][048]|\\d\\d[13579][26]|\\d\\d0[48]|[02468][048]00|[13579][26]00)-02-29|\\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\\d|30)|(?:02)-(?:0[1-9]|1\\d|2[0-8])))T(?:(?:[01]\\d|2[0-3]):[0-5]\\d:[0-5]\\d(?:\\.\\d+)?(?:Z|([+-](?:[01]\\d|2[0-3]):[0-5]\\d)))$"
-          }
-        },
-        "required": [
-          "id",
-          "email",
-          "role",
-          "locale",
-          "displayName",
-          "createdAt",
-          "isActive",
-          "updatedAt"
-        ],
-        "additionalProperties": false
-      },
-      "DistrictDto": {
-        "type": "object",
-        "properties": {
-          "id": {
-            "type": "string",
-            "format": "uuid",
-            "pattern": "^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}|00000000-0000-0000-0000-000000000000|ffffffff-ffff-ffff-ffff-ffffffffffff)$"
-          },
-          "slug": {
-            "type": "string",
-            "pattern": "^[a-z][a-z0-9-]{1,40}$"
-          },
-          "kind": {
-            "type": "string",
-            "enum": [
-              "CITY_DISTRICT",
-              "TOWN"
-            ]
-          },
-          "name": {
-            "type": "object",
-            "properties": {
-              "hy": {
-                "type": "string"
-              },
-              "ru": {
-                "type": "string"
-              },
-              "en": {
-                "type": "string"
-              }
-            },
-            "required": [
-              "hy",
-              "ru",
-              "en"
-            ],
-            "additionalProperties": false
-          },
-          "city": {
-            "type": "string"
-          },
-          "marz": {
-            "type": "string"
-          },
-          "centroid": {
-            "type": "object",
-            "properties": {
-              "lat": {
-                "type": "number",
-                "minimum": -90,
-                "maximum": 90
-              },
-              "lon": {
-                "type": "number",
-                "minimum": -180,
-                "maximum": 180
-              }
-            },
-            "required": [
-              "lat",
-              "lon"
-            ],
-            "additionalProperties": false
-          }
-        },
-        "required": [
-          "id",
-          "slug",
-          "kind",
-          "name",
-          "city",
-          "marz",
-          "centroid"
-        ],
-        "additionalProperties": false
-      },
-      "DistrictBoundaryResponseDto": {
-        "type": "object",
-        "properties": {
-          "slug": {
-            "type": "string",
-            "pattern": "^[a-z][a-z0-9-]{1,40}$"
-          },
-          "boundary": {
-            "type": "object",
-            "properties": {
-              "type": {
-                "type": "string",
-                "enum": [
-                  "MultiPolygon"
-                ]
-              },
-              "coordinates": {
-                "minItems": 1,
-                "type": "array",
-                "items": {
-                  "minItems": 1,
-                  "type": "array",
-                  "items": {
-                    "minItems": 4,
-                    "type": "array",
-                    "items": {
-                      "type": "array",
-                      "items": {
-                        "anyOf": [
-                          {
-                            "type": "number"
-                          },
-                          {
-                            "type": "number"
-                          }
-                        ]
-                      },
-                      "minItems": 2,
-                      "maxItems": 2
-                    }
-                  }
-                }
-              }
-            },
-            "required": [
-              "type",
-              "coordinates"
-            ],
-            "additionalProperties": false
-          }
-        },
-        "required": [
-          "slug",
-          "boundary"
+          "subject",
+          "criteria",
+          "omittedCriteria",
+          "candidateCount",
+          "alternatives"
         ],
         "additionalProperties": false
       },
@@ -3366,6 +3326,634 @@
           "hasElevator",
           "location"
         ]
+      },
+      "RegisterBodyDto": {
+        "type": "object",
+        "properties": {
+          "email": {
+            "type": "string"
+          },
+          "password": {
+            "type": "string",
+            "minLength": 10,
+            "maxLength": 128
+          },
+          "displayName": {
+            "type": "string",
+            "minLength": 2,
+            "maxLength": 80
+          },
+          "locale": {
+            "default": "hy",
+            "type": "string",
+            "enum": [
+              "hy",
+              "ru",
+              "en"
+            ]
+          }
+        },
+        "required": [
+          "email",
+          "password",
+          "displayName"
+        ]
+      },
+      "AuthResponseDto": {
+        "type": "object",
+        "properties": {
+          "user": {
+            "type": "object",
+            "properties": {
+              "id": {
+                "type": "string",
+                "format": "uuid",
+                "pattern": "^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}|00000000-0000-0000-0000-000000000000|ffffffff-ffff-ffff-ffff-ffffffffffff)$"
+              },
+              "email": {
+                "type": "string"
+              },
+              "role": {
+                "type": "string",
+                "enum": [
+                  "USER",
+                  "AGENT",
+                  "MODERATOR",
+                  "ADMIN"
+                ]
+              },
+              "locale": {
+                "type": "string",
+                "enum": [
+                  "hy",
+                  "ru",
+                  "en"
+                ]
+              },
+              "displayName": {
+                "type": "string"
+              },
+              "createdAt": {
+                "type": "string",
+                "format": "date-time",
+                "pattern": "^(?:(?:\\d\\d[2468][048]|\\d\\d[13579][26]|\\d\\d0[48]|[02468][048]00|[13579][26]00)-02-29|\\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\\d|30)|(?:02)-(?:0[1-9]|1\\d|2[0-8])))T(?:(?:[01]\\d|2[0-3]):[0-5]\\d:[0-5]\\d(?:\\.\\d+)?(?:Z|([+-](?:[01]\\d|2[0-3]):[0-5]\\d)))$"
+              }
+            },
+            "required": [
+              "id",
+              "email",
+              "role",
+              "locale",
+              "displayName",
+              "createdAt"
+            ],
+            "additionalProperties": false
+          },
+          "accessToken": {
+            "type": "string"
+          },
+          "tokenType": {
+            "type": "string",
+            "enum": [
+              "Bearer"
+            ]
+          },
+          "expiresIn": {
+            "type": "integer",
+            "minimum": 0,
+            "exclusiveMinimum": true,
+            "maximum": 9007199254740991
+          }
+        },
+        "required": [
+          "user",
+          "accessToken",
+          "tokenType",
+          "expiresIn"
+        ],
+        "additionalProperties": false
+      },
+      "LoginBodyDto": {
+        "type": "object",
+        "properties": {
+          "email": {
+            "type": "string"
+          },
+          "password": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 128
+          }
+        },
+        "required": [
+          "email",
+          "password"
+        ]
+      },
+      "MeResponseDto": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid",
+            "pattern": "^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}|00000000-0000-0000-0000-000000000000|ffffffff-ffff-ffff-ffff-ffffffffffff)$"
+          },
+          "email": {
+            "type": "string"
+          },
+          "role": {
+            "type": "string",
+            "enum": [
+              "USER",
+              "AGENT",
+              "MODERATOR",
+              "ADMIN"
+            ]
+          },
+          "locale": {
+            "type": "string",
+            "enum": [
+              "hy",
+              "ru",
+              "en"
+            ]
+          },
+          "displayName": {
+            "type": "string"
+          },
+          "createdAt": {
+            "type": "string",
+            "format": "date-time",
+            "pattern": "^(?:(?:\\d\\d[2468][048]|\\d\\d[13579][26]|\\d\\d0[48]|[02468][048]00|[13579][26]00)-02-29|\\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\\d|30)|(?:02)-(?:0[1-9]|1\\d|2[0-8])))T(?:(?:[01]\\d|2[0-3]):[0-5]\\d:[0-5]\\d(?:\\.\\d+)?(?:Z|([+-](?:[01]\\d|2[0-3]):[0-5]\\d)))$"
+          },
+          "profile": {
+            "nullable": true,
+            "type": "object",
+            "properties": {
+              "displayName": {
+                "type": "string"
+              },
+              "phone": {
+                "nullable": true,
+                "type": "string"
+              },
+              "budgetMinAmd": {
+                "nullable": true,
+                "type": "integer",
+                "minimum": 0,
+                "maximum": 9007199254740991
+              },
+              "budgetMaxAmd": {
+                "nullable": true,
+                "type": "integer",
+                "minimum": 0,
+                "maximum": 9007199254740991
+              },
+              "preferredRooms": {
+                "type": "array",
+                "items": {
+                  "type": "integer",
+                  "minimum": -9007199254740991,
+                  "maximum": 9007199254740991
+                }
+              },
+              "priorities": {
+                "type": "object",
+                "additionalProperties": {
+                  "type": "number",
+                  "minimum": 0,
+                  "maximum": 1
+                }
+              },
+              "commuteAnchor": {
+                "nullable": true,
+                "type": "object",
+                "properties": {
+                  "lat": {
+                    "type": "number",
+                    "minimum": -90,
+                    "maximum": 90
+                  },
+                  "lon": {
+                    "type": "number",
+                    "minimum": -180,
+                    "maximum": 180
+                  },
+                  "label": {
+                    "type": "string",
+                    "minLength": 1,
+                    "maxLength": 120
+                  }
+                },
+                "required": [
+                  "lat",
+                  "lon",
+                  "label"
+                ],
+                "additionalProperties": false
+              },
+              "onboardingCompletedAt": {
+                "nullable": true,
+                "type": "string",
+                "format": "date-time",
+                "pattern": "^(?:(?:\\d\\d[2468][048]|\\d\\d[13579][26]|\\d\\d0[48]|[02468][048]00|[13579][26]00)-02-29|\\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\\d|30)|(?:02)-(?:0[1-9]|1\\d|2[0-8])))T(?:(?:[01]\\d|2[0-3]):[0-5]\\d:[0-5]\\d(?:\\.\\d+)?(?:Z|([+-](?:[01]\\d|2[0-3]):[0-5]\\d)))$"
+              }
+            },
+            "required": [
+              "displayName",
+              "phone",
+              "budgetMinAmd",
+              "budgetMaxAmd",
+              "preferredRooms",
+              "priorities",
+              "commuteAnchor",
+              "onboardingCompletedAt"
+            ],
+            "additionalProperties": false
+          }
+        },
+        "required": [
+          "id",
+          "email",
+          "role",
+          "locale",
+          "displayName",
+          "createdAt",
+          "profile"
+        ],
+        "additionalProperties": false
+      },
+      "UpdateMeBodyDto": {
+        "type": "object",
+        "properties": {
+          "displayName": {
+            "type": "string",
+            "minLength": 2,
+            "maxLength": 80
+          },
+          "phone": {
+            "nullable": true,
+            "type": "string",
+            "pattern": "^\\+?[1-9][0-9]{7,14}$"
+          },
+          "locale": {
+            "type": "string",
+            "enum": [
+              "hy",
+              "ru",
+              "en"
+            ]
+          }
+        }
+      },
+      "PreferencesBodyDto": {
+        "type": "object",
+        "properties": {
+          "budgetMinAmd": {
+            "nullable": true,
+            "type": "integer",
+            "minimum": 0,
+            "maximum": 9007199254740991
+          },
+          "budgetMaxAmd": {
+            "nullable": true,
+            "type": "integer",
+            "minimum": 0,
+            "maximum": 9007199254740991
+          },
+          "preferredRooms": {
+            "maxItems": 10,
+            "type": "array",
+            "items": {
+              "type": "integer",
+              "minimum": 1,
+              "maximum": 10
+            }
+          },
+          "priorities": {
+            "type": "object",
+            "additionalProperties": {
+              "type": "number",
+              "minimum": 0,
+              "maximum": 1
+            }
+          },
+          "commuteAnchor": {
+            "nullable": true,
+            "type": "object",
+            "properties": {
+              "lat": {
+                "type": "number",
+                "minimum": -90,
+                "maximum": 90
+              },
+              "lon": {
+                "type": "number",
+                "minimum": -180,
+                "maximum": 180
+              },
+              "label": {
+                "type": "string",
+                "minLength": 1,
+                "maxLength": 120
+              }
+            },
+            "required": [
+              "lat",
+              "lon",
+              "label"
+            ]
+          }
+        },
+        "required": [
+          "budgetMinAmd",
+          "budgetMaxAmd",
+          "preferredRooms",
+          "priorities",
+          "commuteAnchor"
+        ]
+      },
+      "AdminUsersPageDto": {
+        "type": "object",
+        "properties": {
+          "items": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "id": {
+                  "type": "string",
+                  "format": "uuid",
+                  "pattern": "^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}|00000000-0000-0000-0000-000000000000|ffffffff-ffff-ffff-ffff-ffffffffffff)$"
+                },
+                "email": {
+                  "type": "string"
+                },
+                "role": {
+                  "type": "string",
+                  "enum": [
+                    "USER",
+                    "AGENT",
+                    "MODERATOR",
+                    "ADMIN"
+                  ]
+                },
+                "locale": {
+                  "type": "string",
+                  "enum": [
+                    "hy",
+                    "ru",
+                    "en"
+                  ]
+                },
+                "displayName": {
+                  "type": "string"
+                },
+                "createdAt": {
+                  "type": "string",
+                  "format": "date-time",
+                  "pattern": "^(?:(?:\\d\\d[2468][048]|\\d\\d[13579][26]|\\d\\d0[48]|[02468][048]00|[13579][26]00)-02-29|\\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\\d|30)|(?:02)-(?:0[1-9]|1\\d|2[0-8])))T(?:(?:[01]\\d|2[0-3]):[0-5]\\d:[0-5]\\d(?:\\.\\d+)?(?:Z|([+-](?:[01]\\d|2[0-3]):[0-5]\\d)))$"
+                },
+                "isActive": {
+                  "type": "boolean"
+                },
+                "updatedAt": {
+                  "type": "string",
+                  "format": "date-time",
+                  "pattern": "^(?:(?:\\d\\d[2468][048]|\\d\\d[13579][26]|\\d\\d0[48]|[02468][048]00|[13579][26]00)-02-29|\\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\\d|30)|(?:02)-(?:0[1-9]|1\\d|2[0-8])))T(?:(?:[01]\\d|2[0-3]):[0-5]\\d:[0-5]\\d(?:\\.\\d+)?(?:Z|([+-](?:[01]\\d|2[0-3]):[0-5]\\d)))$"
+                }
+              },
+              "required": [
+                "id",
+                "email",
+                "role",
+                "locale",
+                "displayName",
+                "createdAt",
+                "isActive",
+                "updatedAt"
+              ],
+              "additionalProperties": false
+            }
+          },
+          "nextCursor": {
+            "nullable": true,
+            "type": "string"
+          }
+        },
+        "required": [
+          "items",
+          "nextCursor"
+        ],
+        "additionalProperties": false
+      },
+      "UpdateUserRoleBodyDto": {
+        "type": "object",
+        "properties": {
+          "role": {
+            "type": "string",
+            "enum": [
+              "USER",
+              "AGENT",
+              "MODERATOR",
+              "ADMIN"
+            ]
+          }
+        },
+        "required": [
+          "role"
+        ]
+      },
+      "AdminUserDto": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid",
+            "pattern": "^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}|00000000-0000-0000-0000-000000000000|ffffffff-ffff-ffff-ffff-ffffffffffff)$"
+          },
+          "email": {
+            "type": "string"
+          },
+          "role": {
+            "type": "string",
+            "enum": [
+              "USER",
+              "AGENT",
+              "MODERATOR",
+              "ADMIN"
+            ]
+          },
+          "locale": {
+            "type": "string",
+            "enum": [
+              "hy",
+              "ru",
+              "en"
+            ]
+          },
+          "displayName": {
+            "type": "string"
+          },
+          "createdAt": {
+            "type": "string",
+            "format": "date-time",
+            "pattern": "^(?:(?:\\d\\d[2468][048]|\\d\\d[13579][26]|\\d\\d0[48]|[02468][048]00|[13579][26]00)-02-29|\\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\\d|30)|(?:02)-(?:0[1-9]|1\\d|2[0-8])))T(?:(?:[01]\\d|2[0-3]):[0-5]\\d:[0-5]\\d(?:\\.\\d+)?(?:Z|([+-](?:[01]\\d|2[0-3]):[0-5]\\d)))$"
+          },
+          "isActive": {
+            "type": "boolean"
+          },
+          "updatedAt": {
+            "type": "string",
+            "format": "date-time",
+            "pattern": "^(?:(?:\\d\\d[2468][048]|\\d\\d[13579][26]|\\d\\d0[48]|[02468][048]00|[13579][26]00)-02-29|\\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\\d|30)|(?:02)-(?:0[1-9]|1\\d|2[0-8])))T(?:(?:[01]\\d|2[0-3]):[0-5]\\d:[0-5]\\d(?:\\.\\d+)?(?:Z|([+-](?:[01]\\d|2[0-3]):[0-5]\\d)))$"
+          }
+        },
+        "required": [
+          "id",
+          "email",
+          "role",
+          "locale",
+          "displayName",
+          "createdAt",
+          "isActive",
+          "updatedAt"
+        ],
+        "additionalProperties": false
+      },
+      "DistrictDto": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid",
+            "pattern": "^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}|00000000-0000-0000-0000-000000000000|ffffffff-ffff-ffff-ffff-ffffffffffff)$"
+          },
+          "slug": {
+            "type": "string",
+            "pattern": "^[a-z][a-z0-9-]{1,40}$"
+          },
+          "kind": {
+            "type": "string",
+            "enum": [
+              "CITY_DISTRICT",
+              "TOWN"
+            ]
+          },
+          "name": {
+            "type": "object",
+            "properties": {
+              "hy": {
+                "type": "string"
+              },
+              "ru": {
+                "type": "string"
+              },
+              "en": {
+                "type": "string"
+              }
+            },
+            "required": [
+              "hy",
+              "ru",
+              "en"
+            ],
+            "additionalProperties": false
+          },
+          "city": {
+            "type": "string"
+          },
+          "marz": {
+            "type": "string"
+          },
+          "centroid": {
+            "type": "object",
+            "properties": {
+              "lat": {
+                "type": "number",
+                "minimum": -90,
+                "maximum": 90
+              },
+              "lon": {
+                "type": "number",
+                "minimum": -180,
+                "maximum": 180
+              }
+            },
+            "required": [
+              "lat",
+              "lon"
+            ],
+            "additionalProperties": false
+          }
+        },
+        "required": [
+          "id",
+          "slug",
+          "kind",
+          "name",
+          "city",
+          "marz",
+          "centroid"
+        ],
+        "additionalProperties": false
+      },
+      "DistrictBoundaryResponseDto": {
+        "type": "object",
+        "properties": {
+          "slug": {
+            "type": "string",
+            "pattern": "^[a-z][a-z0-9-]{1,40}$"
+          },
+          "boundary": {
+            "type": "object",
+            "properties": {
+              "type": {
+                "type": "string",
+                "enum": [
+                  "MultiPolygon"
+                ]
+              },
+              "coordinates": {
+                "minItems": 1,
+                "type": "array",
+                "items": {
+                  "minItems": 1,
+                  "type": "array",
+                  "items": {
+                    "minItems": 4,
+                    "type": "array",
+                    "items": {
+                      "type": "array",
+                      "items": {
+                        "anyOf": [
+                          {
+                            "type": "number"
+                          },
+                          {
+                            "type": "number"
+                          }
+                        ]
+                      },
+                      "minItems": 2,
+                      "maxItems": 2
+                    }
+                  }
+                }
+              }
+            },
+            "required": [
+              "type",
+              "coordinates"
+            ],
+            "additionalProperties": false
+          }
+        },
+        "required": [
+          "slug",
+          "boundary"
+        ],
+        "additionalProperties": false
       },
       "ValuationDto": {
         "type": "object",

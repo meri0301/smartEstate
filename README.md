@@ -134,7 +134,7 @@ Health probes live outside the prefix: `/health` (liveness) and `/health/ready` 
 | buildings | `GET /buildings/:id`, agent: `POST /buildings` (district derived from coordinates)                                                                                                          |
 | geo       | `GET /districts`, `GET /districts/:slug/boundary` (GeoJSON)                                                                                                                                 |
 
-Valuation, recommendations, hybrid search and natural-language parsing have sections of their own below.
+Valuation, recommendations, better options, hybrid search and natural-language parsing have sections of their own below.
 
 - **Sessions.** Access token: 15-minute JWT in `Authorization: Bearer`. Refresh token: httpOnly,
   SameSite=Strict cookie scoped to `/api/auth`, rotated on every refresh; replaying a consumed
@@ -243,6 +243,36 @@ each listing with the arithmetic that put it there. See
   for benchmarking and A/B runs.
 - **The prompt and raw response are stored on the session** when a model was actually reached, so a
   paragraph can be reproduced months later.
+
+## Better options
+
+Given the listing somebody is looking at, which listings are simply better, and what does each of
+the others cost them? See [ADR-0016](docs/adr/0016-dominance-and-alternatives.md).
+
+```
+GET /api/listings/:id/alternatives?limit=6&anchorLat=&anchorLon=&locale=en
+  -> { subject, criteria, omittedCriteria, candidateCount, alternatives }
+```
+
+- **Pareto dominance, not a score.** An alternative that is at least as good on every criterion
+  compared and better on at least one `DOMINATES`; everything else that is better on something is
+  a `TRADE_OFF`, reported with what it gives up. Nothing is weighted, so nobody had to be asked
+  how much price matters against size.
+- **Indifference thresholds make dominance possible at all.** Two prices are never exactly equal,
+  so each criterion has a difference below which the listings count as the same: 2% of the price,
+  2 m², 200 m, a tenth of the condition and building scales.
+- **Rooms and district filter, they do not score.** A candidate is in the same district, has at
+  least as many rooms, and costs no more than 110% — the brief's "similar money".
+- **Every comparison carries both figures**, so "this one is better" can be checked rather than
+  believed.
+- **`location` and `value` are dropped when they cannot be measured**, and `omittedCriteria`
+  says which: dominance over five criteria is a weaker claim than over seven.
+- **Nothing is a real answer.** A listing with no better option is a good buy, and the page says so
+  rather than padding itself with near-misses.
+
+Measured over the 21 two-room flats in Kentron: 3 have a strictly better alternative, 17 have only
+trade-offs, 1 has nothing better. A mechanism that fired on everything would be describing
+similarity, not superiority.
 
 ## Language model layer
 

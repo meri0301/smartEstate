@@ -4,6 +4,162 @@
  */
 
 export interface paths {
+    "/api/listings/{id}/alternatives": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * Better options than this listing, and what each one costs you
+         * @description Compares listings a buyer could actually switch to — same district, at least as many rooms, no more than a tenth dearer — against this one, on price, area, condition, the building and the floor, plus location when an anchor is given and value when the model service answers. An alternative that is better on something and worse on nothing dominates it; the rest are trade-offs, and every comparison carries both figures so the claim can be checked.
+         */
+        get: operations["Alternatives.forListing"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/listings": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * Structured search with filters, sorting and cursor pagination
+         * @description Returns published listings. With mine=true it returns the caller’s own listings in any status; moderators may filter by any status.
+         */
+        get: operations["Listings.search"];
+        put?: never;
+        /**
+         * Create a listing for an existing building
+         * @description Any signed-in account may create one. A regular user’s listing enters the review queue; a verified agent’s is published immediately.
+         */
+        post: operations["Listings.create"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/listings/{idOrPublicId}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Listing detail by id or public id */
+        get: operations["Listings.getOne"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/listings/{id}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        post?: never;
+        /** Archive a listing (soft delete) */
+        delete: operations["Listings.archive"];
+        options?: never;
+        head?: never;
+        /**
+         * Update attributes or translations of a listing
+         * @description Status is not editable here; use the transitions endpoint.
+         */
+        patch: operations["Listings.update"];
+        trace?: never;
+    };
+    "/api/listings/{id}/transitions": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * Move a listing through the moderation lifecycle
+         * @description SUBMIT, PUBLISH, APPROVE, REJECT, REVISE and ARCHIVE. A transition that is not legal from the current status is a conflict, not a bad request.
+         */
+        post: operations["Listings.transition"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/listings/{id}/permanent": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        post?: never;
+        /**
+         * Delete a listing and all of its history, permanently
+         * @description Administrators only. Archiving is the reversible option.
+         */
+        delete: operations["Listings.destroy"];
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/buildings/{id}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Building details */
+        get: operations["Buildings.get"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/buildings": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Register a building; its district is derived from the coordinates */
+        post: operations["Buildings.create"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/api/auth/register": {
         parameters: {
             query?: never;
@@ -192,142 +348,6 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
-    "/api/listings": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        /**
-         * Structured search with filters, sorting and cursor pagination
-         * @description Returns published listings. With mine=true it returns the caller’s own listings in any status; moderators may filter by any status.
-         */
-        get: operations["Listings.search"];
-        put?: never;
-        /**
-         * Create a listing for an existing building
-         * @description Any signed-in account may create one. A regular user’s listing enters the review queue; a verified agent’s is published immediately.
-         */
-        post: operations["Listings.create"];
-        delete?: never;
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
-    };
-    "/api/listings/{idOrPublicId}": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        /** Listing detail by id or public id */
-        get: operations["Listings.getOne"];
-        put?: never;
-        post?: never;
-        delete?: never;
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
-    };
-    "/api/listings/{id}": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        get?: never;
-        put?: never;
-        post?: never;
-        /** Archive a listing (soft delete) */
-        delete: operations["Listings.archive"];
-        options?: never;
-        head?: never;
-        /**
-         * Update attributes or translations of a listing
-         * @description Status is not editable here; use the transitions endpoint.
-         */
-        patch: operations["Listings.update"];
-        trace?: never;
-    };
-    "/api/listings/{id}/transitions": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        get?: never;
-        put?: never;
-        /**
-         * Move a listing through the moderation lifecycle
-         * @description SUBMIT, PUBLISH, APPROVE, REJECT, REVISE and ARCHIVE. A transition that is not legal from the current status is a conflict, not a bad request.
-         */
-        post: operations["Listings.transition"];
-        delete?: never;
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
-    };
-    "/api/listings/{id}/permanent": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        get?: never;
-        put?: never;
-        post?: never;
-        /**
-         * Delete a listing and all of its history, permanently
-         * @description Administrators only. Archiving is the reversible option.
-         */
-        delete: operations["Listings.destroy"];
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
-    };
-    "/api/buildings/{id}": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        /** Building details */
-        get: operations["Buildings.get"];
-        put?: never;
-        post?: never;
-        delete?: never;
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
-    };
-    "/api/buildings": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        get?: never;
-        put?: never;
-        /** Register a building; its district is derived from the coordinates */
-        post: operations["Buildings.create"];
-        delete?: never;
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
-    };
     "/api/listings/{id}/valuation": {
         parameters: {
             query?: never;
@@ -446,148 +466,106 @@ export interface paths {
 export type webhooks = Record<string, never>;
 export interface components {
     schemas: {
-        RegisterBodyDto: {
-            email: string;
-            password: string;
-            displayName: string;
-            /**
-             * @default hy
-             * @enum {string}
-             */
-            locale?: "hy" | "ru" | "en";
-        };
-        AuthResponseDto: {
-            user: {
+        AlternativesResponseDto: {
+            subject: {
                 /** Format: uuid */
                 id: string;
-                email: string;
+                publicId: string;
                 /** @enum {string} */
-                role: "USER" | "AGENT" | "MODERATOR" | "ADMIN";
+                status: "DRAFT" | "PENDING_REVIEW" | "PUBLISHED" | "REJECTED" | "ARCHIVED";
                 /** @enum {string} */
                 locale: "hy" | "ru" | "en";
-                displayName: string;
-                /** Format: date-time */
-                createdAt: string;
-            };
-            accessToken: string;
-            /** @enum {string} */
-            tokenType: "Bearer";
-            expiresIn: number;
-        };
-        LoginBodyDto: {
-            email: string;
-            password: string;
-        };
-        MeResponseDto: {
-            /** Format: uuid */
-            id: string;
-            email: string;
-            /** @enum {string} */
-            role: "USER" | "AGENT" | "MODERATOR" | "ADMIN";
-            /** @enum {string} */
-            locale: "hy" | "ru" | "en";
-            displayName: string;
-            /** Format: date-time */
-            createdAt: string;
-            profile: {
-                displayName: string;
-                phone: string | null;
-                budgetMinAmd: number | null;
-                budgetMaxAmd: number | null;
-                preferredRooms: number[];
-                priorities: {
-                    [key: string]: number;
+                title: string;
+                priceAmd: number;
+                pricePerSqmAmd: number;
+                /** @enum {string} */
+                originalCurrency: "AMD" | "USD" | "EUR";
+                originalPrice: number | null;
+                priceNegotiable: boolean;
+                rooms: number;
+                totalArea: number;
+                floor: number;
+                totalFloors: number;
+                /** @enum {string} */
+                buildingType: "STONE" | "PANEL" | "MONOLITH" | "KHRUSHCHYOVKA" | "STALINKA" | "NEW_BUILD";
+                /** @enum {string} */
+                condition: "NEEDS_REPAIR" | "OLD_RENOVATION" | "GOOD" | "EURO_RENOVATION" | "DESIGNER";
+                district: {
+                    slug: string;
+                    name: {
+                        hy: string;
+                        ru: string;
+                        en: string;
+                    };
                 };
-                commuteAnchor: {
+                location: {
                     lat: number;
                     lon: number;
-                    label: string;
-                } | null;
+                };
+                /** Format: uri */
+                thumbnailUrl: string | null;
                 /** Format: date-time */
-                onboardingCompletedAt: string | null;
-            } | null;
-        };
-        UpdateMeBodyDto: {
-            displayName?: string;
-            phone?: string | null;
-            /** @enum {string} */
-            locale?: "hy" | "ru" | "en";
-        };
-        PreferencesBodyDto: {
-            budgetMinAmd: number | null;
-            budgetMaxAmd: number | null;
-            preferredRooms: number[];
-            priorities: {
-                [key: string]: number;
+                publishedAt: string;
             };
-            commuteAnchor: {
-                lat: number;
-                lon: number;
-                label: string;
-            } | null;
-        };
-        AdminUsersPageDto: {
-            items: {
-                /** Format: uuid */
-                id: string;
-                email: string;
+            criteria: ("price" | "area" | "condition" | "building" | "floor" | "location" | "value")[];
+            omittedCriteria: ("price" | "area" | "condition" | "building" | "floor" | "location" | "value")[];
+            candidateCount: number;
+            alternatives: {
+                listing: {
+                    /** Format: uuid */
+                    id: string;
+                    publicId: string;
+                    /** @enum {string} */
+                    status: "DRAFT" | "PENDING_REVIEW" | "PUBLISHED" | "REJECTED" | "ARCHIVED";
+                    /** @enum {string} */
+                    locale: "hy" | "ru" | "en";
+                    title: string;
+                    priceAmd: number;
+                    pricePerSqmAmd: number;
+                    /** @enum {string} */
+                    originalCurrency: "AMD" | "USD" | "EUR";
+                    originalPrice: number | null;
+                    priceNegotiable: boolean;
+                    rooms: number;
+                    totalArea: number;
+                    floor: number;
+                    totalFloors: number;
+                    /** @enum {string} */
+                    buildingType: "STONE" | "PANEL" | "MONOLITH" | "KHRUSHCHYOVKA" | "STALINKA" | "NEW_BUILD";
+                    /** @enum {string} */
+                    condition: "NEEDS_REPAIR" | "OLD_RENOVATION" | "GOOD" | "EURO_RENOVATION" | "DESIGNER";
+                    district: {
+                        slug: string;
+                        name: {
+                            hy: string;
+                            ru: string;
+                            en: string;
+                        };
+                    };
+                    location: {
+                        lat: number;
+                        lon: number;
+                    };
+                    /** Format: uri */
+                    thumbnailUrl: string | null;
+                    /** Format: date-time */
+                    publishedAt: string;
+                };
                 /** @enum {string} */
-                role: "USER" | "AGENT" | "MODERATOR" | "ADMIN";
-                /** @enum {string} */
-                locale: "hy" | "ru" | "en";
-                displayName: string;
-                /** Format: date-time */
-                createdAt: string;
-                isActive: boolean;
-                /** Format: date-time */
-                updatedAt: string;
+                relation: "DOMINATES" | "TRADE_OFF" | "EQUIVALENT";
+                comparisons: {
+                    /** @enum {string} */
+                    criterion: "price" | "area" | "condition" | "building" | "floor" | "location" | "value";
+                    /** @enum {string} */
+                    direction: "better" | "worse" | "same";
+                    subject: number;
+                    alternative: number;
+                    /** @enum {string} */
+                    unit: "amd" | "sqm" | "metres" | "years" | "percent" | "score";
+                }[];
+                betterCount: number;
+                worseCount: number;
             }[];
-            nextCursor: string | null;
-        };
-        UpdateUserRoleBodyDto: {
-            /** @enum {string} */
-            role: "USER" | "AGENT" | "MODERATOR" | "ADMIN";
-        };
-        AdminUserDto: {
-            /** Format: uuid */
-            id: string;
-            email: string;
-            /** @enum {string} */
-            role: "USER" | "AGENT" | "MODERATOR" | "ADMIN";
-            /** @enum {string} */
-            locale: "hy" | "ru" | "en";
-            displayName: string;
-            /** Format: date-time */
-            createdAt: string;
-            isActive: boolean;
-            /** Format: date-time */
-            updatedAt: string;
-        };
-        DistrictDto: {
-            /** Format: uuid */
-            id: string;
-            slug: string;
-            /** @enum {string} */
-            kind: "CITY_DISTRICT" | "TOWN";
-            name: {
-                hy: string;
-                ru: string;
-                en: string;
-            };
-            city: string;
-            marz: string;
-            centroid: {
-                lat: number;
-                lon: number;
-            };
-        };
-        DistrictBoundaryResponseDto: {
-            slug: string;
-            boundary: {
-                /** @enum {string} */
-                type: "MultiPolygon";
-                coordinates: (number)[][][][];
-            };
         };
         ListingsPageDto: {
             items: {
@@ -866,6 +844,149 @@ export interface components {
             location: {
                 lat: number;
                 lon: number;
+            };
+        };
+        RegisterBodyDto: {
+            email: string;
+            password: string;
+            displayName: string;
+            /**
+             * @default hy
+             * @enum {string}
+             */
+            locale?: "hy" | "ru" | "en";
+        };
+        AuthResponseDto: {
+            user: {
+                /** Format: uuid */
+                id: string;
+                email: string;
+                /** @enum {string} */
+                role: "USER" | "AGENT" | "MODERATOR" | "ADMIN";
+                /** @enum {string} */
+                locale: "hy" | "ru" | "en";
+                displayName: string;
+                /** Format: date-time */
+                createdAt: string;
+            };
+            accessToken: string;
+            /** @enum {string} */
+            tokenType: "Bearer";
+            expiresIn: number;
+        };
+        LoginBodyDto: {
+            email: string;
+            password: string;
+        };
+        MeResponseDto: {
+            /** Format: uuid */
+            id: string;
+            email: string;
+            /** @enum {string} */
+            role: "USER" | "AGENT" | "MODERATOR" | "ADMIN";
+            /** @enum {string} */
+            locale: "hy" | "ru" | "en";
+            displayName: string;
+            /** Format: date-time */
+            createdAt: string;
+            profile: {
+                displayName: string;
+                phone: string | null;
+                budgetMinAmd: number | null;
+                budgetMaxAmd: number | null;
+                preferredRooms: number[];
+                priorities: {
+                    [key: string]: number;
+                };
+                commuteAnchor: {
+                    lat: number;
+                    lon: number;
+                    label: string;
+                } | null;
+                /** Format: date-time */
+                onboardingCompletedAt: string | null;
+            } | null;
+        };
+        UpdateMeBodyDto: {
+            displayName?: string;
+            phone?: string | null;
+            /** @enum {string} */
+            locale?: "hy" | "ru" | "en";
+        };
+        PreferencesBodyDto: {
+            budgetMinAmd: number | null;
+            budgetMaxAmd: number | null;
+            preferredRooms: number[];
+            priorities: {
+                [key: string]: number;
+            };
+            commuteAnchor: {
+                lat: number;
+                lon: number;
+                label: string;
+            } | null;
+        };
+        AdminUsersPageDto: {
+            items: {
+                /** Format: uuid */
+                id: string;
+                email: string;
+                /** @enum {string} */
+                role: "USER" | "AGENT" | "MODERATOR" | "ADMIN";
+                /** @enum {string} */
+                locale: "hy" | "ru" | "en";
+                displayName: string;
+                /** Format: date-time */
+                createdAt: string;
+                isActive: boolean;
+                /** Format: date-time */
+                updatedAt: string;
+            }[];
+            nextCursor: string | null;
+        };
+        UpdateUserRoleBodyDto: {
+            /** @enum {string} */
+            role: "USER" | "AGENT" | "MODERATOR" | "ADMIN";
+        };
+        AdminUserDto: {
+            /** Format: uuid */
+            id: string;
+            email: string;
+            /** @enum {string} */
+            role: "USER" | "AGENT" | "MODERATOR" | "ADMIN";
+            /** @enum {string} */
+            locale: "hy" | "ru" | "en";
+            displayName: string;
+            /** Format: date-time */
+            createdAt: string;
+            isActive: boolean;
+            /** Format: date-time */
+            updatedAt: string;
+        };
+        DistrictDto: {
+            /** Format: uuid */
+            id: string;
+            slug: string;
+            /** @enum {string} */
+            kind: "CITY_DISTRICT" | "TOWN";
+            name: {
+                hy: string;
+                ru: string;
+                en: string;
+            };
+            city: string;
+            marz: string;
+            centroid: {
+                lat: number;
+                lon: number;
+            };
+        };
+        DistrictBoundaryResponseDto: {
+            slug: string;
+            boundary: {
+                /** @enum {string} */
+                type: "MultiPolygon";
+                coordinates: (number)[][][][];
             };
         };
         ValuationDto: {
@@ -1148,6 +1269,14 @@ export interface components {
     headers: never;
     pathItems: never;
 }
+export type AlternativesResponseDto = components['schemas']['AlternativesResponseDto'];
+export type ListingsPageDto = components['schemas']['ListingsPageDto'];
+export type ListingDetailDto = components['schemas']['ListingDetailDto'];
+export type CreateListingBodyDto = components['schemas']['CreateListingBodyDto'];
+export type UpdateListingBodyDto = components['schemas']['UpdateListingBodyDto'];
+export type ListingTransitionBodyDto = components['schemas']['ListingTransitionBodyDto'];
+export type BuildingDto = components['schemas']['BuildingDto'];
+export type CreateBuildingBodyDto = components['schemas']['CreateBuildingBodyDto'];
 export type RegisterBodyDto = components['schemas']['RegisterBodyDto'];
 export type AuthResponseDto = components['schemas']['AuthResponseDto'];
 export type LoginBodyDto = components['schemas']['LoginBodyDto'];
@@ -1159,13 +1288,6 @@ export type UpdateUserRoleBodyDto = components['schemas']['UpdateUserRoleBodyDto
 export type AdminUserDto = components['schemas']['AdminUserDto'];
 export type DistrictDto = components['schemas']['DistrictDto'];
 export type DistrictBoundaryResponseDto = components['schemas']['DistrictBoundaryResponseDto'];
-export type ListingsPageDto = components['schemas']['ListingsPageDto'];
-export type ListingDetailDto = components['schemas']['ListingDetailDto'];
-export type CreateListingBodyDto = components['schemas']['CreateListingBodyDto'];
-export type UpdateListingBodyDto = components['schemas']['UpdateListingBodyDto'];
-export type ListingTransitionBodyDto = components['schemas']['ListingTransitionBodyDto'];
-export type BuildingDto = components['schemas']['BuildingDto'];
-export type CreateBuildingBodyDto = components['schemas']['CreateBuildingBodyDto'];
 export type ValuationDto = components['schemas']['ValuationDto'];
 export type RecommendationRequestDto = components['schemas']['RecommendationRequestDto'];
 export type RecommendationResponseDto = components['schemas']['RecommendationResponseDto'];
@@ -1175,268 +1297,20 @@ export type HybridSearchBodyDto = components['schemas']['HybridSearchBodyDto'];
 export type HybridSearchResponseDto = components['schemas']['HybridSearchResponseDto'];
 export type $defs = Record<string, never>;
 export interface operations {
-    "Auth.register": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        requestBody: {
-            content: {
-                "application/json": components["schemas"]["RegisterBodyDto"];
-            };
-        };
-        responses: {
-            201: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["AuthResponseDto"];
-                };
-            };
-            /** @description Rate limit exceeded */
-            429: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content?: never;
-            };
-        };
-    };
-    "Auth.login": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        requestBody: {
-            content: {
-                "application/json": components["schemas"]["LoginBodyDto"];
-            };
-        };
-        responses: {
-            200: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["AuthResponseDto"];
-                };
-            };
-            /** @description Invalid credentials or disabled account */
-            401: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content?: never;
-            };
-            /** @description Rate limit exceeded */
-            429: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content?: never;
-            };
-        };
-    };
-    "Auth.refresh": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        requestBody?: never;
-        responses: {
-            200: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["AuthResponseDto"];
-                };
-            };
-            /** @description Missing, invalid, expired or replayed refresh token */
-            401: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content?: never;
-            };
-        };
-    };
-    "Auth.logout": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        requestBody?: never;
-        responses: {
-            204: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content?: never;
-            };
-        };
-    };
-    "Auth.logoutAll": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        requestBody?: never;
-        responses: {
-            204: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content?: never;
-            };
-        };
-    };
-    "Users.getMe": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        requestBody?: never;
-        responses: {
-            200: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["MeResponseDto"];
-                };
-            };
-        };
-    };
-    "Users.updateMe": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        requestBody: {
-            content: {
-                "application/json": components["schemas"]["UpdateMeBodyDto"];
-            };
-        };
-        responses: {
-            200: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["MeResponseDto"];
-                };
-            };
-        };
-    };
-    "Users.updatePreferences": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        requestBody: {
-            content: {
-                "application/json": components["schemas"]["PreferencesBodyDto"];
-            };
-        };
-        responses: {
-            200: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["MeResponseDto"];
-                };
-            };
-        };
-    };
-    "Users.listUsers": {
+    "Alternatives.forListing": {
         parameters: {
             query?: {
                 limit?: number;
-                cursor?: string;
-                role?: "USER" | "AGENT" | "MODERATOR" | "ADMIN";
-                search?: string;
+                anchorLat?: number;
+                anchorLon?: number;
+                locale?: "hy" | "ru" | "en";
             };
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        requestBody?: never;
-        responses: {
-            200: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["AdminUsersPageDto"];
-                };
-            };
-            /** @description Requires the ADMIN role */
-            403: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content?: never;
-            };
-        };
-    };
-    "Users.updateRole": {
-        parameters: {
-            query?: never;
             header?: never;
             path: {
                 id: string;
             };
             cookie?: never;
         };
-        requestBody: {
-            content: {
-                "application/json": components["schemas"]["UpdateUserRoleBodyDto"];
-            };
-        };
-        responses: {
-            200: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["AdminUserDto"];
-                };
-            };
-            /** @description Requires the ADMIN role */
-            403: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content?: never;
-            };
-        };
-    };
-    "Geo.listDistricts": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
         requestBody?: never;
         responses: {
             200: {
@@ -1444,31 +1318,10 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/json": components["schemas"]["DistrictDto"][];
+                    "application/json": components["schemas"]["AlternativesResponseDto"];
                 };
             };
-        };
-    };
-    "Geo.getBoundary": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path: {
-                slug: string;
-            };
-            cookie?: never;
-        };
-        requestBody?: never;
-        responses: {
-            200: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["DistrictBoundaryResponseDto"];
-                };
-            };
-            /** @description Unknown district slug */
+            /** @description Unknown, or not visible to the caller */
             404: {
                 headers: {
                     [name: string]: unknown;
@@ -1782,6 +1635,308 @@ export interface operations {
             };
             /** @description Coordinates fall outside every supported district */
             422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    "Auth.register": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["RegisterBodyDto"];
+            };
+        };
+        responses: {
+            201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["AuthResponseDto"];
+                };
+            };
+            /** @description Rate limit exceeded */
+            429: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    "Auth.login": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["LoginBodyDto"];
+            };
+        };
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["AuthResponseDto"];
+                };
+            };
+            /** @description Invalid credentials or disabled account */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Rate limit exceeded */
+            429: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    "Auth.refresh": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["AuthResponseDto"];
+                };
+            };
+            /** @description Missing, invalid, expired or replayed refresh token */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    "Auth.logout": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            204: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    "Auth.logoutAll": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            204: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    "Users.getMe": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["MeResponseDto"];
+                };
+            };
+        };
+    };
+    "Users.updateMe": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["UpdateMeBodyDto"];
+            };
+        };
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["MeResponseDto"];
+                };
+            };
+        };
+    };
+    "Users.updatePreferences": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["PreferencesBodyDto"];
+            };
+        };
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["MeResponseDto"];
+                };
+            };
+        };
+    };
+    "Users.listUsers": {
+        parameters: {
+            query?: {
+                limit?: number;
+                cursor?: string;
+                role?: "USER" | "AGENT" | "MODERATOR" | "ADMIN";
+                search?: string;
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["AdminUsersPageDto"];
+                };
+            };
+            /** @description Requires the ADMIN role */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    "Users.updateRole": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["UpdateUserRoleBodyDto"];
+            };
+        };
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["AdminUserDto"];
+                };
+            };
+            /** @description Requires the ADMIN role */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    "Geo.listDistricts": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["DistrictDto"][];
+                };
+            };
+        };
+    };
+    "Geo.getBoundary": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                slug: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["DistrictBoundaryResponseDto"];
+                };
+            };
+            /** @description Unknown district slug */
+            404: {
                 headers: {
                     [name: string]: unknown;
                 };
