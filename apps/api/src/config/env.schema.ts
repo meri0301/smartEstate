@@ -41,6 +41,37 @@ export const envSchema = z.object({
    * long for one. Two seconds is generous for a single tree ensemble.
    */
   ML_TIMEOUT_MS: z.coerce.number().int().min(100).max(30_000).default(2_000),
+
+  /** Optional. Without it the application runs, uncached. */
+  REDIS_URL: z.string().min(1).optional(),
+
+  /**
+   * Which language model backs the AI features. `rule-based` performs no network
+   * call and is the default, so a fresh checkout with no keys works completely.
+   */
+  LLM_PROVIDER: z.enum(['rule-based', 'gemini', 'ollama']).default('rule-based'),
+  /** Master switch, independent of the provider; only tests and incidents use it. */
+  LLM_ENABLED: booleanString.default(true),
+  /**
+   * Google AI Studio key. The project's rule is that billing is never enabled on
+   * that Google project, so the free tier's limits below are hard limits.
+   */
+  GEMINI_API_KEY: z.string().default(''),
+  /**
+   * Left unset, the model is chosen to suit the provider: a Flash model for
+   * Gemini, because that is what the free tier serves, and a small local one for
+   * Ollama. A single default would hand one provider the other's model name.
+   */
+  LLM_MODEL: z.string().min(1).optional(),
+  LLM_TIMEOUT_MS: z.coerce.number().int().min(500).max(60_000).default(8_000),
+  OLLAMA_BASE_URL: z.string().default('http://localhost:11434'),
+  /** A model on a laptop is slower than one in a data centre. */
+  OLLAMA_TIMEOUT_MS: z.coerce.number().int().min(500).max(120_000).default(30_000),
+  /** Free-tier allowances, counted in Redis and shared across API processes. */
+  LLM_REQUESTS_PER_MINUTE: z.coerce.number().int().min(1).max(1_000).default(10),
+  LLM_REQUESTS_PER_DAY: z.coerce.number().int().min(1).max(100_000).default(250),
+  /** Identical prompts are answered from cache for this long. */
+  LLM_CACHE_TTL_SECONDS: z.coerce.number().int().min(60).max(2_592_000).default(86_400),
 });
 
 export type Env = z.infer<typeof envSchema>;

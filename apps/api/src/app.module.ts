@@ -8,8 +8,10 @@ import { HttpExceptionFilter } from './common/filters/http-exception.filter.js';
 import { ZodValidationPipe } from './common/zod/zod-validation.pipe.js';
 import { APP_CONFIG, type AppConfig } from './config/app-config.js';
 import { ConfigModule } from './config/config.module.js';
+import { LlmModule } from './infrastructure/llm/llm.module.js';
 import { MlModule } from './infrastructure/ml/ml.module.js';
 import { PrismaModule } from './infrastructure/prisma/prisma.module.js';
+import { RedisModule } from './infrastructure/redis/redis.module.js';
 import { AdminModule } from './modules/admin/admin.module.js';
 import { AuthModule } from './modules/auth/auth.module.js';
 import { GeoModule } from './modules/geo/geo.module.js';
@@ -55,7 +57,9 @@ function loggerParams(config: AppConfig): Params {
     ConfigModule,
     LoggerModule.forRootAsync({ inject: [APP_CONFIG], useFactory: loggerParams }),
     PrismaModule,
+    RedisModule,
     MlModule,
+    LlmModule,
     AdminModule,
     AuthModule,
     UsersModule,

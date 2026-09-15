@@ -224,6 +224,35 @@ each listing with the arithmetic that put it there. See
   full ordering, and the response carries the session id. The ranking comparison that is the
   thesis's contribution reads those rows, so they are written from the first request.
 
+## Language model layer
+
+Everything in the application that talks to a language model goes through
+`LlmService.structured()`, which takes a schema **and a deterministic fallback** and always
+returns a value. There is no path through it that throws, and no way to call it without having
+written the non-model answer first. See [ADR-0012](docs/adr/0012-llm-provider-layer.md).
+
+| Provider     | What it is                                                   |
+| ------------ | ------------------------------------------------------------ |
+| `rule-based` | The default. No network call; every caller uses its fallback |
+| `gemini`     | Google AI Studio, free tier, Flash models                    |
+| `ollama`     | A model on the developer's own machine                       |
+
+`LLM_PROVIDER=rule-based` is not a degraded mode. The product is fully demonstrable with no key
+at all, and choosing a model changes the wording of some sentences, never a number.
+
+- **Five reasons an answer is the deterministic one**, each recorded separately so the thesis can
+  report how often the model was actually used: `no-provider`, `quota`, `error`, `invalid`,
+  `disabled`. A sixth, `cache`, means a previous model answer was reused.
+- **The free tier's limits are hard limits.** Minute and day allowances are counted in Redis and
+  shared across processes; exceeding either falls back rather than spending money, because billing
+  is never enabled on that Google project.
+- **Output is validated before use.** A model that answers with prose, or with the wrong types,
+  triggers the fallback. Nothing half-understood reaches a user.
+- **Every invocation is logged** with its prompt, model and raw response, and the trace is returned
+  to the caller so a feature with a record of its own can store it.
+- **Redis is optional.** Without it the layer works uncached, and quota counters that cannot be
+  kept let the call through rather than refusing work because a cache is down.
+
 ## ML service
 
 FastAPI on `http://localhost:8000`, started by `docker compose up`. It values listings and

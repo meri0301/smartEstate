@@ -43,6 +43,7 @@
     "@prisma/client": "7.10.0",
     "@smartestate/contracts": "workspace:*",
     "fastify": "5.12.1",
+    "ioredis": "6.0.0",
     "nestjs-pino": "5.1.0",
     "pg": "8.23.0",
     "pino": "10.3.1",
