@@ -3,6 +3,7 @@ import { createBrowserRouter, Navigate, useLocation, type RouteObject } from 're
 import { useSessionStore } from '../shared/api/session-store.js';
 import { detectLocale, withLocalePath } from '../shared/i18n/detect.js';
 import { AlternativesPage } from './routes/AlternativesPage.js';
+import { AppChrome } from './routes/AppChrome.js';
 import { HomePage } from './routes/HomePage.js';
 import { ListingDetailPage } from './routes/ListingDetailPage.js';
 import { ExperimentResultsPage } from './routes/ExperimentResultsPage.js';
@@ -37,15 +38,22 @@ export const routes: RouteObject[] = [
     path: '/:locale',
     element: <LocaleLayout />,
     children: [
+      // The landing page brings its own header, so it sits beside the app
+      // chrome rather than inside it.
       { index: true, element: <HomePage /> },
-      { path: 'listings', element: <SearchPage /> },
-      { path: 'listings/:idOrPublicId', element: <ListingDetailPage /> },
-      { path: 'listings/:idOrPublicId/alternatives', element: <AlternativesPage /> },
-      { path: 'mortgage', element: <MortgagePage /> },
-      { path: 'picks', element: <PicksPage /> },
-      { path: 'experiments', element: <ExperimentResultsPage /> },
-      { path: 'experiments/:key', element: <ExperimentResultsPage /> },
-      { path: '*', element: <NotFoundPage /> },
+      {
+        element: <AppChrome />,
+        children: [
+          { path: 'listings', element: <SearchPage /> },
+          { path: 'listings/:idOrPublicId', element: <ListingDetailPage /> },
+          { path: 'listings/:idOrPublicId/alternatives', element: <AlternativesPage /> },
+          { path: 'mortgage', element: <MortgagePage /> },
+          { path: 'picks', element: <PicksPage /> },
+          { path: 'experiments', element: <ExperimentResultsPage /> },
+          { path: 'experiments/:key', element: <ExperimentResultsPage /> },
+          { path: '*', element: <NotFoundPage /> },
+        ],
+      },
     ],
   },
   { path: '*', element: <LocaleRedirect /> },

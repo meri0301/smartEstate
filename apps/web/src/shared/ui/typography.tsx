@@ -7,8 +7,13 @@ import { cn } from './cn.js';
  * `transform` exists because uppercase is a poor default for user-generated
  * content such as a listing title, which may be a street name.
  */
-const headingStyles = cva('font-display text-text', {
+const headingStyles = cva('font-display', {
   variants: {
+    tone: {
+      default: 'text-text',
+      /** Ink for a heading sitting on the lime accent, which stays lime on dark. */
+      onAccent: 'text-on-accent',
+    },
     size: {
       sm: 'text-lg leading-none',
       md: 'text-xl leading-none',
@@ -20,7 +25,7 @@ const headingStyles = cva('font-display text-text', {
       none: 'normal-case',
     },
   },
-  defaultVariants: { size: 'md', transform: 'uppercase' },
+  defaultVariants: { tone: 'default', size: 'md', transform: 'uppercase' },
 });
 
 export interface HeadingProps
@@ -31,13 +36,14 @@ export interface HeadingProps
 
 export function Heading({
   as = 'h2',
+  tone,
   size,
   transform,
   className,
   ...props
 }: HeadingProps): JSX.Element {
   const Tag = as as ElementType;
-  return <Tag className={cn(headingStyles({ size, transform }), className)} {...props} />;
+  return <Tag className={cn(headingStyles({ tone, size, transform }), className)} {...props} />;
 }
 
 const textStyles = cva('font-body', {
@@ -53,6 +59,8 @@ const textStyles = cva('font-body', {
       strong: 'text-text',
       muted: 'text-text-muted',
       accent: 'text-text',
+      /** Ink for body copy sitting on the lime accent, which stays lime on dark. */
+      onAccent: 'text-on-accent',
       danger: 'text-danger',
       success: 'text-success',
     },

@@ -1,0 +1,26 @@
+{
+  "nav": {
+    "label": "Landing",
+    "howItWorks": "How it works",
+    "start": "Start"
+  },
+  "hero": {
+    "headline": "Get an AI-powered valuation in seconds.",
+    "cta": "Get Started"
+  },
+  "howItWorks": {
+    "title": "How it works",
+    "details": {
+      "title": "Add the property details",
+      "body": "Enter key information about the property, including price, location, size, and condition."
+    },
+    "analyse": {
+      "title": "Let AI analyze the market",
+      "body": "Our AI compares the property with real market data, similar homes, and pricing trends."
+    },
+    "recommend": {
+      "title": "Get a smart buying recommendation",
+      "body": "Get a simple, data-driven recommendation with insights on price fairness, risk level, and investment potential."
+    }
+  }
+}

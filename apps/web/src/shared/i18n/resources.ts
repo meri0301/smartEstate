@@ -5,6 +5,7 @@ import enMortgage from '../../locales/en/mortgage.json';
 import enPicks from '../../locales/en/picks.json';
 import enCommon from '../../locales/en/common.json';
 import enErrors from '../../locales/en/errors.json';
+import enHome from '../../locales/en/home.json';
 import enListings from '../../locales/en/listings.json';
 import enValuation from '../../locales/en/valuation.json';
 import hyAlternatives from '../../locales/hy/alternatives.json';
@@ -14,6 +15,7 @@ import hyMortgage from '../../locales/hy/mortgage.json';
 import hyPicks from '../../locales/hy/picks.json';
 import hyCommon from '../../locales/hy/common.json';
 import hyErrors from '../../locales/hy/errors.json';
+import hyHome from '../../locales/hy/home.json';
 import hyListings from '../../locales/hy/listings.json';
 import hyValuation from '../../locales/hy/valuation.json';
 import ruAlternatives from '../../locales/ru/alternatives.json';
@@ -23,6 +25,7 @@ import ruMortgage from '../../locales/ru/mortgage.json';
 import ruPicks from '../../locales/ru/picks.json';
 import ruCommon from '../../locales/ru/common.json';
 import ruErrors from '../../locales/ru/errors.json';
+import ruHome from '../../locales/ru/home.json';
 import ruListings from '../../locales/ru/listings.json';
 import ruValuation from '../../locales/ru/valuation.json';
 
@@ -37,6 +40,7 @@ import ruValuation from '../../locales/ru/valuation.json';
  */
 export const NAMESPACES = [
   'common',
+  'home',
   'listings',
   'valuation',
   'alternatives',
@@ -53,6 +57,7 @@ export const DEFAULT_NAMESPACE = 'common' satisfies Namespace;
 export const resources = {
   en: {
     common: enCommon,
+    home: enHome,
     listings: enListings,
     valuation: enValuation,
     alternatives: enAlternatives,
@@ -64,6 +69,7 @@ export const resources = {
   },
   hy: {
     common: hyCommon,
+    home: hyHome,
     listings: hyListings,
     valuation: hyValuation,
     alternatives: hyAlternatives,
@@ -75,6 +81,7 @@ export const resources = {
   },
   ru: {
     common: ruCommon,
+    home: ruHome,
     listings: ruListings,
     valuation: ruValuation,
     alternatives: ruAlternatives,

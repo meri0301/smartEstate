@@ -46,7 +46,7 @@ describe('locale routing', () => {
       expect(screen.getByText('Գնե՞լ այս բնակարանը, թե՞ ոչ')).toBeInTheDocument();
     });
     // Armenian plural selection is asserted in plurals.test.ts and on the search screen.
-    expect(screen.getByRole('link', { name: 'Վաճառվող բնակարաններ' })).toBeInTheDocument();
+    expect(screen.getAllByRole('link', { name: 'Սկսել' })).toHaveLength(2);
   });
 
   it('redirects a path with no locale to one that has it', async () => {
