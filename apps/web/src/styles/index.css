@@ -9,7 +9,9 @@
  *   3. The generated tokens, whose `@theme inline` block re-points Tailwind's
  *      utilities at the custom properties so they follow the active theme.
  *   4. The per-locale font selection, then the base element styles.
- *   5. MapLibre’s own stylesheet and the rules that bring its controls into
+ *   5. The disclosure animation, which needs real CSS: it transitions a
+ *      pseudo-element Tailwind has no variant for.
+ *   6. MapLibre’s own stylesheet and the rules that bring its controls into
  *      the design.
  */
 @import 'tailwindcss';
@@ -25,6 +27,7 @@
 @import '@smartestate/ui-tokens/tokens.css';
 @import '@smartestate/ui-tokens/fonts.css';
 @import '@smartestate/ui-tokens/base.css';
+@import './disclosure.css';
 
 @import 'maplibre-gl/dist/maplibre-gl.css';
 @import './map.css';

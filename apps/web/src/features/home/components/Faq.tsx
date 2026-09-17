@@ -116,7 +116,7 @@ function Entry({
   return (
     <details
       open={defaultOpen}
-      className="group rounded-sm bg-surface-muted px-6 py-4 [&::details-content]:duration-[var(--se-duration-fast)]"
+      className="se-disclosure group rounded-sm bg-surface-muted px-6 py-4"
     >
       <summary className="flex cursor-pointer list-none items-center justify-between gap-4 [&::-webkit-details-marker]:hidden">
         <Heading as="h3" size="sm" transform="none">
@@ -125,7 +125,12 @@ function Entry({
         {/*
           Drawn rather than lettered: a "+" and a "−" in the body face are
           different widths and different heights, so the control shifts as it
-          toggles. Two crossed lines, one of which is hidden when open, do not.
+          toggles. Two crossed lines do not.
+
+          Open turns the upright through a quarter turn onto the crossbar
+          instead of hiding it, so the plus becomes a minus by moving rather
+          than by disappearing — which is the same thing the panel below is
+          doing, and at the same speed.
         */}
         <span aria-hidden="true" className="shrink-0 text-text">
           <svg
@@ -137,7 +142,10 @@ function Entry({
             className="size-5"
           >
             <path d="M5 12h14" />
-            <path d="M12 5v14" className="group-open:hidden" />
+            <path
+              d="M12 5v14"
+              className="origin-center transition-transform duration-[var(--se-duration-base)] ease-standard [transform-box:fill-box] group-open:rotate-90"
+            />
           </svg>
         </span>
       </summary>

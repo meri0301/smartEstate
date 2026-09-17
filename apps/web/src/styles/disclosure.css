@@ -1,0 +1,48 @@
+/*
+ * Opening and closing a native disclosure.
+ *
+ * `<details>` snaps: the browser shows and hides its content in one frame, and
+ * a five-row FAQ built from it jumps the page around as a reader works through
+ * it. Animating that used to mean giving up the element and rebuilding it from
+ * a div, an onClick and four aria attributes, which costs keyboard support,
+ * correct announcement, and working before JavaScript has loaded.
+ *
+ * It no longer does. `::details-content` is the box the browser wraps around
+ * everything after the summary, and it can be transitioned — with two
+ * conditions.
+ *
+ * `interpolate-size: allow-keywords` is what permits a transition between `0`
+ * and `auto`; without it the height jumps and nothing else changes. It is set
+ * on the element rather than on `:root` because it inherits, and enabling
+ * keyword interpolation for the entire document to animate one accordion is a
+ * larger change than it looks.
+ *
+ * `content-visibility` has to be transitioned too, with `allow-discrete`. The
+ * browser sets it to `hidden` on a closed disclosure, and a property that flips
+ * at the start of the transition would hide the content for the whole of the
+ * closing animation, leaving a box that shrinks around nothing.
+ *
+ * Where `::details-content` is not supported the rules are ignored and the
+ * disclosure snaps as it does today, which is the failure worth having.
+ * Reduced motion is handled globally in the design system's base stylesheet.
+ */
+
+@layer components {
+  .se-disclosure {
+    interpolate-size: allow-keywords;
+  }
+
+  .se-disclosure::details-content {
+    block-size: 0;
+    /* `clip` rather than `hidden`: the content must not become scrollable
+       while it is mid-height. */
+    overflow: clip;
+    transition:
+      block-size var(--se-duration-base) var(--se-ease-standard),
+      content-visibility var(--se-duration-base) var(--se-ease-standard) allow-discrete;
+  }
+
+  .se-disclosure[open]::details-content {
+    block-size: auto;
+  }
+}
