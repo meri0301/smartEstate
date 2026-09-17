@@ -23,5 +23,25 @@
       "title": "Get a smart buying recommendation",
       "body": "Get a simple, data-driven recommendation with insights on price fairness, risk level, and investment potential."
     }
+  },
+  "why": {
+    "title": "Why SmartEstate",
+    "intro": "Built on a catalogue of Armenian listings and a model that shows its working, so you can judge an estimate rather than take it on trust.",
+    "comparison": {
+      "title": "Market-wide comparison",
+      "body": "Every estimate is set against the listings in the catalogue, so you can see where a property sits among the asking prices near it."
+    },
+    "model": {
+      "title": "AI-powered accuracy",
+      "body": "A gradient-boosted model weighs area, floor, building and district together, and names what moved each estimate rather than giving you only the number."
+    },
+    "risk": {
+      "title": "Risk assessment",
+      "body": "Every estimate says how much comparable data stands behind it and how wide the model’s range is, so a firm figure is never mistaken for a guess."
+    },
+    "investment": {
+      "title": "Investment insights",
+      "body": "Enter an expected rent to see the gross yield against the asking price, and what the mortgage income-tax refund would return over the term."
+    }
   }
 }
