@@ -1498,6 +1498,128 @@
         ]
       }
     },
+    "/api/reviews": {
+      "get": {
+        "description": "Author names are text somebody typed. Nothing has verified them, and no review is joined to an account.",
+        "operationId": "Reviews.list",
+        "parameters": [
+          {
+            "name": "limit",
+            "required": false,
+            "in": "query",
+            "schema": {
+              "minimum": 1,
+              "maximum": 50,
+              "default": 12,
+              "type": "integer"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ReviewListDto"
+                }
+              }
+            }
+          }
+        },
+        "summary": "Published reviews, newest first",
+        "tags": [
+          "reviews"
+        ]
+      },
+      "post": {
+        "description": "Open by product decision: no account is needed and the review is published on submission. Rate limited per address, because an endpoint that publishes immediately and asks for no credentials is otherwise an open channel to the front page.",
+        "operationId": "Reviews.create",
+        "parameters": [],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CreateReviewRequestDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ReviewDto"
+                }
+              }
+            }
+          }
+        },
+        "summary": "Write a review",
+        "tags": [
+          "reviews"
+        ]
+      }
+    },
+    "/api/reviews/stats": {
+      "get": {
+        "description": "Counts taken from the database, so the landing page can state a figure that can be checked rather than one that cannot.",
+        "operationId": "Reviews.stats",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProductStatsDto"
+                }
+              }
+            }
+          }
+        },
+        "summary": "What the product has actually done",
+        "tags": [
+          "reviews"
+        ]
+      }
+    },
+    "/api/reviews/{id}": {
+      "delete": {
+        "description": "Hides rather than deletes, so what was removed and who removed it survives in the audit log.",
+        "operationId": "Reviews.hide",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "format": "uuid",
+              "pattern": "^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}|00000000-0000-0000-0000-000000000000|ffffffff-ffff-ffff-ffff-ffffffffffff)$",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "204": {
+            "description": "Hidden"
+          },
+          "403": {
+            "description": "Moderators and administrators only"
+          },
+          "404": {
+            "description": "Unknown, or already hidden"
+          }
+        },
+        "summary": "Take a review off the page",
+        "tags": [
+          "reviews"
+        ]
+      }
+    },
     "/api/listings/{id}/valuation": {
       "get": {
         "description": "Every figure comes from the model or the database. A stored valuation is reused while the listing is unchanged, and served with isStale set when the model cannot be reached to refresh it.",
@@ -4779,6 +4901,179 @@
           "totalInterestAmd",
           "schedule",
           "calculatedAt"
+        ],
+        "additionalProperties": false
+      },
+      "ReviewListDto": {
+        "type": "object",
+        "properties": {
+          "items": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "id": {
+                  "type": "string",
+                  "format": "uuid",
+                  "pattern": "^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}|00000000-0000-0000-0000-000000000000|ffffffff-ffff-ffff-ffff-ffffffffffff)$"
+                },
+                "authorName": {
+                  "type": "string"
+                },
+                "authorRole": {
+                  "type": "string",
+                  "enum": [
+                    "HOMEBUYER",
+                    "INVESTOR",
+                    "PROPERTY_MANAGER",
+                    "AGENT",
+                    "OTHER"
+                  ]
+                },
+                "body": {
+                  "type": "string"
+                },
+                "locale": {
+                  "type": "string",
+                  "enum": [
+                    "hy",
+                    "ru",
+                    "en"
+                  ]
+                },
+                "createdAt": {
+                  "type": "string",
+                  "format": "date-time",
+                  "pattern": "^(?:(?:\\d\\d[2468][048]|\\d\\d[13579][26]|\\d\\d0[48]|[02468][048]00|[13579][26]00)-02-29|\\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\\d|30)|(?:02)-(?:0[1-9]|1\\d|2[0-8])))T(?:(?:[01]\\d|2[0-3]):[0-5]\\d:[0-5]\\d(?:\\.\\d+)?(?:Z|([+-](?:[01]\\d|2[0-3]):[0-5]\\d)))$"
+                }
+              },
+              "required": [
+                "id",
+                "authorName",
+                "authorRole",
+                "body",
+                "locale",
+                "createdAt"
+              ],
+              "additionalProperties": false
+            }
+          },
+          "total": {
+            "type": "integer",
+            "minimum": 0,
+            "maximum": 9007199254740991
+          }
+        },
+        "required": [
+          "items",
+          "total"
+        ],
+        "additionalProperties": false
+      },
+      "ProductStatsDto": {
+        "type": "object",
+        "properties": {
+          "valuationsCompleted": {
+            "type": "integer",
+            "minimum": 0,
+            "maximum": 9007199254740991
+          },
+          "listingsPublished": {
+            "type": "integer",
+            "minimum": 0,
+            "maximum": 9007199254740991
+          }
+        },
+        "required": [
+          "valuationsCompleted",
+          "listingsPublished"
+        ],
+        "additionalProperties": false
+      },
+      "CreateReviewRequestDto": {
+        "type": "object",
+        "properties": {
+          "authorName": {
+            "type": "string",
+            "minLength": 2,
+            "maxLength": 80
+          },
+          "authorRole": {
+            "type": "string",
+            "enum": [
+              "HOMEBUYER",
+              "INVESTOR",
+              "PROPERTY_MANAGER",
+              "AGENT",
+              "OTHER"
+            ]
+          },
+          "body": {
+            "type": "string",
+            "minLength": 20,
+            "maxLength": 600
+          },
+          "locale": {
+            "type": "string",
+            "enum": [
+              "hy",
+              "ru",
+              "en"
+            ]
+          }
+        },
+        "required": [
+          "authorName",
+          "authorRole",
+          "body",
+          "locale"
+        ]
+      },
+      "ReviewDto": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid",
+            "pattern": "^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}|00000000-0000-0000-0000-000000000000|ffffffff-ffff-ffff-ffff-ffffffffffff)$"
+          },
+          "authorName": {
+            "type": "string"
+          },
+          "authorRole": {
+            "type": "string",
+            "enum": [
+              "HOMEBUYER",
+              "INVESTOR",
+              "PROPERTY_MANAGER",
+              "AGENT",
+              "OTHER"
+            ]
+          },
+          "body": {
+            "type": "string"
+          },
+          "locale": {
+            "type": "string",
+            "enum": [
+              "hy",
+              "ru",
+              "en"
+            ]
+          },
+          "createdAt": {
+            "type": "string",
+            "format": "date-time",
+            "pattern": "^(?:(?:\\d\\d[2468][048]|\\d\\d[13579][26]|\\d\\d0[48]|[02468][048]00|[13579][26]00)-02-29|\\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\\d|30)|(?:02)-(?:0[1-9]|1\\d|2[0-8])))T(?:(?:[01]\\d|2[0-3]):[0-5]\\d:[0-5]\\d(?:\\.\\d+)?(?:Z|([+-](?:[01]\\d|2[0-3]):[0-5]\\d)))$"
+          }
+        },
+        "required": [
+          "id",
+          "authorName",
+          "authorRole",
+          "body",
+          "locale",
+          "createdAt"
         ],
         "additionalProperties": false
       },

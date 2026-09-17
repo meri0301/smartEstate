@@ -255,6 +255,17 @@ erDiagram
     uuid listing_id PK, FK
     int position
   }
+  reviews {
+    uuid id PK
+    string author_name
+    ReviewerRole author_role
+    string body
+    Locale locale
+    ReviewStatus status
+    timestamptz created_at
+    timestamptz hidden_at "nullable"
+    uuid hidden_by_id FK "nullable"
+  }
   audit_logs {
     uuid id PK
     uuid actor_id FK "nullable"
@@ -285,6 +296,7 @@ erDiagram
   users |o--o{ listings : "createdBy"
   users |o--o{ listings : "reviewedBy"
   users |o--o{ recommendation_sessions : "user"
+  users |o--o{ reviews : "hiddenBy"
   users |o--o{ user_interactions : "user"
   users ||--o{ comparisons : "user"
   users ||--o{ favorites : "user"

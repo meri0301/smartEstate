@@ -51,6 +51,26 @@ enum ListingStatus {
   ARCHIVED
 }
 
+/// Who a reviewer says they are. A fixed list rather than free text: the label
+/// is shown beside a name on the front page, it has to exist in three
+/// languages, and an unconstrained field is an invitation to claim a title
+/// nobody checked.
+enum ReviewerRole {
+  HOMEBUYER
+  INVESTOR
+  PROPERTY_MANAGER
+  AGENT
+  OTHER
+}
+
+/// Reviews are published on submission by product decision, so this exists to
+/// take one down rather than to let one up. Without it, removing an abusive
+/// review would mean a deletion with no record that anything was there.
+enum ReviewStatus {
+  PUBLISHED
+  HIDDEN
+}
+
 /// Yerevan building stock. Type has a large, well-known effect on price.
 enum BuildingType {
   STONE
@@ -156,6 +176,7 @@ model User {
   refreshTokens          RefreshToken[]
   listings               Listing[]               @relation("ListingCreatedBy")
   reviewedListings       Listing[]               @relation("ListingReviewedBy")
+  hiddenReviews          Review[]                @relation("ReviewHiddenBy")
   favorites              Favorite[]
   savedSearches          SavedSearch[]
   comparisons            Comparison[]
@@ -685,6 +706,34 @@ model ComparisonItem {
   @@id([comparisonId, listingId])
   @@unique([comparisonId, position])
   @@map("comparison_items")
+}
+
+// ---------------------------------------------------------------------------
+// Reviews
+// ---------------------------------------------------------------------------
+
+/// A review of the product, written from the landing page.
+///
+/// Unauthenticated by product decision: there is no author account, only the
+/// name someone typed, so nothing here should be read as a verified identity.
+/// The locale is stored because a review is prose that cannot be translated,
+/// and the interface marks the language it was written in.
+model Review {
+  id         String       @id @default(uuid(7)) @db.Uuid
+  authorName String       @map("author_name") @db.VarChar(80)
+  authorRole ReviewerRole @map("author_role")
+  body       String       @db.VarChar(600)
+  locale     Locale
+  status     ReviewStatus @default(PUBLISHED)
+  createdAt  DateTime     @default(now()) @map("created_at") @db.Timestamptz(3)
+  hiddenAt   DateTime?    @map("hidden_at") @db.Timestamptz(3)
+  hiddenById String?      @map("hidden_by_id") @db.Uuid
+
+  hiddenBy User? @relation("ReviewHiddenBy", fields: [hiddenById], references: [id], onDelete: SetNull)
+
+  /// The landing page reads the published ones, newest first.
+  @@index([status, createdAt(sort: Desc)])
+  @@map("reviews")
 }
 
 // ---------------------------------------------------------------------------

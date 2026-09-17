@@ -1,5 +1,6 @@
 import type { JSX } from 'react';
 import { Hero, HowItWorks, LandingHeader, WhySmartEstate } from '../../features/home/index.js';
+import { ReviewsSection } from '../../features/reviews/index.js';
 import { ValuationSection } from '../../features/valuation/index.js';
 
 /**
@@ -11,8 +12,7 @@ import { ValuationSection } from '../../features/valuation/index.js';
  * app shell provides that is not chrome — the locale, the toast region, the
  * skip link — still comes from `LocaleLayout` above it.
  *
- * The testimonials, the FAQ and the footer are the rest of the same frame and
- * arrive with their own data.
+ * The FAQ and the footer are the rest of the same frame.
  */
 export function HomePage(): JSX.Element {
   return (
@@ -23,6 +23,7 @@ export function HomePage(): JSX.Element {
         <HowItWorks />
         <ValuationSection />
         <WhySmartEstate />
+        <ReviewsSection />
       </main>
     </>
   );

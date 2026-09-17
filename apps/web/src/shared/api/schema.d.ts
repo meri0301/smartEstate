@@ -425,6 +425,70 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/api/reviews": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * Published reviews, newest first
+         * @description Author names are text somebody typed. Nothing has verified them, and no review is joined to an account.
+         */
+        get: operations["Reviews.list"];
+        put?: never;
+        /**
+         * Write a review
+         * @description Open by product decision: no account is needed and the review is published on submission. Rate limited per address, because an endpoint that publishes immediately and asks for no credentials is otherwise an open channel to the front page.
+         */
+        post: operations["Reviews.create"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/reviews/stats": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * What the product has actually done
+         * @description Counts taken from the database, so the landing page can state a figure that can be checked rather than one that cannot.
+         */
+        get: operations["Reviews.stats"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/reviews/{id}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        post?: never;
+        /**
+         * Take a review off the page
+         * @description Hides rather than deletes, so what was removed and who removed it survives in the audit log.
+         */
+        delete: operations["Reviews.hide"];
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/api/listings/{id}/valuation": {
         parameters: {
             query?: never;
@@ -1223,6 +1287,45 @@ export interface components {
             /** Format: date-time */
             calculatedAt: string;
         };
+        ReviewListDto: {
+            items: {
+                /** Format: uuid */
+                id: string;
+                authorName: string;
+                /** @enum {string} */
+                authorRole: "HOMEBUYER" | "INVESTOR" | "PROPERTY_MANAGER" | "AGENT" | "OTHER";
+                body: string;
+                /** @enum {string} */
+                locale: "hy" | "ru" | "en";
+                /** Format: date-time */
+                createdAt: string;
+            }[];
+            total: number;
+        };
+        ProductStatsDto: {
+            valuationsCompleted: number;
+            listingsPublished: number;
+        };
+        CreateReviewRequestDto: {
+            authorName: string;
+            /** @enum {string} */
+            authorRole: "HOMEBUYER" | "INVESTOR" | "PROPERTY_MANAGER" | "AGENT" | "OTHER";
+            body: string;
+            /** @enum {string} */
+            locale: "hy" | "ru" | "en";
+        };
+        ReviewDto: {
+            /** Format: uuid */
+            id: string;
+            authorName: string;
+            /** @enum {string} */
+            authorRole: "HOMEBUYER" | "INVESTOR" | "PROPERTY_MANAGER" | "AGENT" | "OTHER";
+            body: string;
+            /** @enum {string} */
+            locale: "hy" | "ru" | "en";
+            /** Format: date-time */
+            createdAt: string;
+        };
         ValuationDto: {
             /** Format: uuid */
             listingId: string;
@@ -1575,6 +1678,10 @@ export type DistrictDto = components['schemas']['DistrictDto'];
 export type DistrictBoundaryResponseDto = components['schemas']['DistrictBoundaryResponseDto'];
 export type MortgageRefundRequestDto = components['schemas']['MortgageRefundRequestDto'];
 export type MortgageRefundResponseDto = components['schemas']['MortgageRefundResponseDto'];
+export type ReviewListDto = components['schemas']['ReviewListDto'];
+export type ProductStatsDto = components['schemas']['ProductStatsDto'];
+export type CreateReviewRequestDto = components['schemas']['CreateReviewRequestDto'];
+export type ReviewDto = components['schemas']['ReviewDto'];
 export type ValuationDto = components['schemas']['ValuationDto'];
 export type ValuationQuoteRequestDto = components['schemas']['ValuationQuoteRequestDto'];
 export type ValuationQuoteDto = components['schemas']['ValuationQuoteDto'];
@@ -2337,6 +2444,103 @@ export interface operations {
                 };
             };
             /** @description Unknown district */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    "Reviews.list": {
+        parameters: {
+            query?: {
+                limit?: number;
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ReviewListDto"];
+                };
+            };
+        };
+    };
+    "Reviews.create": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["CreateReviewRequestDto"];
+            };
+        };
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ReviewDto"];
+                };
+            };
+        };
+    };
+    "Reviews.stats": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ProductStatsDto"];
+                };
+            };
+        };
+    };
+    "Reviews.hide": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Hidden */
+            204: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Moderators and administrators only */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Unknown, or already hidden */
             404: {
                 headers: {
                     [name: string]: unknown;

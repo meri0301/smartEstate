@@ -43,5 +43,43 @@
       "title": "Investment insights",
       "body": "Enter an expected rent to see the gross yield against the asking price, and what the mortgage income-tax refund would return over the term."
     }
+  },
+  "reviews": {
+    "title": "Trusted by buyers",
+    "intro": "Reviews written by people who used SmartEstate. Names are given by their authors and are not verified by us.",
+    "empty": "No reviews yet. If you have used SmartEstate, yours would be the first.",
+    "failed": "Reviews could not be loaded.",
+    "carousel": "Reviews",
+    "previous": "Previous reviews",
+    "next": "More reviews",
+    "role": {
+      "HOMEBUYER": "Homebuyer",
+      "INVESTOR": "Investor",
+      "PROPERTY_MANAGER": "Property manager",
+      "AGENT": "Estate agent",
+      "OTHER": "Used SmartEstate"
+    },
+    "stats": {
+      "listings": "{count, plural, one {# apartment} other {# apartments}} in the catalogue",
+      "valuations": "{count, plural, one {# valuation} other {# valuations}} completed"
+    },
+    "write": {
+      "open": "Write a review",
+      "title": "Write a review",
+      "intro": "It appears on this page straight away, so please write it as you would sign it.",
+      "name": "Your name",
+      "namePlaceholder": "How you want to be credited",
+      "role": "You are a",
+      "body": "Your review",
+      "bodyPlaceholder": "What did you use it for, and what did it tell you?",
+      "bodyHint": "Between {min} and {max} characters.",
+      "remaining": "{count} characters left",
+      "notice": "This is published publicly under the name you type, and we do not verify it. Do not include anything you would not put on a public page.",
+      "submit": "Publish my review",
+      "submitting": "Publishing…",
+      "cancel": "Cancel",
+      "failed": "The review could not be published.",
+      "thanks": "Thank you — your review is on the page."
+    }
   }
 }
