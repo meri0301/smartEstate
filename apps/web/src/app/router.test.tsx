@@ -144,3 +144,31 @@ describe('theme toggle', () => {
     expect(document.documentElement.hasAttribute('data-theme')).toBe(false);
   });
 });
+
+describe('header controls stay legible while taking less room', () => {
+  it('shows the abbreviated language and keeps the full one as the link’s name', async () => {
+    // The header cannot afford three languages spelled out. A reader using a
+    // screen reader must not pay for that.
+    renderAt('/en');
+
+    const armenian = await screen.findByRole('link', { name: 'Switch to Հայերեն' });
+    expect(armenian).toHaveTextContent('ՀԱՅ');
+    expect(armenian).toHaveAttribute('hreflang', 'hy');
+
+    expect(screen.getByRole('link', { name: 'Current language: English' })).toHaveTextContent(
+      'ENG',
+    );
+  });
+
+  it('draws the theme choices and keeps their names', async () => {
+    // "Match system" is three words in English and longer elsewhere. The glyph
+    // replaces the visible words, not the accessible name.
+    renderAt('/en');
+
+    for (const name of ['Light', 'Dark', 'Match system']) {
+      const radio = await screen.findByRole('radio', { name });
+      expect(radio.querySelector('svg')).not.toBeNull();
+      expect(radio.querySelector('.sr-only')).toHaveTextContent(name);
+    }
+  });
+});

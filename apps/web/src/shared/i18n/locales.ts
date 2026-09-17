@@ -6,6 +6,16 @@ export interface LocaleDescriptor {
   readonly locale: Locale;
   /** Name of the language written in that language, for the switcher. */
   readonly nativeName: string;
+  /**
+   * The same name abbreviated, in its own script.
+   *
+   * The switcher shows this and keeps the full name as the control's
+   * accessible name, so the header costs three short words instead of three
+   * long ones without a reader losing anything. Abbreviated in the language
+   * itself rather than to an ISO code, because "HY" is not a word anybody
+   * looking for Armenian recognises.
+   */
+  readonly shortName: string;
   /** BCP 47 tag passed to `Intl`; the region decides separators and date order. */
   readonly intlTag: string;
   readonly dir: 'ltr';
@@ -17,9 +27,9 @@ export interface LocaleDescriptor {
  * language every string is authored in first.
  */
 export const LOCALE_DESCRIPTORS: readonly LocaleDescriptor[] = [
-  { locale: 'hy', nativeName: 'Հայերեն', intlTag: 'hy-AM', dir: 'ltr' },
-  { locale: 'ru', nativeName: 'Русский', intlTag: 'ru-RU', dir: 'ltr' },
-  { locale: 'en', nativeName: 'English', intlTag: 'en-US', dir: 'ltr' },
+  { locale: 'hy', nativeName: 'Հայերեն', shortName: 'ՀԱՅ', intlTag: 'hy-AM', dir: 'ltr' },
+  { locale: 'ru', nativeName: 'Русский', shortName: 'РУС', intlTag: 'ru-RU', dir: 'ltr' },
+  { locale: 'en', nativeName: 'English', shortName: 'ENG', intlTag: 'en-US', dir: 'ltr' },
 ];
 
 const BY_LOCALE = new Map(LOCALE_DESCRIPTORS.map((entry) => [entry.locale, entry]));
