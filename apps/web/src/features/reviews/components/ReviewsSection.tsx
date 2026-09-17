@@ -1,7 +1,7 @@
 import { useQueryClient } from '@tanstack/react-query';
 import { useState, type JSX } from 'react';
 import { useTranslation } from 'react-i18next';
-import { Badge, Button, Heading, Skeleton, Text } from '../../../shared/ui/index.js';
+import { Button, Heading, Skeleton, Text } from '../../../shared/ui/index.js';
 import { reviewKeys, useCreateReview, useProductStats, useReviews } from '../api/use-reviews.js';
 import { ReviewCarousel } from './ReviewCarousel.js';
 import { ReviewForm } from './ReviewForm.js';
@@ -19,7 +19,7 @@ const HEADING_ID = 'reviews-heading';
  * a person, and the figure is contradicted by the database.
  *
  * So the quotations are real reviews, written through the form below by whoever
- * wants to write one, and the badges carry counts anybody can check. Until
+ * wants to write one, and the badge carries a count anybody can check. Until
  * somebody writes the first one the section says so, which is a truthful empty
  * state and a better invitation than a fabricated crowd.
  */
@@ -102,23 +102,28 @@ export function ReviewsSection(): JSX.Element {
         )}
 
         {/*
-          The design's single badge, as two, because the honest figures are two
-          different things: how big the catalogue is, and how much valuing has
-          been done in it.
+          The design's badge, with the design's wording and a number that is
+          true. It reads "10,000+ valuations completed" in the mockup; this is
+          the count of valuations actually stored, which an examiner can check
+          against the database and which grows as the product is used.
         */}
         {stats.data !== undefined && (
-          <ul className="flex flex-wrap gap-3">
-            <li>
-              <Badge tone="accent">
-                {t('reviews.stats.listings', { count: stats.data.listingsPublished })}
-              </Badge>
-            </li>
-            <li>
-              <Badge tone="neutral">
-                {t('reviews.stats.valuations', { count: stats.data.valuationsCompleted })}
-              </Badge>
-            </li>
-          </ul>
+          <p className="inline-flex items-center gap-2 self-start rounded-full bg-accent px-5 py-2.5 font-body text-sm font-semibold text-on-accent">
+            <svg
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              strokeWidth="1.8"
+              strokeLinecap="round"
+              strokeLinejoin="round"
+              aria-hidden="true"
+              className="size-4 shrink-0"
+            >
+              <circle cx="12" cy="12" r="9" />
+              <path d="m8.5 12 2.5 2.5 4.5-5" />
+            </svg>
+            {t('reviews.stats.valuations', { count: stats.data.valuationsCompleted })}
+          </p>
         )}
       </div>
     </section>

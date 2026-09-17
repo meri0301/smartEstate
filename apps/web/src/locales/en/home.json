@@ -61,7 +61,6 @@
       "OTHER": "Used SmartEstate"
     },
     "stats": {
-      "listings": "{count, plural, one {# apartment} other {# apartments}} in the catalogue",
       "valuations": "{count, plural, one {# valuation} other {# valuations}} completed"
     },
     "write": {

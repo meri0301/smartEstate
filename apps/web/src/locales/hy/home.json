@@ -61,7 +61,6 @@
       "OTHER": "Օգտվել է SmartEstate-ից"
     },
     "stats": {
-      "listings": "{count, plural, one {# բնակարան} other {# բնակարան}} կատալոգում",
       "valuations": "կատարված է {count, plural, one {# գնահատում} other {# գնահատում}}"
     },
     "write": {

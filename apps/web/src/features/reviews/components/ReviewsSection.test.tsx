@@ -194,10 +194,12 @@ describe('ReviewsSection', () => {
     expect(body).toHaveValue('It told me the estimate rested on thin data, which helped a lot.');
   });
 
-  it('states counts that can be checked, not a round number', async () => {
+  it('states a count that can be checked, not a round number', async () => {
+    // The design's badge reads '10,000+ valuations completed'. This is what the
+    // database actually holds.
     renderSection();
 
-    expect(await screen.findByText('340 apartments in the catalogue')).toBeInTheDocument();
-    expect(screen.getByText('12 valuations completed')).toBeInTheDocument();
+    expect(await screen.findByText('12 valuations completed')).toBeInTheDocument();
+    expect(screen.queryByText(/10,000/)).not.toBeInTheDocument();
   });
 });

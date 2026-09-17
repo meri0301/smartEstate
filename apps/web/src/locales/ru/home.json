@@ -61,7 +61,6 @@
       "OTHER": "Пользовался SmartEstate"
     },
     "stats": {
-      "listings": "{count, plural, one {# квартира} few {# квартиры} many {# квартир} other {# квартир}} в каталоге",
       "valuations": "выполнено {count, plural, one {# оценка} few {# оценки} many {# оценок} other {# оценок}}"
     },
     "write": {
