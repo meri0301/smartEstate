@@ -2,7 +2,8 @@
   "nav": {
     "label": "Landing",
     "howItWorks": "How it works",
-    "start": "Start"
+    "start": "Start",
+    "valuation": "Valuation"
   },
   "hero": {
     "headline": "Get an AI-powered valuation in seconds.",

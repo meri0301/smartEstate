@@ -445,6 +445,26 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/api/valuation/quote": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * What a property is worth, without it being a listing
+         * @description Values a property from its own details. Nothing is stored. Fields the reader leaves blank are filled from the district’s published stock and reported in assumptions, so no figure rests on a substitution the reader cannot see.
+         */
+        post: operations["Quote.quote"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/api/recommendations": {
         parameters: {
             query?: never;
@@ -1223,6 +1243,52 @@ export interface components {
             calculatedAt: string;
             isStale: boolean;
         };
+        ValuationQuoteRequestDto: {
+            districtSlug: string;
+            rooms: number;
+            totalArea: number;
+            floor: number;
+            totalFloors: number;
+            /** @enum {string} */
+            buildingType: "STONE" | "PANEL" | "MONOLITH" | "KHRUSHCHYOVKA" | "STALINKA" | "NEW_BUILD";
+            /** @enum {string} */
+            condition: "NEEDS_REPAIR" | "OLD_RENOVATION" | "GOOD" | "EURO_RENOVATION" | "DESIGNER";
+            askingPriceAmd: number;
+            constructionYear?: number;
+            /** @enum {string} */
+            heating?: "CENTRAL_GAS" | "INDIVIDUAL_GAS_BOILER" | "ELECTRIC" | "NONE";
+            hasElevator?: boolean;
+            hasParking?: boolean;
+            monthlyRentAmd?: number;
+            notes?: string;
+        };
+        ValuationQuoteDto: {
+            modelVersion: string;
+            fairPriceAmd: number;
+            lowerBoundAmd: number;
+            upperBoundAmd: number;
+            deviationPct: number;
+            /** @enum {string} */
+            verdict: "UNDERPRICED" | "FAIR" | "OVERPRICED";
+            factors: {
+                feature: string;
+                value: string | number | boolean | (null);
+                effect: number;
+                impactAmd: number;
+            }[];
+            comparableCount: number;
+            /** @enum {string} */
+            evidence: "THIN" | "MODERATE" | "STRONG";
+            confidence: number;
+            grossRentalYieldPct?: number;
+            assumptions: {
+                /** @enum {string} */
+                field: "constructionYear" | "heating" | "coordinates" | "interior";
+                value: string;
+            }[];
+            /** Format: date-time */
+            calculatedAt: string;
+        };
         RecommendationRequestDto: {
             preferences: {
                 budgetAmd: number;
@@ -1510,6 +1576,8 @@ export type DistrictBoundaryResponseDto = components['schemas']['DistrictBoundar
 export type MortgageRefundRequestDto = components['schemas']['MortgageRefundRequestDto'];
 export type MortgageRefundResponseDto = components['schemas']['MortgageRefundResponseDto'];
 export type ValuationDto = components['schemas']['ValuationDto'];
+export type ValuationQuoteRequestDto = components['schemas']['ValuationQuoteRequestDto'];
+export type ValuationQuoteDto = components['schemas']['ValuationQuoteDto'];
 export type RecommendationRequestDto = components['schemas']['RecommendationRequestDto'];
 export type RecommendationResponseDto = components['schemas']['RecommendationResponseDto'];
 export type ParseQueryBodyDto = components['schemas']['ParseQueryBodyDto'];
@@ -2304,6 +2372,43 @@ export interface operations {
                 content?: never;
             };
             /** @description No model is deployed and nothing has been valued before */
+            503: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    "Quote.quote": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["ValuationQuoteRequestDto"];
+            };
+        };
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ValuationQuoteDto"];
+                };
+            };
+            /** @description Unknown district, or details out of range */
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description No model is deployed */
             503: {
                 headers: {
                     [name: string]: unknown;

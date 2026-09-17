@@ -1,6 +1,7 @@
 import type { JSX } from 'react';
 import { useTranslation } from 'react-i18next';
 import { Heading } from '../../../shared/ui/index.js';
+import { VALUATION_ID } from '../../valuation/index.js';
 import { HERO_PHOTO, cssUrl } from '../assets.js';
 import { CtaLink } from './CtaLink.js';
 
@@ -54,8 +55,14 @@ export function Hero(): JSX.Element {
         style={{ backgroundImage: cssUrl(HERO_PHOTO) }}
       />
 
+      {/*
+        The hero's call to action goes to the calculator further down this page,
+        not into the catalogue: the design funnels a visitor towards valuing the
+        property they are already looking at. The header's "Start" is what leads
+        into the app itself.
+      */}
       <div className="mt-4 md:absolute md:bottom-0 md:end-0 md:mt-0 md:rounded-ss-md md:bg-bg md:ps-3 md:pt-3">
-        <CtaLink to="listings" size="lg" className="w-full md:w-[22rem]">
+        <CtaLink href={`#${VALUATION_ID}`} size="lg" className="w-full md:w-[22rem]">
           {t('home:hero.cta')}
         </CtaLink>
       </div>

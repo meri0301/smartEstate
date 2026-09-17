@@ -1538,6 +1538,45 @@
         ]
       }
     },
+    "/api/valuation/quote": {
+      "post": {
+        "description": "Values a property from its own details. Nothing is stored. Fields the reader leaves blank are filled from the district’s published stock and reported in assumptions, so no figure rests on a substitution the reader cannot see.",
+        "operationId": "Quote.quote",
+        "parameters": [],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ValuationQuoteRequestDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ValuationQuoteDto"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Unknown district, or details out of range"
+          },
+          "503": {
+            "description": "No model is deployed"
+          }
+        },
+        "summary": "What a property is worth, without it being a listing",
+        "tags": [
+          "valuation"
+        ]
+      }
+    },
     "/api/recommendations": {
       "post": {
         "description": "Hard limits filter the catalogue; the remainder are scored on each criterion and combined by the chosen method. Each result carries the criteria that placed it there, and a paragraph phrasing them when a model wrote one that quotes only the figures it was given. Every run is stored so rankings can be compared later.",
@@ -4844,6 +4883,245 @@
           "factors",
           "calculatedAt",
           "isStale"
+        ],
+        "additionalProperties": false
+      },
+      "ValuationQuoteRequestDto": {
+        "type": "object",
+        "properties": {
+          "districtSlug": {
+            "type": "string",
+            "pattern": "^[a-z][a-z0-9-]{1,40}$"
+          },
+          "rooms": {
+            "type": "integer",
+            "minimum": 1,
+            "maximum": 10
+          },
+          "totalArea": {
+            "type": "number",
+            "minimum": 5,
+            "exclusiveMinimum": true,
+            "maximum": 1000
+          },
+          "floor": {
+            "type": "integer",
+            "minimum": 1,
+            "maximum": 60
+          },
+          "totalFloors": {
+            "type": "integer",
+            "minimum": 1,
+            "maximum": 60
+          },
+          "buildingType": {
+            "type": "string",
+            "enum": [
+              "STONE",
+              "PANEL",
+              "MONOLITH",
+              "KHRUSHCHYOVKA",
+              "STALINKA",
+              "NEW_BUILD"
+            ]
+          },
+          "condition": {
+            "type": "string",
+            "enum": [
+              "NEEDS_REPAIR",
+              "OLD_RENOVATION",
+              "GOOD",
+              "EURO_RENOVATION",
+              "DESIGNER"
+            ]
+          },
+          "askingPriceAmd": {
+            "type": "integer",
+            "minimum": 0,
+            "maximum": 9007199254740991
+          },
+          "constructionYear": {
+            "type": "integer",
+            "minimum": 1850,
+            "maximum": 2100
+          },
+          "heating": {
+            "type": "string",
+            "enum": [
+              "CENTRAL_GAS",
+              "INDIVIDUAL_GAS_BOILER",
+              "ELECTRIC",
+              "NONE"
+            ]
+          },
+          "hasElevator": {
+            "type": "boolean"
+          },
+          "hasParking": {
+            "type": "boolean"
+          },
+          "monthlyRentAmd": {
+            "type": "integer",
+            "minimum": 0,
+            "maximum": 9007199254740991
+          },
+          "notes": {
+            "type": "string",
+            "maxLength": 1000
+          }
+        },
+        "required": [
+          "districtSlug",
+          "rooms",
+          "totalArea",
+          "floor",
+          "totalFloors",
+          "buildingType",
+          "condition",
+          "askingPriceAmd"
+        ]
+      },
+      "ValuationQuoteDto": {
+        "type": "object",
+        "properties": {
+          "modelVersion": {
+            "type": "string"
+          },
+          "fairPriceAmd": {
+            "type": "integer",
+            "minimum": 0,
+            "maximum": 9007199254740991
+          },
+          "lowerBoundAmd": {
+            "type": "integer",
+            "minimum": 0,
+            "maximum": 9007199254740991
+          },
+          "upperBoundAmd": {
+            "type": "integer",
+            "minimum": 0,
+            "maximum": 9007199254740991
+          },
+          "deviationPct": {
+            "type": "number"
+          },
+          "verdict": {
+            "type": "string",
+            "enum": [
+              "UNDERPRICED",
+              "FAIR",
+              "OVERPRICED"
+            ]
+          },
+          "factors": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "feature": {
+                  "type": "string"
+                },
+                "value": {
+                  "anyOf": [
+                    {
+                      "type": "string"
+                    },
+                    {
+                      "type": "number"
+                    },
+                    {
+                      "type": "boolean"
+                    },
+                    {
+                      "type": "string",
+                      "nullable": true,
+                      "enum": [
+                        null
+                      ]
+                    }
+                  ]
+                },
+                "effect": {
+                  "type": "number"
+                },
+                "impactAmd": {
+                  "type": "number"
+                }
+              },
+              "required": [
+                "feature",
+                "value",
+                "effect",
+                "impactAmd"
+              ],
+              "additionalProperties": false
+            }
+          },
+          "comparableCount": {
+            "type": "integer",
+            "minimum": 0,
+            "maximum": 9007199254740991
+          },
+          "evidence": {
+            "type": "string",
+            "enum": [
+              "THIN",
+              "MODERATE",
+              "STRONG"
+            ]
+          },
+          "confidence": {
+            "type": "number",
+            "minimum": 0,
+            "maximum": 1
+          },
+          "grossRentalYieldPct": {
+            "type": "number"
+          },
+          "assumptions": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "field": {
+                  "type": "string",
+                  "enum": [
+                    "constructionYear",
+                    "heating",
+                    "coordinates",
+                    "interior"
+                  ]
+                },
+                "value": {
+                  "type": "string"
+                }
+              },
+              "required": [
+                "field",
+                "value"
+              ],
+              "additionalProperties": false
+            }
+          },
+          "calculatedAt": {
+            "type": "string",
+            "format": "date-time",
+            "pattern": "^(?:(?:\\d\\d[2468][048]|\\d\\d[13579][26]|\\d\\d0[48]|[02468][048]00|[13579][26]00)-02-29|\\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\\d|30)|(?:02)-(?:0[1-9]|1\\d|2[0-8])))T(?:(?:[01]\\d|2[0-3]):[0-5]\\d:[0-5]\\d(?:\\.\\d+)?(?:Z|([+-](?:[01]\\d|2[0-3]):[0-5]\\d)))$"
+          }
+        },
+        "required": [
+          "modelVersion",
+          "fairPriceAmd",
+          "lowerBoundAmd",
+          "upperBoundAmd",
+          "deviationPct",
+          "verdict",
+          "factors",
+          "comparableCount",
+          "evidence",
+          "confidence",
+          "assumptions",
+          "calculatedAt"
         ],
         "additionalProperties": false
       },

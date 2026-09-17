@@ -1,5 +1,8 @@
 import { Module } from '@nestjs/common';
 import { ListingsModule } from '../listings/listings.module.js';
+import { QuoteController } from './quote.controller.js';
+import { QuoteRepository } from './quote.repository.js';
+import { QuoteService } from './quote.service.js';
 import { ValuationController } from './valuation.controller.js';
 import { ValuationRepository } from './valuation.repository.js';
 import { ValuationService } from './valuation.service.js';
@@ -10,8 +13,8 @@ import { ValuationService } from './valuation.service.js';
  */
 @Module({
   imports: [ListingsModule],
-  controllers: [ValuationController],
-  providers: [ValuationService, ValuationRepository],
-  exports: [ValuationService],
+  controllers: [ValuationController, QuoteController],
+  providers: [ValuationService, ValuationRepository, QuoteService, QuoteRepository],
+  exports: [ValuationService, QuoteService],
 })
 export class ValuationModule {}

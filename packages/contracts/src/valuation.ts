@@ -6,6 +6,8 @@
  * brief asks for, and keeping the shapes in one file makes it checkable.
  */
 import { z } from 'zod';
+import { buildingTypeSchema, conditionSchema, heatingTypeSchema } from './common/enums.js';
+import { districtSlugSchema } from './geo.js';
 import { amdAmountSchema, isoDateTimeSchema, uuidSchema } from './common/primitives.js';
 
 export const VALUATION_VERDICTS = ['UNDERPRICED', 'FAIR', 'OVERPRICED'] as const;
@@ -52,3 +54,99 @@ export const valuationSchema = z.object({
   isStale: z.boolean(),
 });
 export type Valuation = z.infer<typeof valuationSchema>;
+
+// ---------------------------------------------------------------------------
+// Valuing a property that is not a listing
+// ---------------------------------------------------------------------------
+
+/**
+ * What the landing page's calculator asks about a property.
+ *
+ * The model needs more than a reader will reliably know, so the fields it can
+ * manage without are optional and the answer says what was assumed in their
+ * place. Nothing here is a listing: this values a property someone is looking
+ * at, which is the question the product exists to answer.
+ */
+export const valuationQuoteRequestSchema = z
+  .object({
+    districtSlug: districtSlugSchema,
+    rooms: z.number().int().min(1).max(10),
+    totalArea: z.number().gt(5).lte(1000),
+    floor: z.number().int().min(1).max(60),
+    totalFloors: z.number().int().min(1).max(60),
+    buildingType: buildingTypeSchema,
+    condition: conditionSchema,
+    askingPriceAmd: amdAmountSchema.refine((value) => value > 0, 'Asking price is required'),
+
+    /** Optional: assumed from the district's housing stock when not given. */
+    constructionYear: z.number().int().min(1850).max(2100).optional(),
+    /** Optional: assumed from the district's housing stock when not given. */
+    heating: heatingTypeSchema.optional(),
+    hasElevator: z.boolean().optional(),
+    hasParking: z.boolean().optional(),
+
+    /** Optional: only used to report a gross yield, never fed to the model. */
+    monthlyRentAmd: amdAmountSchema.optional(),
+    /** Free text from the reader. Never reaches the model; it is not a feature. */
+    notes: z.string().max(1_000).optional(),
+  })
+  .refine((value) => value.floor <= value.totalFloors, {
+    message: 'Floor cannot be above the top of the building',
+    path: ['floor'],
+  });
+export type ValuationQuoteRequest = z.infer<typeof valuationQuoteRequestSchema>;
+
+/** A field the reader left blank, and what was used instead. */
+export const ASSUMED_FIELDS = ['constructionYear', 'heating', 'coordinates', 'interior'] as const;
+export const assumedFieldSchema = z.enum(ASSUMED_FIELDS);
+export type AssumedField = z.infer<typeof assumedFieldSchema>;
+
+export const valuationAssumptionSchema = z.object({
+  field: assumedFieldSchema,
+  /** What was used, for display: "1975", "CENTRAL_GAS", "Kentron". */
+  value: z.string(),
+});
+export type ValuationAssumption = z.infer<typeof valuationAssumptionSchema>;
+
+/**
+ * How much of the catalogue stands behind the estimate.
+ *
+ * The bands are counts of comparable listings, not a judgement about the
+ * property: `THIN` means the model is extrapolating from few neighbours and the
+ * figure deserves less weight, whatever it says.
+ */
+export const EVIDENCE_LEVELS = ['THIN', 'MODERATE', 'STRONG'] as const;
+export const evidenceLevelSchema = z.enum(EVIDENCE_LEVELS);
+export type EvidenceLevel = z.infer<typeof evidenceLevelSchema>;
+
+export const valuationQuoteSchema = z.object({
+  modelVersion: z.string(),
+  fairPriceAmd: amdAmountSchema,
+  lowerBoundAmd: amdAmountSchema,
+  upperBoundAmd: amdAmountSchema,
+  /** Asking price against the estimate, as a percentage: 12 means 12% above it. */
+  deviationPct: z.number(),
+  verdict: valuationVerdictSchema,
+  /** Ordered by how much they moved the estimate, largest first. */
+  factors: z.array(valuationFactorSchema),
+
+  /** Listings in the catalogue close enough to stand behind the estimate. */
+  comparableCount: z.number().int().min(0),
+  evidence: evidenceLevelSchema,
+  /**
+   * How tight the model's range is, from 0 to 1.
+   *
+   * `1 − (upper − lower) / estimate`, floored at zero: a range of ±10% around
+   * the estimate is 0.8, and a range as wide as the estimate itself is 0. It is
+   * a property of the interval and nothing else — in particular it is not a
+   * probability, and says nothing about whether the asking price is sensible.
+   */
+  confidence: z.number().min(0).max(1),
+
+  /** Annual rent over the asking price, when a rent was given. */
+  grossRentalYieldPct: z.number().optional(),
+  /** Every field the reader left blank, and what stood in for it. */
+  assumptions: z.array(valuationAssumptionSchema),
+  calculatedAt: isoDateTimeSchema,
+});
+export type ValuationQuote = z.infer<typeof valuationQuoteSchema>;

@@ -43,5 +43,73 @@
     "condition": "Condition group",
     "heating": "Heating",
     "ownership_docs": "Documents"
+  },
+  "quote": {
+    "title": "Start your valuation",
+    "intro": "Enter the home details and get a quick AI-based analysis.",
+    "form": {
+      "legend": "Property details",
+      "district": "Location",
+      "districtPlaceholder": "Choose a district",
+      "rooms": "Rooms",
+      "totalArea": "Area, m²",
+      "totalAreaPlaceholder": "e.g. 85",
+      "askingPrice": "Asking price, AMD",
+      "askingPricePlaceholder": "e.g. 45000000",
+      "condition": "Condition",
+      "buildingType": "Construction type",
+      "constructionYear": "Year built",
+      "constructionYearPlaceholder": "Leave blank if unsure",
+      "heating": "Heating",
+      "floor": "Floor",
+      "floorPlaceholder": "e.g. 4",
+      "totalFloors": "Floors in the building",
+      "totalFloorsPlaceholder": "e.g. 9",
+      "elevator": "Lift",
+      "parking": "Parking",
+      "monthlyRent": "Estimated rent, AMD a month (optional)",
+      "monthlyRentPlaceholder": "e.g. 300000",
+      "notes": "Anything else worth mentioning",
+      "notesPlaceholder": "View, noise, recent repairs, how long it has been listed…",
+      "notesHint": "Kept for your own notes. It is not sent to the model, which reads numbers and categories only.",
+      "select": "Select",
+      "unknown": "Not sure",
+      "yes": "Yes",
+      "no": "No",
+      "submit": "Get my verdict",
+      "example": "Try an example",
+      "submitting": "Working it out…"
+    },
+    "result": {
+      "title": "Your verdict",
+      "intro": "Based on what you enter, on the left.",
+      "empty": "Fill in the details and the verdict appears here.",
+      "fairValue": "Estimated fair value",
+      "marketPosition": "Market position",
+      "above": "About {percent} above comparable listings nearby",
+      "below": "About {percent} below comparable listings nearby",
+      "level": "About the same as comparable listings nearby",
+      "evidenceLabel": "Evidence — {level}",
+      "evidence": {
+        "THIN": "thin comparable data",
+        "MODERATE": "some comparable data",
+        "STRONG": "plenty of comparable data"
+      },
+      "evidenceCount": "{count, plural, one {# comparable listing} other {# comparable listings}} in this district at this size",
+      "confidence": "Confidence",
+      "confidenceHint": "How tight the model’s range is. It is not a probability, and it says nothing about whether the asking price is sensible.",
+      "yield": "Gross rental yield",
+      "yieldValue": "{percent} a year before costs",
+      "assumptionsTitle": "What was assumed",
+      "assumed": {
+        "constructionYear": "Year built taken as {value}, the district median",
+        "heating": "Heating taken as {value}, the commonest in this district",
+        "coordinates": "Placed at the centre of the district, since no address was given",
+        "interior": "Ceiling height, room sizes and balconies taken from the district’s typical flat"
+      },
+      "reasonsTitle": "What moved the estimate",
+      "restart": "Start a new valuation",
+      "failed": "The valuation could not be worked out."
+    }
   }
 }

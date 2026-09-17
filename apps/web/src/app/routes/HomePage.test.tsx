@@ -50,15 +50,28 @@ describe('HomePage', () => {
     expect(screen.getByRole('radiogroup', { name: 'Theme' })).toBeInTheDocument();
   });
 
-  it('sends both calls to action into the catalogue', async () => {
+  it('sends the hero to the calculator and the header into the app', async () => {
+    // The design funnels a visitor towards valuing the property in front of
+    // them; the catalogue has to stay reachable from somewhere, and that is
+    // what the header's Start is for.
     renderAt('/en');
 
     await screen.findByRole('heading', { level: 1 });
     expect(screen.getByRole('link', { name: 'Start' })).toHaveAttribute('href', '/en/listings');
-    expect(screen.getByRole('link', { name: 'Get Started' })).toHaveAttribute(
+    expect(screen.getByRole('link', { name: 'Get Started' })).toHaveAttribute('href', '#valuation');
+  });
+
+  it('links the nav only to sections that exist', async () => {
+    renderAt('/en');
+
+    await screen.findByRole('heading', { level: 1 });
+    expect(screen.getByRole('link', { name: 'How it works' })).toHaveAttribute(
       'href',
-      '/en/listings',
+      '#how-it-works',
     );
+    expect(screen.getByRole('link', { name: 'Valuation' })).toHaveAttribute('href', '#valuation');
+    // The FAQ waits for its section rather than pointing at nothing.
+    expect(screen.queryByRole('link', { name: 'FAQ' })).not.toBeInTheDocument();
   });
 
   it('names the three steps in the order they are performed', async () => {
