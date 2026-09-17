@@ -1,5 +1,13 @@
 import type { JSX } from 'react';
-import { Faq, Hero, HowItWorks, LandingHeader, WhySmartEstate } from '../../features/home/index.js';
+import {
+  CallToAction,
+  Faq,
+  Hero,
+  HowItWorks,
+  LandingFooter,
+  LandingHeader,
+  WhySmartEstate,
+} from '../../features/home/index.js';
 import { ReviewsSection } from '../../features/reviews/index.js';
 import { ValuationSection } from '../../features/valuation/index.js';
 
@@ -12,7 +20,7 @@ import { ValuationSection } from '../../features/valuation/index.js';
  * app shell provides that is not chrome — the locale, the toast region, the
  * skip link — still comes from `LocaleLayout` above it.
  *
- * The closing call to action and the footer are the rest of the same frame.
+ * Every section of the design frame is now here.
  */
 export function HomePage(): JSX.Element {
   return (
@@ -25,7 +33,9 @@ export function HomePage(): JSX.Element {
         <WhySmartEstate />
         <ReviewsSection />
         <Faq />
+        <CallToAction />
       </main>
+      <LandingFooter />
     </>
   );
 }

@@ -63,21 +63,35 @@ describe('HomePage', () => {
 
   it('links the nav only to sections that exist', async () => {
     renderAt('/en');
-
     await screen.findByRole('heading', { level: 1 });
-    expect(screen.getByRole('link', { name: 'How it works' })).toHaveAttribute(
+
+    // Scoped to the header: the footer repeats these names by design, and an
+    // unscoped lookup would match both.
+    const nav = within(screen.getByRole('banner')).getByRole('navigation', { name: 'Landing' });
+    expect(within(nav).getByRole('link', { name: 'How it works' })).toHaveAttribute(
       'href',
       '#how-it-works',
     );
-    expect(screen.getByRole('link', { name: 'Valuation' })).toHaveAttribute('href', '#valuation');
-    expect(screen.getByRole('link', { name: 'FAQ' })).toHaveAttribute('href', '#faq');
+    expect(within(nav).getByRole('link', { name: 'Valuation' })).toHaveAttribute(
+      'href',
+      '#valuation',
+    );
+    expect(within(nav).getByRole('link', { name: 'FAQ' })).toHaveAttribute('href', '#faq');
+  });
 
-    // Every nav link points at a section that is actually on the page.
-    for (const link of screen.getAllByRole('link')) {
-      const href = link.getAttribute('href') ?? '';
-      if (href.startsWith('#')) {
-        expect(document.querySelector(href), href).not.toBeNull();
-      }
+  it('never points a link at a section that is not on the page', async () => {
+    // Header and footer both anchor into this page, so one sweep covers both.
+    renderAt('/en');
+    await screen.findByRole('heading', { level: 1 });
+
+    const anchors = screen
+      .getAllByRole('link')
+      .map((link) => link.getAttribute('href') ?? '')
+      .filter((href) => href.startsWith('#'));
+
+    expect(anchors.length).toBeGreaterThan(0);
+    for (const href of anchors) {
+      expect(document.querySelector(href), href).not.toBeNull();
     }
   });
 
@@ -97,9 +111,13 @@ describe('HomePage', () => {
 
   it('jumps to the steps from the header', async () => {
     renderAt('/en');
+    await screen.findByRole('heading', { level: 1 });
 
-    const link = await screen.findByRole('link', { name: 'How it works' });
-    expect(link).toHaveAttribute('href', '#how-it-works');
+    const nav = within(screen.getByRole('banner')).getByRole('navigation', { name: 'Landing' });
+    expect(within(nav).getByRole('link', { name: 'How it works' })).toHaveAttribute(
+      'href',
+      '#how-it-works',
+    );
   });
 
   it('switches language without leaving the page', async () => {

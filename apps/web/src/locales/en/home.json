@@ -108,5 +108,24 @@
       "question": "Do I need an account?",
       "answer": "No. The valuation, the catalogue, the comparisons, the mortgage refund and writing a review all work without signing in. An account exists for people who list a property, which is a different job."
     }
+  },
+  "cta": {
+    "title": "Ready to see your property's value?",
+    "body": "Get an AI-based valuation in seconds. It is free, there is nothing to buy, and you do not need an account.",
+    "action": "Start Valuation"
+  },
+  "footer": {
+    "label": "Site",
+    "tagline": "SmartEstate weighs an asking price against the Armenian apartment market with a model that shows its working, so you can judge the estimate rather than take it on trust.",
+    "product": "Product",
+    "links": {
+      "howItWorks": "How it works",
+      "valuation": "Valuation",
+      "features": "Why SmartEstate",
+      "faq": "FAQ",
+      "listings": "Browse listings"
+    },
+    "copyright": "© {year} SmartEstate",
+    "project": "A university thesis project, not a commercial service. Every estimate is a statistical guess, and none of it is financial advice."
   }
 }
