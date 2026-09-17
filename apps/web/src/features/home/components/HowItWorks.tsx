@@ -1,7 +1,7 @@
 import type { JSX } from 'react';
 import { useTranslation } from 'react-i18next';
 import { Heading, Text, cn } from '../../../shared/ui/index.js';
-import { STEP_ARTWORK, backgroundImage } from '../assets.js';
+import { STEP_ARTWORK, cssUrl } from '../assets.js';
 import { HOW_IT_WORKS_ID } from './LandingHeader.js';
 
 /** Names the section for assistive technology, so it is reachable as a region. */
@@ -10,7 +10,7 @@ const HEADING_ID = 'how-it-works-heading';
 interface StepProps {
   title: string;
   body: string;
-  artwork: string;
+  artwork: (typeof STEP_ARTWORK)[keyof typeof STEP_ARTWORK];
   /** The lime card needs its own ink, because the accent stays lime on dark. */
   tone: 'muted' | 'accent';
   className?: string;
@@ -87,10 +87,26 @@ function Step({ title, body, artwork, tone, className }: StepProps): JSX.Element
       <Text size="sm" tone={onAccent ? 'onAccent' : 'default'}>
         {body}
       </Text>
+      {/*
+        The drawing is a mask filled with the card's ink rather than an image,
+        so it is the colour of the text beside it in either theme. Drawn as an
+        image it would stay the black it was exported in and all but vanish on
+        the dark surface.
+      */}
       <div
         aria-hidden="true"
-        className="mt-auto h-32 w-full bg-contain bg-bottom bg-no-repeat md:h-44"
-        style={{ backgroundImage: backgroundImage(artwork) }}
+        className={cn('mt-auto w-full', onAccent ? 'bg-on-accent' : 'bg-text')}
+        style={{
+          aspectRatio: artwork.aspectRatio,
+          maskImage: cssUrl(artwork.src),
+          maskRepeat: 'no-repeat',
+          maskPosition: 'bottom',
+          maskSize: 'contain',
+          WebkitMaskImage: cssUrl(artwork.src),
+          WebkitMaskRepeat: 'no-repeat',
+          WebkitMaskPosition: 'bottom',
+          WebkitMaskSize: 'contain',
+        }}
       />
     </article>
   );

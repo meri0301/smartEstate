@@ -1,7 +1,7 @@
 import type { JSX } from 'react';
 import { useTranslation } from 'react-i18next';
 import { Heading } from '../../../shared/ui/index.js';
-import { HERO_PHOTO, backgroundImage } from '../assets.js';
+import { HERO_PHOTO, cssUrl } from '../assets.js';
 import { CtaLink } from './CtaLink.js';
 
 /**
@@ -50,8 +50,8 @@ export function Hero(): JSX.Element {
 
       <div
         aria-hidden="true"
-        className="mt-4 aspect-[4/3] w-full rounded-md rounded-tr-lg bg-surface-muted bg-cover bg-center md:mt-0 md:aspect-[1120/596]"
-        style={{ backgroundImage: backgroundImage(HERO_PHOTO) }}
+        className="mt-4 aspect-[4/3] w-full rounded-md rounded-tr-lg bg-surface-muted bg-cover bg-center md:mt-0 md:aspect-[1120/628]"
+        style={{ backgroundImage: cssUrl(HERO_PHOTO) }}
       />
 
       <div className="mt-4 md:absolute md:bottom-0 md:end-0 md:mt-0 md:rounded-ss-md md:bg-bg md:ps-3 md:pt-3">
