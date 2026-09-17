@@ -175,9 +175,10 @@ describe('ReviewsSection', () => {
     expect(screen.queryByRole('button', { name: 'Publish my review' })).not.toBeInTheDocument();
   });
 
-  it('keeps what was written when publishing fails', async () => {
-    // A rate limit is the likeliest failure here, and losing the text to it
-    // would be the rudest possible way to report one.
+  it('names the rate limit rather than failing vaguely, and keeps what was written', async () => {
+    // The budget is keyed on the address, which a dev proxy and an office
+    // connection both share, so this is the likeliest refusal by far. Losing
+    // the text to it would be the rudest possible way to report one.
     state.createStatus = 429;
     renderSection();
 
@@ -187,7 +188,9 @@ describe('ReviewsSection', () => {
     await userEvent.type(body, 'It told me the estimate rested on thin data, which helped a lot.');
     await userEvent.click(screen.getByRole('button', { name: 'Publish my review' }));
 
-    expect(await screen.findByText('The review could not be published.')).toBeInTheDocument();
+    expect(
+      await screen.findByText('You have published a few reviews already. Please try again later.'),
+    ).toBeInTheDocument();
     expect(body).toHaveValue('It told me the estimate rested on thin data, which helped a lot.');
   });
 

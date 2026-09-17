@@ -79,7 +79,8 @@
       "submitting": "Publishing…",
       "cancel": "Cancel",
       "failed": "The review could not be published.",
-      "thanks": "Thank you — your review is on the page."
+      "thanks": "Thank you — your review is on the page.",
+      "rateLimited": "You have published a few reviews already. Please try again later."
     }
   }
 }

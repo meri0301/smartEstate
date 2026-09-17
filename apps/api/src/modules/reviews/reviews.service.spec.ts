@@ -3,6 +3,7 @@ import type { CreateReviewRequest, Review } from '@smartestate/contracts';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 import type { AuthenticatedUser } from '../../common/auth/authenticated-user.js';
 import type { AuditService } from '../admin/audit.service.js';
+import { DEFAULT_REVIEWS_PER_HOUR, reviewsPerHour } from './review.rate-limit.js';
 import { ReviewsService } from './reviews.service.js';
 import type { ReviewsRepository } from './reviews.repository.js';
 import type { StatsRepository } from './stats.repository.js';
@@ -92,5 +93,23 @@ describe('ReviewsService', () => {
       NotFoundException,
     );
     expect(already.audit.record).not.toHaveBeenCalled();
+  });
+});
+
+describe('reviewsPerHour', () => {
+  it('defaults when nothing is set', () => {
+    expect(reviewsPerHour(undefined)).toBe(DEFAULT_REVIEWS_PER_HOUR);
+  });
+
+  it('takes a positive whole number from the environment', () => {
+    expect(reviewsPerHour('40')).toBe(40);
+  });
+
+  it('ignores anything that would remove the limit rather than raise it', () => {
+    // A misconfigured value must not silently become "unlimited" on a route
+    // that needs no credentials and publishes straight to the front page.
+    for (const value of ['0', '-5', 'lots', '', '2.5']) {
+      expect(reviewsPerHour(value), value).toBe(DEFAULT_REVIEWS_PER_HOUR);
+    }
   });
 });

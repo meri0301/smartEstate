@@ -33,6 +33,16 @@ export function ReviewsSection(): JSX.Element {
 
   const justPublished = create.isSuccess && !isWriting;
 
+  /*
+    A refusal has to say which refusal it was. The likeliest one here by far is
+    the rate limit — the budget is keyed on the address, and behind a dev proxy
+    or an office connection that is shared — and "it could not be published"
+    leaves someone retrying a button that cannot work yet.
+  */
+  const failure = create.isError
+    ? t(create.error.statusCode === 429 ? 'reviews.write.rateLimited' : 'reviews.write.failed')
+    : undefined;
+
   return (
     <section id={REVIEWS_ID} aria-labelledby={HEADING_ID} className="mt-16 scroll-mt-8 md:mt-20">
       <div className="flex max-w-2xl flex-col gap-2">
@@ -63,7 +73,7 @@ export function ReviewsSection(): JSX.Element {
         {isWriting ? (
           <ReviewForm
             isSubmitting={create.isPending}
-            error={create.isError ? t('reviews.write.failed') : undefined}
+            error={failure}
             onCancel={() => {
               setWriting(false);
               create.reset();
