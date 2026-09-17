@@ -100,11 +100,27 @@ const embeddingModelSchema = z.object({
 });
 export type MlEmbeddingModel = z.infer<typeof embeddingModelSchema>;
 
+/** One cross-validation scheme's score for the model itself. */
+const foldMetricsSchema = z.object({
+  model: z.object({ mape: z.number(), r2: z.number() }),
+  intervalCoverageCalibrated: z.number(),
+});
+
 const modelInfoSchema = z.object({
   modelVersion: z.string().min(1),
   trainedAt: z.string(),
   trainingRows: z.number().int(),
+  districts: z.array(z.string()).default([]),
+  target: z.string().default(''),
+  /**
+   * Both validation schemes. The random one holds out listings; the grouped one
+   * holds out whole districts, which is the harder and more honest question —
+   * it asks what happens somewhere the model has never been.
+   */
+  metrics: z.object({ random: foldMetricsSchema, grouped: foldMetricsSchema }).optional(),
 });
+
+export type MlModelInfo = z.infer<typeof modelInfoSchema>;
 
 /** The ML service could not be reached, or answered with something unusable. */
 export class MlUnavailableError extends DomainError {
@@ -142,6 +158,15 @@ export class MlClient {
     const info = modelInfoSchema.parse(await this.request('GET', '/model'));
     this.cachedVersion = { value: info.modelVersion, expiresAt: now + MODEL_VERSION_TTL_MS };
     return info.modelVersion;
+  }
+
+  /** Everything the model service knows about what is loaded, metrics included. */
+  async modelInfo(): Promise<MlModelInfo> {
+    const parsed = modelInfoSchema.safeParse(await this.request('GET', '/model'));
+    if (!parsed.success) {
+      throw new MlUnavailableError('it answered /model with an unexpected shape');
+    }
+    return parsed.data;
   }
 
   /** Value one listing and ask why. `askingPriceAmd` adds the deviation and the verdict. */

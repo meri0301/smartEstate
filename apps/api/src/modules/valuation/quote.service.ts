@@ -17,6 +17,7 @@ import type {
   ValuationAssumption,
   ValuationFactor,
   ValuationQuote,
+  ModelAccuracy,
   ValuationQuoteRequest,
 } from '@smartestate/contracts';
 import type { MlListingFeatures } from '../../infrastructure/ml/ml.client.js';
@@ -55,6 +56,21 @@ export class QuoteService {
     private readonly quotes: QuoteRepository,
     private readonly ml: MlClient,
   ) {}
+
+  /** What the model measured about itself, for the question the FAQ asks. */
+  async accuracy(): Promise<ModelAccuracy> {
+    const info = await this.ml.modelInfo();
+    return {
+      modelVersion: info.modelVersion,
+      trainedAt: info.trainedAt,
+      trainingRows: info.trainingRows,
+      districtsCovered: info.districts.length,
+      target: info.target,
+      withinKnownDistrictsMape: info.metrics?.random.model.mape,
+      unseenDistrictMape: info.metrics?.grouped.model.mape,
+      intervalCoverage: info.metrics?.grouped.intervalCoverageCalibrated,
+    };
+  }
 
   async quote(request: ValuationQuoteRequest): Promise<ValuationQuote> {
     const stock = await this.quotes.districtStock(request.districtSlug);

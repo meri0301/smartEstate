@@ -1,4 +1,5 @@
 export { CtaLink, type CtaLinkProps } from './components/CtaLink.js';
+export { FAQ_ID, Faq } from './components/Faq.js';
 export { Hero } from './components/Hero.js';
 export { HowItWorks } from './components/HowItWorks.js';
 export { HOW_IT_WORKS_ID, LandingHeader } from './components/LandingHeader.js';

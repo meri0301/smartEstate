@@ -1,4 +1,4 @@
-import { Body, Controller, Post } from '@nestjs/common';
+import { Body, Controller, Get, Post } from '@nestjs/common';
 import {
   ApiBadRequestResponse,
   ApiOkResponse,
@@ -6,9 +6,9 @@ import {
   ApiServiceUnavailableResponse,
   ApiTags,
 } from '@nestjs/swagger';
-import type { ValuationQuote } from '@smartestate/contracts';
+import type { ModelAccuracy, ValuationQuote } from '@smartestate/contracts';
 import { Public } from '../../common/auth/decorators.js';
-import { ValuationQuoteRequestDto, ValuationQuoteDto } from './valuation.dto.js';
+import { ModelAccuracyDto, ValuationQuoteRequestDto, ValuationQuoteDto } from './valuation.dto.js';
 import { QuoteService } from './quote.service.js';
 
 @ApiTags('valuation')
@@ -28,5 +28,18 @@ export class QuoteController {
   @ApiServiceUnavailableResponse({ description: 'No model is deployed' })
   quote(@Body() body: ValuationQuoteRequestDto): Promise<ValuationQuote> {
     return this.quotes.quote(body);
+  }
+
+  @Public()
+  @Get('model')
+  @ApiOperation({
+    summary: 'What the model measured about itself',
+    description:
+      'The cross-validation the model reports, so a published accuracy figure is the one it actually scored rather than a number typed into the copy that goes stale on the next retrain. Two error figures: one holding out listings, one holding out whole districts.',
+  })
+  @ApiOkResponse({ type: ModelAccuracyDto })
+  @ApiServiceUnavailableResponse({ description: 'No model is deployed' })
+  accuracy(): Promise<ModelAccuracy> {
+    return this.quotes.accuracy();
   }
 }

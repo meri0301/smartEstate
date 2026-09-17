@@ -3,7 +3,8 @@
     "label": "Landing",
     "howItWorks": "How it works",
     "start": "Start",
-    "valuation": "Valuation"
+    "valuation": "Valuation",
+    "faq": "FAQ"
   },
   "hero": {
     "headline": "Get an AI-powered valuation in seconds.",
@@ -81,6 +82,32 @@
       "failed": "The review could not be published.",
       "thanks": "Thank you — your review is on the page.",
       "rateLimited": "You have published a few reviews already. Please try again later."
+    }
+  },
+  "faq": {
+    "title": "Frequently asked questions",
+    "accuracy": {
+      "question": "How accurate is the AI?",
+      "measured": "Measured by cross-validation, the typical error is {known} in a district the model has seen before and {unseen} in one it has not. About {coverage} of held-out properties fell inside the range it reported. Those figures come from the model itself, not from this page.",
+      "unmeasured": "The model reports its own cross-validation, and that report is not reachable at the moment. Every estimate carries the range it came with, which is the part worth reading.",
+      "caveat": "Against asking prices, not sale prices: the catalogue holds what sellers ask, and no record of what anyone paid. Nothing here can tell you what a property sold for.",
+      "trained": "Trained on {rows} listings across {districts} districts, version {version}."
+    },
+    "data": {
+      "question": "What data does it use?",
+      "answer": "A catalogue of Armenian apartment listings, with the floor area, rooms, floor, building type and year, district, condition and heating of each. Nothing is scraped from a live source. Where you leave a field blank, the median of the district’s own published stock stands in, and the verdict tells you which."
+    },
+    "free": {
+      "question": "Is it free?",
+      "answer": "Yes, and there is nothing to buy. This is a university project rather than a business: there is no payment of any kind anywhere in it, and no plan for one."
+    },
+    "speed": {
+      "question": "How long does it take?",
+      "answer": "A few seconds. The model runs locally beside the application rather than behind an external service, so a valuation is a round trip on the same machine."
+    },
+    "account": {
+      "question": "Do I need an account?",
+      "answer": "No. The valuation, the catalogue, the comparisons, the mortgage refund and writing a review all work without signing in. An account exists for people who list a property, which is a different job."
     }
   }
 }

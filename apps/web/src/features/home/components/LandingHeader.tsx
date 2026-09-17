@@ -4,6 +4,7 @@ import { Link } from 'react-router';
 import { LanguageSwitcher } from '../../locale/index.js';
 import { ThemeToggle } from '../../theme/index.js';
 import { VALUATION_ID } from '../../valuation/index.js';
+import { FAQ_ID } from './Faq.js';
 import { CtaLink } from './CtaLink.js';
 
 /** Anchor target for the header's "How it works" link. */
@@ -34,10 +35,7 @@ export function LandingHeader(): JSX.Element {
       </Link>
 
       <div className="flex flex-wrap items-center gap-x-6 gap-y-4 md:ms-auto">
-        {/*
-          Only sections that exist are linked. The design's FAQ entry waits for
-          its section, because an anchor to nothing is worse than an absence.
-        */}
+        {/* Only sections that exist are linked. */}
         <nav
           aria-label={t('home:nav.label')}
           className="flex flex-wrap items-center gap-x-6 gap-y-2"
@@ -53,6 +51,12 @@ export function LandingHeader(): JSX.Element {
             className="font-body text-base text-text-secondary hover:text-text"
           >
             {t('home:nav.valuation')}
+          </a>
+          <a
+            href={`#${FAQ_ID}`}
+            className="font-body text-base text-text-secondary hover:text-text"
+          >
+            {t('home:nav.faq')}
           </a>
         </nav>
         <ThemeToggle />

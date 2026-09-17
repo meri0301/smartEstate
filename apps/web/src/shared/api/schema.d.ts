@@ -529,6 +529,26 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/api/valuation/model": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * What the model measured about itself
+         * @description The cross-validation the model reports, so a published accuracy figure is the one it actually scored rather than a number typed into the copy that goes stale on the next retrain. Two error figures: one holding out listings, one holding out whole districts.
+         */
+        get: operations["Quote.accuracy"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/api/recommendations": {
         parameters: {
             query?: never;
@@ -1392,6 +1412,16 @@ export interface components {
             /** Format: date-time */
             calculatedAt: string;
         };
+        ModelAccuracyDto: {
+            modelVersion: string;
+            trainedAt: string;
+            trainingRows: number;
+            districtsCovered: number;
+            target: string;
+            withinKnownDistrictsMape?: number;
+            unseenDistrictMape?: number;
+            intervalCoverage?: number;
+        };
         RecommendationRequestDto: {
             preferences: {
                 budgetAmd: number;
@@ -1685,6 +1715,7 @@ export type ReviewDto = components['schemas']['ReviewDto'];
 export type ValuationDto = components['schemas']['ValuationDto'];
 export type ValuationQuoteRequestDto = components['schemas']['ValuationQuoteRequestDto'];
 export type ValuationQuoteDto = components['schemas']['ValuationQuoteDto'];
+export type ModelAccuracyDto = components['schemas']['ModelAccuracyDto'];
 export type RecommendationRequestDto = components['schemas']['RecommendationRequestDto'];
 export type RecommendationResponseDto = components['schemas']['RecommendationResponseDto'];
 export type ParseQueryBodyDto = components['schemas']['ParseQueryBodyDto'];
@@ -2611,6 +2642,32 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content?: never;
+            };
+            /** @description No model is deployed */
+            503: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    "Quote.accuracy": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ModelAccuracyDto"];
+                };
             };
             /** @description No model is deployed */
             503: {

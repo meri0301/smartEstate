@@ -1699,6 +1699,32 @@
         ]
       }
     },
+    "/api/valuation/model": {
+      "get": {
+        "description": "The cross-validation the model reports, so a published accuracy figure is the one it actually scored rather than a number typed into the copy that goes stale on the next retrain. Two error figures: one holding out listings, one holding out whole districts.",
+        "operationId": "Quote.accuracy",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ModelAccuracyDto"
+                }
+              }
+            }
+          },
+          "503": {
+            "description": "No model is deployed"
+          }
+        },
+        "summary": "What the model measured about itself",
+        "tags": [
+          "valuation"
+        ]
+      }
+    },
     "/api/recommendations": {
       "post": {
         "description": "Hard limits filter the catalogue; the remainder are scored on each criterion and combined by the chosen method. Each result carries the criteria that placed it there, and a paragraph phrasing them when a model wrote one that quotes only the figures it was given. Every run is stored so rankings can be compared later.",
@@ -5417,6 +5443,47 @@
           "confidence",
           "assumptions",
           "calculatedAt"
+        ],
+        "additionalProperties": false
+      },
+      "ModelAccuracyDto": {
+        "type": "object",
+        "properties": {
+          "modelVersion": {
+            "type": "string"
+          },
+          "trainedAt": {
+            "type": "string"
+          },
+          "trainingRows": {
+            "type": "integer",
+            "minimum": 0,
+            "maximum": 9007199254740991
+          },
+          "districtsCovered": {
+            "type": "integer",
+            "minimum": 0,
+            "maximum": 9007199254740991
+          },
+          "target": {
+            "type": "string"
+          },
+          "withinKnownDistrictsMape": {
+            "type": "number"
+          },
+          "unseenDistrictMape": {
+            "type": "number"
+          },
+          "intervalCoverage": {
+            "type": "number"
+          }
+        },
+        "required": [
+          "modelVersion",
+          "trainedAt",
+          "trainingRows",
+          "districtsCovered",
+          "target"
         ],
         "additionalProperties": false
       },

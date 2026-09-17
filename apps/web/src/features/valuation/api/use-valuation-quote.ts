@@ -1,5 +1,10 @@
-import { useMutation, type UseMutationResult } from '@tanstack/react-query';
-import type { ValuationQuote, ValuationQuoteRequest } from '@smartestate/contracts';
+import {
+  useMutation,
+  useQuery,
+  type UseMutationResult,
+  type UseQueryResult,
+} from '@tanstack/react-query';
+import type { ModelAccuracy, ValuationQuote, ValuationQuoteRequest } from '@smartestate/contracts';
 import type { ApiError } from '../../../shared/api/api-error.js';
 import { api } from '../../../shared/api/client.js';
 import { apiRequest } from '../../../shared/api/request.js';
@@ -21,5 +26,21 @@ export function useValuationQuote(): UseMutationResult<
     mutationFn: (body: ValuationQuoteRequest) =>
       apiRequest(() => api.POST('/api/valuation/quote', { body })),
     retry: false,
+  });
+}
+
+/**
+ * What the model measured about itself.
+ *
+ * Read rather than written into the copy, so a published accuracy figure cannot
+ * survive the retrain that invalidates it. A failure is not a failure of the
+ * page: the FAQ answers without the numbers when they cannot be fetched.
+ */
+export function useModelAccuracy(): UseQueryResult<ModelAccuracy, ApiError> {
+  return useQuery({
+    queryKey: ['valuation', 'model'],
+    queryFn: () => apiRequest(() => api.GET('/api/valuation/model')),
+    retry: false,
+    staleTime: 60 * 60 * 1000,
   });
 }

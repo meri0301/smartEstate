@@ -1,4 +1,5 @@
 import {
+  modelAccuracySchema,
   valuationQuoteRequestSchema,
   valuationQuoteSchema,
   valuationSchema,
@@ -17,5 +18,10 @@ export class ValuationQuoteRequestDto extends createZodDto(valuationQuoteRequest
 
 export class ValuationQuoteDto extends createZodDto(valuationQuoteSchema, {
   name: 'ValuationQuoteDto',
+  io: 'output',
+}) {}
+
+export class ModelAccuracyDto extends createZodDto(modelAccuracySchema, {
+  name: 'ModelAccuracyDto',
   io: 'output',
 }) {}

@@ -150,3 +150,41 @@ export const valuationQuoteSchema = z.object({
   calculatedAt: isoDateTimeSchema,
 });
 export type ValuationQuote = z.infer<typeof valuationQuoteSchema>;
+
+// ---------------------------------------------------------------------------
+// How well the model actually does
+// ---------------------------------------------------------------------------
+
+/**
+ * The model's own cross-validation, published.
+ *
+ * The landing page's FAQ asks how accurate the estimates are, and the only
+ * defensible answer is the one the model measured about itself. Hard-coding a
+ * figure into the copy would make it a claim that silently went stale the next
+ * time anything was retrained.
+ *
+ * Two error figures, because there are two questions. `withinKnownDistrictsMape`
+ * holds out individual listings, which is the everyday case: somewhere the model
+ * has seen before. `unseenDistrictMape` holds out a whole district, which asks
+ * what happens somewhere it has never been. The second is always worse and is
+ * the one worth quoting when someone asks whether to trust it.
+ */
+export const modelAccuracySchema = z.object({
+  modelVersion: z.string(),
+  trainedAt: z.string(),
+  trainingRows: z.number().int().min(0),
+  districtsCovered: z.number().int().min(0),
+  /**
+   * What the model was trained to predict. It is a price per square metre taken
+   * from asking prices: the catalogue holds no sale prices, so no claim about
+   * sale prices can be made from it.
+   */
+  target: z.string(),
+  /** Mean absolute percentage error, holding out listings. Absent if unmeasured. */
+  withinKnownDistrictsMape: z.number().optional(),
+  /** The same, holding out a whole district. Absent if unmeasured. */
+  unseenDistrictMape: z.number().optional(),
+  /** Share of held-out listings whose true price fell inside the reported range. */
+  intervalCoverage: z.number().optional(),
+});
+export type ModelAccuracy = z.infer<typeof modelAccuracySchema>;

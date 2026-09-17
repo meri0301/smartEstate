@@ -70,8 +70,15 @@ describe('HomePage', () => {
       '#how-it-works',
     );
     expect(screen.getByRole('link', { name: 'Valuation' })).toHaveAttribute('href', '#valuation');
-    // The FAQ waits for its section rather than pointing at nothing.
-    expect(screen.queryByRole('link', { name: 'FAQ' })).not.toBeInTheDocument();
+    expect(screen.getByRole('link', { name: 'FAQ' })).toHaveAttribute('href', '#faq');
+
+    // Every nav link points at a section that is actually on the page.
+    for (const link of screen.getAllByRole('link')) {
+      const href = link.getAttribute('href') ?? '';
+      if (href.startsWith('#')) {
+        expect(document.querySelector(href), href).not.toBeNull();
+      }
+    }
   });
 
   it('names the three steps in the order they are performed', async () => {
