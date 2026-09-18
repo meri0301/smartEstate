@@ -53,7 +53,8 @@ WHERE l.status = 'PUBLISHED'
 ORDER BY l.public_id
 """
 
-#: Columns a row must carry for the feature pipeline and the target to work.
+#: Columns that must be present and carry a value in every row. Without any one
+#: of them there is no target to learn or no listing to attach it to.
 REQUIRED_COLUMNS: Final[tuple[str, ...]] = (
     "public_id",
     "price_amd",
@@ -61,14 +62,38 @@ REQUIRED_COLUMNS: Final[tuple[str, ...]] = (
     "rooms",
     "floor",
     "total_floors",
-    "construction_year",
     "condition",
-    "heating",
     "building_type",
-    "ownership_docs",
     "district_slug",
+)
+
+#: Columns the feature pipeline uses when they are there and treats as missing
+#: when they are not.
+#:
+#: Construction year, coordinates and heating were required until the 2021
+#: Yerevan scrape arrived: it records none of them, and requiring a column that
+#: a real dataset does not have would have meant inventing values to satisfy a
+#: check. The pipeline already reads an absent column as NaN, which LightGBM
+#: handles as "not observed" rather than as zero, so the honest move was to stop
+#: demanding them. `report_coverage` then says out loud which features a given
+#: training run actually had — a feature that is absent everywhere contributes
+#: nothing, and that belongs in the log rather than in a footnote.
+OPTIONAL_COLUMNS: Final[tuple[str, ...]] = (
+    "construction_year",
     "lat",
     "lon",
+    "heating",
+    "ownership_docs",
+    "living_area",
+    "kitchen_area",
+    "ceiling_height",
+    "bathrooms",
+    "balcony_count",
+    "has_loggia",
+    "has_parking",
+    "has_storage",
+    "has_elevator",
+    "seismic_retrofit",
 )
 
 _NUMERIC_CSV_COLUMNS: Final[frozenset[str]] = frozenset(
@@ -150,6 +175,12 @@ def validate(rows: list[dict[str, Any]], minimum_rows: int = 50) -> None:
     missing = [name for name in REQUIRED_COLUMNS if name not in rows[0]]
     if missing:
         raise DatasetError(f"dataset is missing the columns {', '.join(missing)}")
+    # Present is not the same as populated. A column of empty strings satisfies
+    # a key check and teaches the model nothing, which is exactly the failure
+    # this guard is for.
+    empty = [name for name in REQUIRED_COLUMNS if all(row.get(name) in (None, "") for row in rows)]
+    if empty:
+        raise DatasetError(f"dataset has no values in the columns {', '.join(empty)}")
     without_price = sum(1 for row in rows if not row.get("price_amd"))
     if without_price:
         raise DatasetError(f"{without_price} listings have no price and cannot be trained on")
@@ -213,3 +244,30 @@ def _coerce(row: dict[str, Any]) -> dict[str, Any]:
         else:
             out[key] = value
     return out
+
+
+def coverage(rows: list[dict[str, Any]]) -> dict[str, float]:
+    """
+    Share of rows carrying a value, per optional column.
+
+    A model is only as good as what it was shown, and "was this feature in the
+    training set at all" is the first question to ask of a reported accuracy.
+    """
+    total = len(rows)
+    if total == 0:
+        return {}
+    return {
+        name: sum(1 for row in rows if row.get(name) not in (None, "")) / total
+        for name in OPTIONAL_COLUMNS
+    }
+
+
+def report_coverage(rows: list[dict[str, Any]]) -> str:
+    """One line naming the optional features this dataset does not have."""
+    absent = sorted(name for name, share in coverage(rows).items() if share == 0.0)
+    if not absent:
+        return "every optional feature is present in the training set"
+    return (
+        f"{len(absent)} optional feature(s) absent from every row and therefore "
+        f"unused: {', '.join(absent)}"
+    )

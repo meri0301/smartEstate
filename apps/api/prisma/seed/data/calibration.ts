@@ -1,10 +1,21 @@
 /**
  * Market calibration for the synthetic dataset.
  *
- * ASSUMPTION (documented for the thesis): the medians below approximate 2025
- * asking prices per m² observed on public Armenian listing portals, rounded to
- * the nearest 10 000 AMD. They are synthetic-data parameters, not measured
- * statistics, and no live source is scraped. Building-type mixes reflect the
+ * The twelve Yerevan medians below are **measured**, not assumed: they are the
+ * median asking price per m² of the 7 037 real listings in
+ * `apps/ml/data/yerevan-2021`, collected in May 2021 and converted at the CBA
+ * average of 503.8 AMD/USD. They replaced estimates of 2025 prices, which had
+ * been the honest option while the only data was generated.
+ *
+ * Two consequences follow, and both are deliberate. The catalogue now describes
+ * 2021, which is the year the model was trained on — a catalogue and a model
+ * that disagreed about the era would make every listing read as mispriced. And
+ * the three towns outside Yerevan are not in the scrape, so they keep estimated
+ * medians, scaled by the median ratio between the measured Yerevan figures and
+ * the estimates they replaced (0.728); they are still assumptions and are the
+ * only ones left here.
+ *
+ * Building-type mixes reflect the
  * dominant housing stock of each district (Soviet panel estates in Nor Nork and
  * Ajapnyak, tuff-stone and Stalin-era blocks in Kentron and Arabkir, new
  * monolith construction concentrated in the centre and Arabkir).
@@ -40,7 +51,7 @@ export const DISTRICT_CALIBRATION: readonly DistrictCalibration[] = [
   {
     slug: 'kentron',
     listingCount: 45,
-    medianPricePerSqmAmd: 1_150_000,
+    medianPricePerSqmAmd: 795_000,
     priceNoiseSigma: 0.14,
     buildingTypeMix: [
       ['STONE', 40],
@@ -54,7 +65,7 @@ export const DISTRICT_CALIBRATION: readonly DistrictCalibration[] = [
   {
     slug: 'arabkir',
     listingCount: 40,
-    medianPricePerSqmAmd: 900_000,
+    medianPricePerSqmAmd: 584_000,
     priceNoiseSigma: 0.12,
     buildingTypeMix: [
       ['STONE', 45],
@@ -68,7 +79,7 @@ export const DISTRICT_CALIBRATION: readonly DistrictCalibration[] = [
   {
     slug: 'kanaker-zeytun',
     listingCount: 25,
-    medianPricePerSqmAmd: 720_000,
+    medianPricePerSqmAmd: 462_000,
     priceNoiseSigma: 0.12,
     buildingTypeMix: [
       ['STONE', 40],
@@ -81,7 +92,7 @@ export const DISTRICT_CALIBRATION: readonly DistrictCalibration[] = [
   {
     slug: 'davtashen',
     listingCount: 20,
-    medianPricePerSqmAmd: 700_000,
+    medianPricePerSqmAmd: 491_000,
     priceNoiseSigma: 0.11,
     buildingTypeMix: [
       ['PANEL', 45],
@@ -93,7 +104,7 @@ export const DISTRICT_CALIBRATION: readonly DistrictCalibration[] = [
   {
     slug: 'ajapnyak',
     listingCount: 30,
-    medianPricePerSqmAmd: 620_000,
+    medianPricePerSqmAmd: 443_000,
     priceNoiseSigma: 0.11,
     buildingTypeMix: [
       ['PANEL', 45],
@@ -106,7 +117,7 @@ export const DISTRICT_CALIBRATION: readonly DistrictCalibration[] = [
   {
     slug: 'avan',
     listingCount: 15,
-    medianPricePerSqmAmd: 600_000,
+    medianPricePerSqmAmd: 435_000,
     priceNoiseSigma: 0.11,
     buildingTypeMix: [
       ['PANEL', 40],
@@ -119,7 +130,7 @@ export const DISTRICT_CALIBRATION: readonly DistrictCalibration[] = [
   {
     slug: 'nor-nork',
     listingCount: 35,
-    medianPricePerSqmAmd: 560_000,
+    medianPricePerSqmAmd: 420_000,
     priceNoiseSigma: 0.1,
     buildingTypeMix: [
       ['PANEL', 55],
@@ -132,7 +143,7 @@ export const DISTRICT_CALIBRATION: readonly DistrictCalibration[] = [
   {
     slug: 'malatia-sebastia',
     listingCount: 30,
-    medianPricePerSqmAmd: 560_000,
+    medianPricePerSqmAmd: 408_000,
     priceNoiseSigma: 0.11,
     buildingTypeMix: [
       ['PANEL', 40],
@@ -145,7 +156,7 @@ export const DISTRICT_CALIBRATION: readonly DistrictCalibration[] = [
   {
     slug: 'erebuni',
     listingCount: 25,
-    medianPricePerSqmAmd: 520_000,
+    medianPricePerSqmAmd: 420_000,
     priceNoiseSigma: 0.11,
     buildingTypeMix: [
       ['STONE', 35],
@@ -158,7 +169,7 @@ export const DISTRICT_CALIBRATION: readonly DistrictCalibration[] = [
   {
     slug: 'shengavit',
     listingCount: 20,
-    medianPricePerSqmAmd: 500_000,
+    medianPricePerSqmAmd: 433_000,
     priceNoiseSigma: 0.11,
     buildingTypeMix: [
       ['PANEL', 35],
@@ -171,7 +182,7 @@ export const DISTRICT_CALIBRATION: readonly DistrictCalibration[] = [
   {
     slug: 'nork-marash',
     listingCount: 10,
-    medianPricePerSqmAmd: 650_000,
+    medianPricePerSqmAmd: 543_000,
     priceNoiseSigma: 0.12,
     buildingTypeMix: [
       ['STONE', 55],
@@ -183,7 +194,7 @@ export const DISTRICT_CALIBRATION: readonly DistrictCalibration[] = [
   {
     slug: 'nubarashen',
     listingCount: 5,
-    medianPricePerSqmAmd: 340_000,
+    medianPricePerSqmAmd: 304_000,
     priceNoiseSigma: 0.1,
     buildingTypeMix: [
       ['PANEL', 50],
@@ -195,7 +206,7 @@ export const DISTRICT_CALIBRATION: readonly DistrictCalibration[] = [
   {
     slug: 'gyumri',
     listingCount: 18,
-    medianPricePerSqmAmd: 330_000,
+    medianPricePerSqmAmd: 240_000,
     priceNoiseSigma: 0.16,
     buildingTypeMix: [
       // Gyumri's stock is dominated by post-1988 reconstruction and Soviet
@@ -211,7 +222,7 @@ export const DISTRICT_CALIBRATION: readonly DistrictCalibration[] = [
   {
     slug: 'vanadzor',
     listingCount: 14,
-    medianPricePerSqmAmd: 300_000,
+    medianPricePerSqmAmd: 218_000,
     priceNoiseSigma: 0.16,
     buildingTypeMix: [
       ['PANEL', 45],
@@ -225,7 +236,7 @@ export const DISTRICT_CALIBRATION: readonly DistrictCalibration[] = [
   {
     slug: 'dilijan',
     listingCount: 8,
-    medianPricePerSqmAmd: 420_000,
+    medianPricePerSqmAmd: 306_000,
     priceNoiseSigma: 0.2,
     buildingTypeMix: [
       // A resort town: newer construction is a larger share than its size

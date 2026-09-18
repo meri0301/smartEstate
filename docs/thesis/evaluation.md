@@ -7,7 +7,7 @@
   would break that link.
 -->
 
-**Model** `valuation-lgbm-20260914-65982e00` · trained 2026-09-14T12:43:28+00:00 on 300 published listings across 12 districts · LightGBM 4.7.0 · dataset `65982e00a6574765…`
+**Model** `valuation-lgbm-20260918-deaf322f` · trained 2026-09-18T09:28:50+00:00 on 7037 published listings across 12 districts · LightGBM 4.7.0 · dataset `deaf322f96e5ff3b…`
 
 ## What is predicted, and why in that form
 
@@ -44,12 +44,12 @@ during training.
 
 | Model | n | MAE, AMD | RMSE, AMD | MAPE | R² |
 | --- | ---: | ---: | ---: | ---: | ---: |
-| LightGBM, random k-fold | 300 | 6,544,232 | 9,545,877 | 12.8% | 0.932 |
-| Baseline (area only), random k-fold | 300 | 19,470,092 | 27,522,975 | 40.9% | 0.439 |
-| LightGBM, grouped by district | 300 | 15,398,059 | 25,195,403 | 24.4% | 0.530 |
-| Baseline (area only), grouped by district | 300 | 21,403,874 | 29,743,719 | 44.6% | 0.345 |
+| LightGBM, random k-fold | 7037 | 7,123,862 | 12,005,259 | 17.3% | 0.728 |
+| Baseline (area only), random k-fold | 7037 | 12,793,227 | 18,887,583 | 33.4% | 0.326 |
+| LightGBM, grouped by district | 7037 | 11,071,847 | 18,930,796 | 22.7% | 0.323 |
+| Baseline (area only), grouped by district | 7037 | 14,080,000 | 20,587,062 | 36.2% | 0.200 |
 
-Within a district it knows, the model cuts mean absolute error by **66%** against a straight line through floor area alone, which is the baseline the brief asks for. Held out of a district entirely it still leads, by 28%.
+Within a district it knows, the model cuts mean absolute error by **44%** against a straight line through floor area alone, which is the baseline the brief asks for. Held out of a district entirely it still leads, by 21%.
 
 ## The prediction interval
 
@@ -59,8 +59,8 @@ about 80% of asking prices.
 
 | Scheme | Raw | Calibrated |
 | --- | ---: | ---: |
-| Random k-fold | 60.3% | 80.7% |
-| Grouped | 40.7% | 80.7% |
+| Random k-fold | 77.9% | 80.0% |
+| Grouped | 58.3% | 80.0% |
 
 The raw interval does not keep its promise. Quantile regression on a few hundred rows is
 optimistic about its own accuracy, and the left column shows by how much. The service therefore
@@ -76,16 +76,16 @@ listings as bargains and traps.
 
 | Feature | Share of total gain |
 | --- | ---: |
-| `district_slug` | 54.1% |
-| `condition_rank` | 12.4% |
-| `ceiling_height` | 10.3% |
-| `distance_to_centre_m` | 5.6% |
-| `building_type` | 4.6% |
-| `building_age` | 4.6% |
-| `condition` | 1.5% |
-| `kitchen_ratio` | 1.2% |
-| `living_ratio` | 1.2% |
-| `total_area` | 0.8% |
+| `district_slug` | 60.4% |
+| `total_area` | 10.5% |
+| `building_type` | 7.2% |
+| `total_floors` | 6.5% |
+| `condition_rank` | 3.5% |
+| `condition` | 3.3% |
+| `area_per_room` | 2.2% |
+| `floor_ratio` | 2.1% |
+| `floor` | 1.8% |
+| `rooms` | 1.4% |
 
 Gain-based importance describes the model as a whole. Individual listings are
 explained with exact TreeSHAP values instead, computed by LightGBM itself, because a buyer asking
@@ -101,7 +101,10 @@ why *this* flat is priced as it is cannot use an average.
   market, and the thesis should not present them as such.
 - **The sample is small.** A few hundred listings is enough to fit a shallow ensemble and not
   enough to justify a hyperparameter search: any search at this size would tune itself to the
-  validation folds. The hyperparameters are fixed and stated in `evaluate.py`.
+  validation folds. The hyperparameters are fixed and stated in `evaluate.py`. One value was
+  chosen from evidence rather than assumed, the number of boosting rounds, by comparing three
+  candidates on out-of-fold error; that is a single-parameter choice on a one-dimensional grid,
+  not a search, and it is reported here because a reader should be told which numbers were tuned.
 - **Grouped validation is pessimistic by construction.** Holding out an entire district removes
   the single strongest predictor for those listings. A production system would keep district-level
   price levels updated from recent transactions rather than asking the model to infer them.

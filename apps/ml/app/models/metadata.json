@@ -1,7 +1,7 @@
 {
   "schemaVersion": 1,
-  "modelVersion": "valuation-lgbm-20260914-65982e00",
-  "trainedAt": "2026-09-14T12:43:28+00:00",
+  "modelVersion": "valuation-lgbm-20260918-deaf322f",
+  "trainedAt": "2026-09-18T09:28:50+00:00",
   "featureColumns": [
     "total_area",
     "rooms",
@@ -50,53 +50,53 @@
     "low": 0.1,
     "high": 0.9
   },
-  "intervalLogOffset": 0.08563832379808636,
+  "intervalLogOffset": 0.008474145946220007,
   "targetCoverage": 0.8,
-  "trainingRows": 300,
-  "datasetFingerprint": "65982e00a65747656c1ab7a130d70f79a31b7ccb3fcbb8b7aab4f6bfbbdc23f4",
+  "trainingRows": 7037,
+  "datasetFingerprint": "deaf322f96e5ff3b3c3da2200930e45de87c8a586e06b41c866d8bed60d7bafe",
   "lightgbmVersion": "4.7.0",
   "metrics": {
     "random": {
       "scheme": "random",
       "folds": 5,
       "model": {
-        "n": 300,
-        "maeAmd": 6544232,
-        "rmseAmd": 9545877,
-        "mape": 0.1283,
-        "r2": 0.9325
+        "n": 7037,
+        "maeAmd": 7123862,
+        "rmseAmd": 12005259,
+        "mape": 0.173,
+        "r2": 0.7279
       },
       "baselineAreaOnly": {
-        "n": 300,
-        "maeAmd": 19470092,
-        "rmseAmd": 27522975,
-        "mape": 0.4088,
-        "r2": 0.4393
+        "n": 7037,
+        "maeAmd": 12793227,
+        "rmseAmd": 18887583,
+        "mape": 0.3336,
+        "r2": 0.3264
       },
-      "intervalCoverage": 0.6033,
-      "intervalCoverageCalibrated": 0.8067,
-      "intervalLogOffset": 0.0856
+      "intervalCoverage": 0.779,
+      "intervalCoverageCalibrated": 0.8003,
+      "intervalLogOffset": 0.0085
     },
     "grouped": {
       "scheme": "grouped",
       "folds": 12,
       "model": {
-        "n": 300,
-        "maeAmd": 15398059,
-        "rmseAmd": 25195403,
-        "mape": 0.244,
-        "r2": 0.5301
+        "n": 7037,
+        "maeAmd": 11071847,
+        "rmseAmd": 18930796,
+        "mape": 0.2268,
+        "r2": 0.3233
       },
       "baselineAreaOnly": {
-        "n": 300,
-        "maeAmd": 21403874,
-        "rmseAmd": 29743719,
-        "mape": 0.4458,
-        "r2": 0.3451
+        "n": 7037,
+        "maeAmd": 14080000,
+        "rmseAmd": 20587062,
+        "mape": 0.3621,
+        "r2": 0.1998
       },
-      "intervalCoverage": 0.4067,
-      "intervalCoverageCalibrated": 0.8067,
-      "intervalLogOffset": 0.3643
+      "intervalCoverage": 0.5826,
+      "intervalCoverageCalibrated": 0.8003,
+      "intervalLogOffset": 0.173
     }
   }
 }

@@ -137,6 +137,7 @@ def run(args: argparse.Namespace) -> int:
     districts = dataset_module.districts_of(rows)
     fingerprint = dataset_module.fingerprint(rows)
     print(f"dataset: {len(rows)} listings, {len(districts)} districts, {fingerprint[:16]}…")
+    print(f"         {dataset_module.report_coverage(rows)}")
 
     results = {
         "random": cross_validate(rows, districts, "random"),
