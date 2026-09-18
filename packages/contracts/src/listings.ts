@@ -181,10 +181,34 @@ export const listingTransitionBodySchema = z
   });
 export type ListingTransitionBody = z.infer<typeof listingTransitionBodySchema>;
 
+/**
+ * Where a photograph lives.
+ *
+ * Either an absolute URL, for imagery hosted somewhere else, or a root-relative
+ * path for imagery the application serves itself — which is what the seeded
+ * catalogue uses, so that a demonstration needs no internet and no remote
+ * placeholder service decides what a listing looks like.
+ *
+ * The path form is deliberately narrow. It must start with a single slash, so
+ * it cannot be read as a protocol-relative URL to another host, and it excludes
+ * the characters that would let one be smuggled in.
+ *
+ * One string with one pattern rather than a union of `z.url()` and a path.
+ * A union here reaches the OpenAPI bridge as a composite the decorator reader
+ * cannot name, and Nest reports it as a circular dependency on `thumbnailUrl`
+ * and refuses to start the application.
+ */
+export const mediaUrlSchema = z
+  .string()
+  .regex(
+    /^(?:https?:\/\/[^\s]+|\/[A-Za-z0-9\-_./]+)$/,
+    'Must be an absolute http(s) URL or an app-served path',
+  );
+
 export const mediaSchema = z.object({
   id: uuidSchema,
   kind: mediaKindSchema,
-  url: z.url(),
+  url: mediaUrlSchema,
   width: z.number().int().nullable(),
   height: z.number().int().nullable(),
   sortOrder: z.number().int(),
@@ -221,7 +245,7 @@ export const listingSummarySchema = z.object({
   condition: conditionSchema,
   district: z.object({ slug: districtSlugSchema, name: localizedNameSchema }),
   location: geoPointSchema,
-  thumbnailUrl: z.url().nullable(),
+  thumbnailUrl: mediaUrlSchema.nullable(),
   publishedAt: isoDateTimeSchema,
 });
 export type ListingSummary = z.infer<typeof listingSummarySchema>;

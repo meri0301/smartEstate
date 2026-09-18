@@ -3,6 +3,7 @@
  * Yerevan districts. Structure and price effects follow prisma/seed/lib/pricing.ts
  * and the calibration in prisma/seed/data/calibration.ts.
  */
+import { LISTING_PHOTOS, photosFor } from '../data/photos.js';
 import { Prisma } from '../../../src/generated/prisma/client.js';
 import type {
   BuildingType,
@@ -411,11 +412,13 @@ export async function seedInventory(
 
   const media = listings.flatMap((l) => {
     const photoCount = ctx.rng.int(3, 5);
-    return Array.from({ length: photoCount }, (_, index) => ({
+    // Where in the rotation this listing starts. Drawn from the seeded
+    // generator, so the catalogue looks the same after every reseed.
+    const offset = ctx.rng.int(0, LISTING_PHOTOS.length - 1);
+    return photosFor(offset, photoCount).map((url, index) => ({
       listingId: l.id,
       kind: 'PHOTO' as const,
-      // Placeholder imagery: deterministic per listing so the UI is stable between reseeds.
-      url: `https://picsum.photos/seed/${l.publicId}-${String(index + 1)}/1200/800`,
+      url,
       width: 1200,
       height: 800,
       sortOrder: index,

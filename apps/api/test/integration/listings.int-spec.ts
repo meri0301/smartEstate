@@ -40,7 +40,9 @@ describe('listings search', () => {
     const first = page.items[0];
     expect(first?.title.length).toBeGreaterThan(0);
     expect(first?.district.slug.length).toBeGreaterThan(0);
-    expect(first?.thumbnailUrl).toMatch(/^https:\/\//);
+    // The catalogue serves its own imagery, so a demonstration needs no
+    // internet and no placeholder service decides what a listing looks like.
+    expect(first?.thumbnailUrl).toMatch(/^\/listings\//);
   });
 
   it('applies structured filters', async () => {
