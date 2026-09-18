@@ -53,11 +53,18 @@ describe('HomePage', () => {
   it('sends the hero to the calculator and the header into the app', async () => {
     // The design funnels a visitor towards valuing the property in front of
     // them; the catalogue has to stay reachable from somewhere, and that is
-    // what the header's Start is for.
+    // what the header's button is for. Each is named after where it goes,
+    // because two buttons that both said "start" said nothing.
     renderAt('/en');
 
     await screen.findByRole('heading', { level: 1 });
-    expect(screen.getByRole('link', { name: 'Start' })).toHaveAttribute('href', '/en/listings');
+    // Scoped to the header: the footer links to the catalogue under the same
+    // name, which is correct — one destination, one name.
+    const header = screen.getByRole('banner');
+    expect(within(header).getByRole('link', { name: 'Browse listings' })).toHaveAttribute(
+      'href',
+      '/en/listings',
+    );
     expect(screen.getByRole('link', { name: 'Get Started' })).toHaveAttribute('href', '#valuation');
   });
 
