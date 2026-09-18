@@ -10,7 +10,7 @@ describe('loadConfig', () => {
   it('applies development defaults', () => {
     const config = loadConfig(minimal);
     expect(config.nodeEnv).toBe('development');
-    expect(config.port).toBe(3000);
+    expect(config.port).toBe(3100);
     expect(config.jwt.accessTtlSeconds).toBe(900);
     expect(config.refreshToken.ttlDays).toBe(30);
     expect(config.refreshToken.cookieSecure).toBe(false);

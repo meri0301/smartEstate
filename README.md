@@ -42,7 +42,7 @@ pnpm docker:up        # Postgres (PostGIS + pgvector) and Redis, waits for healt
 pnpm db:migrate       # apply Prisma migrations
 pnpm db:seed          # 300 synthetic Yerevan listings inside real district boundaries
 pnpm check            # lint + typecheck + test + build across all workspaces
-pnpm dev              # api on :3000, web on :5173
+pnpm dev              # api on :3100, web on :5173
 ```
 
 Verify the infrastructure:
@@ -52,7 +52,7 @@ docker compose exec postgres psql -U smartestate -d smartestate -c "SELECT extna
 ```
 
 ```bash
-curl http://localhost:3000/health
+curl http://localhost:3100/health
 ```
 
 ## Everyday commands
@@ -122,7 +122,7 @@ docker/       Purpose-built images (postgres with PostGIS + pgvector)
 
 ## API
 
-Base URL `http://localhost:3000/api`; interactive docs at `http://localhost:3000/docs`, raw
+Base URL `http://localhost:3100/api`; interactive docs at `http://localhost:3100/docs`, raw
 document at `/docs/openapi.json` (exported copy: [`docs/api/openapi.json`](docs/api/openapi.json)).
 Health probes live outside the prefix: `/health` (liveness) and `/health/ready` (database).
 

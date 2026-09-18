@@ -3,11 +3,16 @@ import react from '@vitejs/plugin-react';
 import { defineConfig } from 'vitest/config';
 
 /**
- * Where the dev server proxies API calls. Overridable because port 3000 is a
- * popular default and may already be taken by something else on the machine;
- * set API_PROXY_TARGET to wherever the API is actually listening.
+ * Where the dev server proxies API calls.
+ *
+ * 3100 matches the API's own default, which is deliberately not 3000: that is
+ * the default of most Node frameworks and every tutorial, so on a machine with
+ * a second project running it is the one port guaranteed to be taken.
+ *
+ * Still overridable, because the API can be told to listen anywhere; set
+ * API_PROXY_TARGET to wherever it actually is.
  */
-const API_ORIGIN = process.env.API_PROXY_TARGET ?? 'http://localhost:3000';
+const API_ORIGIN = process.env.API_PROXY_TARGET ?? 'http://localhost:3100';
 
 export default defineConfig({
   plugins: [react(), tailwindcss()],

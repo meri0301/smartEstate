@@ -9,7 +9,7 @@ import { sessionStore } from './session-store.js';
  * every request (`credentials: 'include'`) so the httpOnly refresh cookie reaches
  * `/api/auth/refresh`.
  *
- * `VITE_API_BASE_URL` is empty in development (Vite proxies `/api` to :3000) and
+ * `VITE_API_BASE_URL` is empty in development (Vite proxies `/api` to :3100) and
  * in the single-origin Docker deployment; set it only when the API lives elsewhere.
  */
 export type ApiClient = Client<paths>;

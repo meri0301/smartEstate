@@ -9,7 +9,13 @@ const booleanString = z.enum(['true', 'false']).transform((value) => value === '
  */
 export const envSchema = z.object({
   NODE_ENV: z.enum(['development', 'test', 'production']).default('development'),
-  API_PORT: z.coerce.number().int().min(1).max(65_535).default(3000),
+  /**
+   * 3100 rather than 3000. Three thousand is the default of most Node
+   * frameworks and of `create-react-app`, `next dev` and every tutorial, so on
+   * a machine with a second project it is the one port guaranteed to be taken.
+   * Losing that argument once is cheaper than losing it every morning.
+   */
+  API_PORT: z.coerce.number().int().min(1).max(65_535).default(3100),
   DATABASE_URL: z
     .string()
     .min(1)
